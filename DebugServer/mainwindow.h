@@ -15,6 +15,12 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    void draw();
+private slots:
+    void on_saveButton_released();
+
+    void on_loadButton_released();
+
 private:
     Ui::MainWindow *ui;
 };

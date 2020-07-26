@@ -24,6 +24,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 #    endif()
 #endif()
 
+find_package(OpenGL REQUIRED)
+find_package(GLUT REQUIRED)
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
 
 if(ANDROID)
@@ -32,14 +34,22 @@ if(ANDROID)
     mainwindow.cpp
     mainwindow.h
     mainwindow.ui
-  )
+    oglwidget.cpp
+    oglwidget.h
+    graph.cpp
+    graph.h
+)
 else()
   add_executable(HuaweiRouter
     main.cpp
     mainwindow.cpp
     mainwindow.h
     mainwindow.ui
-  )
+    oglwidget.cpp
+    oglwidget.h
+    graph.cpp
+    graph.h
+)
 endif()
 
-target_link_libraries(HuaweiRouter PRIVATE Qt5::Widgets)
+target_link_libraries(HuaweiRouter PRIVATE Qt5::Widgets  ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES})
