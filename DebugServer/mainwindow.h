@@ -18,8 +18,10 @@ public:
     void draw();
 private slots:
     void on_saveButton_released();
-
+    void setEllipseInfo(QString info);
     void on_loadButton_released();
+
+    void on_deleteButton_released();
 
 private:
     Ui::MainWindow *ui;

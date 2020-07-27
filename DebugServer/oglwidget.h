@@ -9,7 +9,7 @@
 class OGLWidget : public QOpenGLWidget
  {
     Q_OBJECT
-    void drawEllipse(float xCenter, float yCenter);
+    void drawEllipse(float xCenter, float yCenter, int color);
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
     void mouseDoubleClickEvent(QMouseEvent *event);
@@ -18,10 +18,14 @@ public:
     ~OGLWidget();
     Graph graph;
     void mousePressEvent(QMouseEvent *event);
+    void drawEdge(float x1, float y1, float x2, float y2);
 protected:
     void initializeGL();
     void resizeGL(int w, int h);
     void paintGL();
+signals:
+    void transmit_info(QString);
+
 };
 
 #endif // OGLWIDGET_H

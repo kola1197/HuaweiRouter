@@ -32,11 +32,43 @@ void OGLWidget::paintGL()
 
     for (Ellips e:graph.ellipses)
     {
-        drawEllipse(e.x,e.y);
+        if (e.number != graph.activeNumberForEdge)
+        {
+            drawEllipse(e.x,e.y, 0);
+        }
+        else
+        {
+            drawEllipse(e.x,e.y, 1);
+        }
+    }
+    for (Edge e:graph.edges)
+    {
+        Ellips *el1 = graph.getEllipseByNumber(e.from);
+        Ellips *el2 = graph.getEllipseByNumber(e.to);
+        if (el1!=NULL && el2!=NULL)
+        {
+            std::cout<<"Edge output "<<e.from<<" "<<e.to<<std::endl;
+            std::cout<<"Ellips "<<el1->x<<" "<<el1->y<<" -*- "<<el2->x<<" "<<el2->y<<std::endl;
+            drawEdge(el1->x,el1->y,el2->x,el2->y);
+        }
     }
 }
 
-void OGLWidget::drawEllipse(float xCenter, float yCenter)
+void OGLWidget::drawEdge(float x1, float y1, float x2,float y2)
+{
+    GLfloat fSizes [2];
+    glGetFloatv(GL_LINE_WIDTH_RANGE,fSizes);
+    GLfloat fCurrentSize = fSizes[0];
+    fCurrentSize+=3.0f;
+    glLineWidth(fCurrentSize);
+    glBegin(GL_LINE_LOOP);
+    glColor3f(0.0, 0.0, 1.0);
+    glVertex2f(x1, y1);
+    glVertex2f(x2, y2);
+    glEnd();
+}
+
+void OGLWidget::drawEllipse(float xCenter, float yCenter, int color)      //color 0 - default, 1 - active ellipse
 {
     float step = float(2 * M_PI/180);
     //glBegin(GL_LINE_STRIP);
@@ -46,7 +78,14 @@ void OGLWidget::drawEllipse(float xCenter, float yCenter)
     fCurrentSize+=3.0f;
     glLineWidth(fCurrentSize);
     glBegin(GL_LINE_LOOP);
-    glColor3f(1.0, 0.56, 0.0);
+    if (color == 0)
+    {
+        glColor3f(1.0, 0.56, 0.0);
+    }
+    if (color == 1)
+    {
+        glColor3f(0.5, 0.3, 0.5);
+    }
     for (float angle = 0; angle < float(2 * M_PI); angle += step)
     {
         const float dx = 50 * cosf(angle);
@@ -70,20 +109,32 @@ void OGLWidget::resizeGL(int w, int h)
 
 void OGLWidget::mousePressEvent(QMouseEvent *event)
 {
-    std::cout<<event->x()<<"::"<<event->y()<<std::endl;
-    float x = event->x();
-    float y = event->y();
-    Ellips *el = graph.getEllipseByPoint(x,y);
-    if (el!=NULL)
+    if (event->button() == Qt::LeftButton)
     {
-        std::cout<<"ellips number "<<el->number<<std::endl;
-        //el->number=30;
-        //std::cout<<el->x<<"*"<<el->y<<std::endl;
-        //std::cout<<"ellips number now "<<el->number<<std::endl;
-        graph.active = el;
+        std::cout<<event->x()<<"::"<<event->y()<<std::endl;
+        float x = event->x();
+        float y = event->y();
+        Ellips *el = graph.getEllipseByPoint(x,y);
+        if (el!=NULL)
+        {
+            QString q="";
+            q+="x  : "+QString::number(el->x)+"\n";
+            q+="y  : "+QString::number(el->y)+"\n";
+            q+="num: "+QString::number(el->number)+"\n";
+            emit transmit_info(q);
+            std::cout<<"ellips number "<<el->number<<std::endl;
+            //el->number=30;
+            //std::cout<<el->x<<"*"<<el->y<<std::endl;
+            //std::cout<<"ellips number now "<<el->number<<std::endl;
+            graph.active = el;
+        }
+        else{
+            std::cout<<"FREE AREA"<<std::endl;
+        }
     }
-    else{
-        std::cout<<"FREE AREA"<<std::endl;
+    if (event->button() == Qt::RightButton)
+    {
+        graph.addEdge(-1);
     }
 }
 
@@ -101,12 +152,20 @@ void OGLWidget::mouseReleaseEvent(QMouseEvent *event)
 {
     graph.active = NULL;
     update();
+    //std::cout<<"release"<<std::endl;
+    //graph.addEdge(-1);
 }
 
 void OGLWidget::mouseDoubleClickEvent(QMouseEvent *event)
 {
-    if (graph.getEllipseByPoint(event->x(),event->y())==NULL)
+    Ellips *el = graph.getEllipseByPoint(event->x(),event->y());
+    if (el == NULL)
     {
         graph.addEllips(event->x(),event->y());
     }
+    else
+    {
+        graph.addEdge(el->number);
+    }
 }
+
