@@ -8,46 +8,124 @@
 #include <arpa/inet.h>
 #include <string.h>
 #include <string>
-
+#include <thread>
+#include <fstream>
 #include <list>
 #include <vector>
-
-
-class NetworkManager { // connects nodes before whole work
-public:
-
-};
 
 class Channel {
   public:
     Channel(int portToRecv, int portToSend);
+    Channel(int id, int nodeId,
+            int portToRecv, int portToSend,
+            char infoToSend[10000],
+            char dataToSend[10000]);
 
-    void init();
     void initReciever();
+    void initSender();
+
     void startRecieving();
 
-    void initSender();
     void startSending();
+    void startSendingDebug(char c);
 
-    int acceptConnection(sockaddr_in& addr, int socket);
-    void setListeningToConnection(sockaddr_in& addr, int socket);
-    void bindSocket(int sock, int port);
-    sockaddr_in getLocalAddr(int port);
+    void startSendingFromFile(const std::string &filename); //better not to touch these
+    void startRecievingToFile(const std::string &filename); //doesnt work
+
+private:
+    int id;
+    int nodeId;
+
+    char dataRecieved[10000];
+    char dataToSend[10000];
 
     int portToRecv;
     int portToSend;
-    int senderSocket;
+
     int recieverSocket;
+    int senderSocket;
+
+    //
+    sockaddr_in getLocalAddr(int port);
+
+    int acceptConnection(sockaddr_in& addr, int socket);
+
+    void setListeningToConnection(
+            sockaddr_in& addr, int socket);
+
+    void bindSocket(int sock, int port);
 };
 
 class Node {
 public:
     Node();
-    void addChannel (int portToRecv, int portToSend, char* infoToSend);
+    Node(int id);
+    void addChannel (int ChannelId,
+                     int portToRecv, int portToSend,
+                     char infoToSend[10000],
+                     char dataToSend[10000]);
+    Channel& getLastChannel();
     uint32_t getChannelsAmount() const;
+
+    Channel& operator[] (int i);
+
 private:
-    uint32_t channels_amount;
-    std::list<Channel> channel;
+    int id;
+    std::vector<Channel> channels;
 };
+
+class Network { // connects nodes before whole work
+public:
+
+    Network();
+    Network(std::vector<Node> &nodes,
+            std::vector<std::pair<int,int>> &adjList,
+            int port);
+
+    Network(std::vector<std::pair<int,int>> &adjList,
+            int port, int nodesAmount);
+
+    void setAdjList(std::vector<std::pair<int,int>> &adjList);
+
+    uint32_t getNodesAmount() const;
+
+    void connectNetwork();
+
+    void createNodes(int n);
+
+    void startDebugNetwork();
+
+private:
+
+    bool releaseTheKraken;
+
+    int freePort;
+
+    void setLeftToSendRight(Channel& left,
+                            Channel& right);
+
+    void connectTwoChannels(Channel& left,
+                            Channel& right);
+
+    void startLeftToSendRight(Channel& left,
+                              Channel& right);
+
+    void startTwoChannels(Channel& left,
+                          Channel& right);
+
+    void startLeftToSendRightDebug(
+            Channel& left, Channel& right,
+            char c);
+
+    void startTwoChannelsDebug(
+            Channel& left, Channel& right, char c);
+
+    std::vector<Node> nodes;
+    std::vector<std::pair<int,int>> adjList;
+    std::vector<std::pair<int,int>> auxillaryList;
+};
+
+
+
 
 #endif // NODE_H
