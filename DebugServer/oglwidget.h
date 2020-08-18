@@ -19,6 +19,10 @@ public:
     Graph graph;
     void mousePressEvent(QMouseEvent *event);
     void drawEdge(float x1, float y1, float x2, float y2);
+    bool screenLocked = false;    //we cannot change our map after start
+    void drawEllipse(Ellips *e);
+    void deactivate();
+    void deactivateNewEdge();
 protected:
     void initializeGL();
     void resizeGL(int w, int h);

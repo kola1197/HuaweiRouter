@@ -183,26 +183,29 @@ float Graph::dist(float x1,float y1,float x2,float y2)
     return result;
 }
 
-void Graph::addEdge(int number)
+bool Graph::addEdge(int number)
 {
+    bool result = false;
     if (activeNumberForEdge == -1)
     {
         activeNumberForEdge = number;
     }
     else{
-        if (number!=-1)
+        if (number != -1)
         {
             Edge e;
             e.from = activeNumberForEdge;
             e.to = number;
             edges.push_back(e);
             activeNumberForEdge = -1;
+            result = true;
         }
         else
         {
             activeNumberForEdge = -1;
         }
     }
+    return result;
 }
 
 void Graph::deleteActiveEllips()
