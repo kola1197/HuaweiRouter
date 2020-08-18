@@ -11,6 +11,7 @@ struct Ellips
     float x;
     float y;
     int number = -1;
+    int colorStatus = 0; // 0 - orange - default but not connected, 1 - blue - active for movement, 2 - green - conected
 };
 
 struct Edge
@@ -33,7 +34,7 @@ public:
     Ellips *active = NULL;
     void save(QString path);
     void load(QString path);
-    void addEdge(int number);
+    bool addEdge(int number);
     Ellips *getEllipseByNumber(int num);
     int activeNumberForEdge = -1;
     void addEllips(float x, float y, int num);

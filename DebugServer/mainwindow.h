@@ -23,6 +23,8 @@ private slots:
 
     void on_deleteButton_released();
 
+    void on_startButton_released();
+
 private:
     Ui::MainWindow *ui;
 };

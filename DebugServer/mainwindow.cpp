@@ -47,3 +47,10 @@ void MainWindow::on_deleteButton_released()
     ui->openGLWidget->graph.deleteActiveEllips();
     ui->openGLWidget->update();
 }
+
+void MainWindow::on_startButton_released()   // lock the screen and start simulation
+{
+    ui->openGLWidget->screenLocked = true;
+
+
+}
