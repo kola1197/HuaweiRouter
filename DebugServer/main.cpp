@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include <thread>
 #include <node.h>
+#include <network.h>
 #include <QApplication>
 
 
@@ -51,9 +52,9 @@ void initFiles() {
     secondStorage << secondData;
 }
 
-int main(int argc, char *argv[]) {
+void TestNetwork() { //some sockets send each otther 'a'-'f'
     using namespace std;
-    int port = 16006;
+    int port = 11006;
     int nodesAmount = 3;
     vector<pair<int,int>> adjList = { {0, 1}, {1, 2}, {0, 2}};
 
@@ -61,9 +62,32 @@ int main(int argc, char *argv[]) {
 
     n.connectNetwork();
     n.startDebugNetwork();
-    while (true) {
+    while (true) {}
+}
 
-    }
+
+int main(int argc, char *argv[]) {
+    using namespace std;
+
+    //TestNetwork();
+
+    int port1 = 1453;
+    int port2 = 1459;
+    Channel a(port1, port2);
+    Channel b(port2, port1);
+    std::thread t2(&Channel::initReciever, b);
+    std::thread t1(&Channel::initSender, a);
+
+    t1.join();
+    t2.join();
+    clock_t time1 = clock();
+
+    std::thread t3(&Channel::startSendingFromFile, a, "bigfile");
+    std::thread t4(&Channel::startRecievingToFile, b, "anottherbigfile");
+    t3.join();
+    t4.join();
+    auto time2 = clock();
+    std :: cout << time2 << ' ' << time1 << endl;
 }
 
 //int main(int argc, char *argv[]) {   network works too

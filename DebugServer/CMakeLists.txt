@@ -39,8 +39,12 @@ if(ANDROID)
     oglwidget.h
     graph.cpp
     graph.h
+    channel.h
+    channel.cpp
     node.h
     node.cpp
+    network.h
+    network.cpp
 )
 else()
   add_executable(HuaweiRouter
@@ -52,8 +56,12 @@ else()
     oglwidget.h
     graph.cpp
     graph.h
+    channel.h
+    channel.cpp
     node.h
     node.cpp
+    network.h
+    network.cpp
 )
 endif()
 
