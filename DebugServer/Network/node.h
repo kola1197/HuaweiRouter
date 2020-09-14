@@ -1,6 +1,6 @@
 #ifndef NODE_H
 #define NODE_H
-#include <channel.h>
+#include <Network/channel.h>
 
 class Node {
 public:

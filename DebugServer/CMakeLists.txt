@@ -28,7 +28,7 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
 find_package(OpenGL REQUIRED)
 #find_package(GLUT REQUIRED)
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
-
+include_directories(include)
 if(ANDROID)
   add_library(HuaweiRouter SHARED
     main.cpp
@@ -45,10 +45,11 @@ if(ANDROID)
     node.cpp
     network.h
     network.cpp
+    dir/channel.cpp
 )
 else()
   add_executable(HuaweiRouter
-    main.cpp
+    Network/main.cpp
     mainwindow.cpp
     mainwindow.h
     mainwindow.ui
@@ -56,12 +57,13 @@ else()
     oglwidget.h
     graph.cpp
     graph.h
-    channel.h
-    channel.cpp
-    node.h
-    node.cpp
-    network.h
-    network.cpp
+    Network/channel.h
+    Network/channel.cpp
+    Network/node.h
+    Network/node.cpp
+    Network/network.h
+    Network/network.cpp
+    Network/channel.cpp
 )
 endif()
 

@@ -29,8 +29,8 @@ class Channel {
     void startSending();
     void startSendingDebug(char c);
 
-    void startSendingFromFile(const std::string &filename); //better not to touch these
-    void startRecievingToFile(const std::string &filename); //doesnt work
+    void startSendingInformation(std::string* inf);
+    void startRecievingInformation(uint64_t size);
 
 //private:
     int id;

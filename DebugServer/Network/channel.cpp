@@ -1,4 +1,6 @@
 #include "channel.h"
+using namespace  std;
+
 Channel::Channel(int portToRecv, int portToSend)
         : portToRecv(portToRecv),
           portToSend(portToSend) {}
@@ -32,8 +34,6 @@ static int acceptConnection(    //no static
 }
 
 void Channel::initReciever() {
-    using namespace std;
-
     int connectionListener = socket(AF_INET, SOCK_STREAM, 0);
     if (connectionListener == -1) {
         cerr << "Can't create a socket! Quitting" << endl;
@@ -50,8 +50,6 @@ void Channel::initReciever() {
 }
 
 void Channel::initSender() {
-    using namespace std;
-
     senderSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (recieverSocket == -1) {
         cerr << "Can't create a socket! Quitting" << endl;
@@ -65,17 +63,14 @@ void Channel::initSender() {
 }
 
 void Channel::startRecieving() {
-    using namespace std;
     while(true) {
         sleep(1);
-        char msg[256] = "not hey";
+        char msg[256];
         recv(recieverSocket, msg, 256, 0);
-        std::cerr << msg << endl;
     }
 }
 
 void Channel::startSending() {
-    using namespace std;
     cerr << "send started";
     while(true) {
         sleep(1);
@@ -85,7 +80,6 @@ void Channel::startSending() {
 }
 
 void Channel::startSendingDebug(char c) {
-    using namespace std;
     cerr << "send started";
     while(true) {
         sleep(1);
@@ -95,34 +89,29 @@ void Channel::startSendingDebug(char c) {
     }
 }
 
-void Channel::startRecievingToFile(
-        const std :: string &filename) { //doesnt work
-    using namespace std;
-    cerr << "recieving started";
-    char msg[1000 * 1000] = "hey";
-    for (int i = 0; i < 1000000; ++i)  {
-        recv(senderSocket, msg, 1000 * 1000, 0);
+void Channel::startSendingInformation(
+        string *informationPtr) {
+    cerr << "send started" << endl;
+    uint64_t infoSize = informationPtr->size(); //
+    uint64_t step = infoSize / 10000;
+    for (uint64_t i = 0; i < infoSize; i += step) {
+        auto ptr = (char*)&((*informationPtr)[i]);
+       send(senderSocket, ptr, step, 0);
     }
+    cerr << "send ended"  << endl;
 }
 
-static void getNChars(size_t n, char*a,
-               std::ifstream& f) {
-    using namespace std;
-    for (size_t i = 0; i < n; ++i) {
-        f >> a[i];
+void Channel::startRecievingInformation(uint64_t infoSize) {
+    cerr << "recieve started" << endl;
+    uint64_t step = infoSize / 1000000;
+    string buffer(step, '\n');
+    char* ptr = &(buffer[0]);
+    for (uint64_t i = 0; i < infoSize; i += step) {
+       recv(recieverSocket, ptr, step, 0);
     }
+    cerr << "recieve ended" << clock() << endl;
 }
 
-void Channel::startSendingFromFile(
-        const std::string &filename) {
-    using namespace std;
-    cerr << "sending started";
-    char msg[1000 * 1000] = "hey";
-    ifstream file(filename);
-    for (int i = 0; i < 1000000; ++i) {
-        send(senderSocket, msg, 1000 * 1000, 0);
-    }
-}
 
 //void Channel::startSendingFromFile(
 //        const std::string &filename) {
