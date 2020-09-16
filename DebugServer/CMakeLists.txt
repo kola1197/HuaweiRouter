@@ -62,6 +62,10 @@ else()
     node.cpp
     network.h
     network.cpp
+    SimulationCore/simulation.cpp
+    SimulationCore/simulation.h
+    SimulationCore/Messages.h
+    SimulationCore/Messages.cpp
 )
 endif()
 
