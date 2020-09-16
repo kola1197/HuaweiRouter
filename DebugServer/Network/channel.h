@@ -25,6 +25,7 @@ class Channel {
     void initSender();
 
     void startRecieving();
+    void startRecievingDebug();
 
     void startSending();
     void startSendingDebug(char c);

@@ -82,7 +82,7 @@ void Network::startLeftToSendRightDebug(Channel& left, Channel& right, char c) {
         std::thread startSendingThread
                 (&Channel::startSendingDebug, left, c);
         std::thread startRecievingThread
-                (&Channel::startRecieving, right);
+                (&Channel::startRecievingDebug, right);
         startSendingThread.detach();
         startRecievingThread.detach();
 }

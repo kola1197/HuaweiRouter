@@ -55,14 +55,15 @@ void Channel::initSender() {
         cerr << "Can't create a socket! Quitting" << endl;
     }
     sockaddr_in addr = getLocalAddr(portToSend);
-    if (connect(senderSocket, (sockaddr*)&addr, sizeof(addr)) == 0) {
-        cerr << "connected!\n";
-    } else {
-        cout << "not connected\n";
+    while (connect(senderSocket, (sockaddr*)&addr, sizeof(addr)) != 0) {
+        cerr << "Channel " << id << " not connected\n";
+        sleep(1);
     }
+    cerr << "Channel " << id << " connected!\n";
 }
 
 void Channel::startRecieving() {
+    cerr << "recieving started" << endl;
     while(true) {
         sleep(1);
         char msg[256];
@@ -71,7 +72,7 @@ void Channel::startRecieving() {
 }
 
 void Channel::startSending() {
-    cerr << "send started";
+    cerr << "sending started" << endl;
     while(true) {
         sleep(1);
         char msg[256] = "hey";
@@ -80,7 +81,7 @@ void Channel::startSending() {
 }
 
 void Channel::startSendingDebug(char c) {
-    cerr << "send started";
+    cerr << "debug sending started" << endl;
     while(true) {
         sleep(1);
         char msg[256] = "a";
@@ -89,21 +90,31 @@ void Channel::startSendingDebug(char c) {
     }
 }
 
+void Channel::startRecievingDebug() {
+    cerr << "debug recieving started" << endl;
+    while(true) {
+        sleep(1);
+        char msg[256];
+        recv(recieverSocket, msg, 256, 0);
+        cerr << msg;
+    }
+}
+
 void Channel::startSendingInformation(
         string *informationPtr) {
-    cerr << "send started" << endl;
+    cerr << "information sending started" << endl;
     uint64_t infoSize = informationPtr->size(); //
-    uint64_t step = infoSize / 10000;
+    uint64_t step = infoSize / (1000 * 1000);
     for (uint64_t i = 0; i < infoSize; i += step) {
         auto ptr = (char*)&((*informationPtr)[i]);
-       send(senderSocket, ptr, step, 0);
+        send(senderSocket, ptr, step, 0);
     }
     cerr << "send ended"  << endl;
 }
 
 void Channel::startRecievingInformation(uint64_t infoSize) {
-    cerr << "recieve started" << endl;
-    uint64_t step = infoSize / 1000000;
+    cerr << "information recieving started" << endl;
+    uint64_t step = infoSize / (1000 * 1000);
     string buffer(step, '\n');
     char* ptr = &(buffer[0]);
     for (uint64_t i = 0; i < infoSize; i += step) {
@@ -111,7 +122,6 @@ void Channel::startRecievingInformation(uint64_t infoSize) {
     }
     cerr << "recieve ended" << clock() << endl;
 }
-
 
 //void Channel::startSendingFromFile(
 //        const std::string &filename) {
