@@ -51,6 +51,6 @@ void MainWindow::on_deleteButton_released()
 void MainWindow::on_startButton_released()   // lock the screen and start simulation
 {
     ui->openGLWidget->screenLocked = true;
-
-
+    simulation = Simulation(&ui->openGLWidget->graph);
+    simulation.Start();
 }

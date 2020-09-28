@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <SimulationCore/simulation.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -26,6 +27,7 @@ private slots:
     void on_startButton_released();
 
 private:
+    Simulation simulation;
     Ui::MainWindow *ui;
 };
 #endif // MAINWINDOW_H

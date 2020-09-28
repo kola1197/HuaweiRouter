@@ -84,8 +84,12 @@ void testMultiThreading(int sendingThreadsAmount) {
 
 
 int main(int argc, char *argv[]) {
-    using namespace std;
+    QApplication a(argc, argv);
+    MainWindow w;
+    w.show();
+    return a.exec();
 
+    //using namespace std;
     //TestNetworkDebug();
-    testMultiThreading(4);
+    //testMultiThreading(4);
 }

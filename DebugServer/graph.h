@@ -26,18 +26,26 @@ Q_OBJECT
 
 public:
     explicit Graph(QObject *parent = nullptr);
+    Graph(const Graph &obj);
+    Graph& operator = (const Graph &obj);
+
     std::vector<Ellips> ellipses;
     std::vector<Edge> edges;
     void testInit();
-    void addEllips(float x, float y);
     Ellips *getEllipseByPoint(int x, int y);
     Ellips *active = NULL;
     void save(QString path);
     void load(QString path);
-    bool addEdge(int number);
     Ellips *getEllipseByNumber(int num);
     int activeNumberForEdge = -1;
+
+    bool addEdge(int number);
+    void addEdge(Edge e);
+
     void addEllips(float x, float y, int num);
+    void addEllips(float x, float y);
+    void addEllips(Ellips e);
+
     void deleteActiveEllips();
 private:
     float dist(float x1, float y1, float x2, float y2);

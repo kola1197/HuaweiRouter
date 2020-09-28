@@ -12,6 +12,32 @@ Graph::Graph(QObject *parent) : QObject(parent)
     testInit();
 }
 
+Graph& Graph::operator = (const Graph &obj)
+{
+    Graph result;
+    for (int i=0;i<obj.ellipses.size();i++)
+    {
+        result.addEllips(obj.ellipses[i]);
+    }
+    for (int i=0;i<obj.edges.size();i++)
+    {
+        result.addEdge(obj.edges[i]);
+    }
+    return result;
+}
+
+Graph::Graph(const Graph &obj)
+{
+    for (int i=0;i<obj.ellipses.size();i++)
+    {
+        addEllips(obj.ellipses[i]);
+    }
+    for (int i=0;i<obj.edges.size();i++)
+    {
+        addEdge(obj.edges[i]);
+    }
+}
+
 void Graph::testInit()
 {
 //    addEllips(0.0,0.0);
@@ -131,6 +157,11 @@ void Graph::addEllips(float x,float y)
     addEllips(x,y,ellipseCounter);
 }
 
+void Graph::addEllips(Ellips e)
+{
+    addEllips(e.x,e.y,e.number);
+}
+
 void Graph::addEllips(float x,float y, int num)
 {
     Ellips d;
@@ -181,6 +212,13 @@ float Graph::dist(float x1,float y1,float x2,float y2)
 {
     float result = std::sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
     return result;
+}
+
+void Graph::addEdge(Edge e)
+{
+    edges.push_back(e);
+//    addEdge(e.from);
+//    addEdge(e.to);
 }
 
 bool Graph::addEdge(int number)

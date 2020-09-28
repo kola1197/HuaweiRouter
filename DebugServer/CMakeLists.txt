@@ -46,29 +46,35 @@ if(ANDROID)
     network.h
     network.cpp
     dir/channel.cpp
-)
+          SimulationCore/ServerNode.cpp SimulationCore/ServerNode.h SimulationCore/ServerConnection.cpp SimulationCore/ServerConnection.h SimulationCore/DebugServer.cpp SimulationCore/DebugServer.h)
 else()
   add_executable(HuaweiRouter
-    Network/main.cpp
-    mainwindow.cpp
-    mainwindow.h
-    mainwindow.ui
-    oglwidget.cpp
-    oglwidget.h
-    graph.cpp
-    graph.h
-    Network/channel.h
-    Network/channel.cpp
-    Network/node.h
-    Network/node.cpp
-    Network/network.h
-    Network/network.cpp
-    Network/channel.cpp
-    SimulationCore/simulation.cpp
-    SimulationCore/simulation.h
-    SimulationCore/Messages.h
-    SimulationCore/Messages.cpp
-)
+          Network/main.cpp
+          mainwindow.cpp
+          mainwindow.h
+          mainwindow.ui
+          oglwidget.cpp
+          oglwidget.h
+          graph.cpp
+          graph.h
+          Network/channel.h
+          Network/channel.cpp
+          Network/node.h
+          Network/node.cpp
+          Network/network.h
+          Network/network.cpp
+          Network/channel.cpp
+          SimulationCore/simulation.cpp
+          SimulationCore/simulation.h
+          SimulationCore/Messages.h
+          SimulationCore/Messages.cpp
+          SimulationCore/ServerNode.cpp
+          SimulationCore/ServerNode.h
+          SimulationCore/ServerConnection.cpp
+          SimulationCore/ServerConnection.h
+          Utils/MutexBool.cpp
+          Utils/MutexBool.h
+          SimulationCore/DebugServer.cpp SimulationCore/DebugServer.h Utils/Settings.h Utils/ColorMode.cpp Utils/ColorMode.h)
 endif()
 
 target_link_libraries(HuaweiRouter PRIVATE Qt5::Widgets  ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES})
