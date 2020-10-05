@@ -8,7 +8,9 @@
 
 DebugServer::DebugServer(int debugSocketAdress, Graph g) : ServerNode(-1,debugSocketAdress,g)
 {
-
+    //std::cout<<"Debug server: we have got "<<g.ellipses.size()<<" nodes"<<std::endl;
+    //graph = g;
+    //std::cout<<"Debug server: now we have got "<<graph.ellipses.size()<<" nodes"<<std::endl;
 }
 
 void DebugServer::Start()
@@ -20,4 +22,6 @@ void DebugServer::Start()
         }
     });
     thr.detach();
+    isReady.set(true);
+    std::cout<<"Debug server finished his work"<<std::endl;
 }

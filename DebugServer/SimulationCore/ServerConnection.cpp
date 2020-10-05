@@ -9,7 +9,7 @@
 #include <Utils/ColorMode.h>
 #include "ServerConnection.h"
 #include "Messages.h"
-
+#include "QObject"
 
 ServerConnection::ServerConnection(int _port, int _from, int _to):QObject()
 {
@@ -20,9 +20,10 @@ ServerConnection::ServerConnection(int _port, int _from, int _to):QObject()
 
 void ServerConnection::connectTo()
 {
-    if (connected.get())
+    if (!connected.get())
     {
         std::thread thr([this]() {
+            std::cout<<"trying to connect "<<from<<" => "<<to<<". Port: "<<port<<std::endl;
             struct sockaddr_in serv_addr;
             if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
                 std::cout << "\n Socket creation error \n" << std::endl;
@@ -64,6 +65,10 @@ void ServerConnection::getMessage()
     {
         getPingMessage();
     }
+    if (h.type == HarbingerMessage::TEST_MESSAGE)
+    {
+        getTestMessage();
+    }
 }
 
 void ServerConnection::getPingMessage()
@@ -81,13 +86,29 @@ void ServerConnection::getPingMessage()
     sendMessage(m);
 }
 
+void ServerConnection::getTestMessage()
+{
+    TestMessage m;
+    //m.testTexst = "";
+    char msg[sizeof (m)];
+    int bytes;
+    for (int i = 0; i < sizeof(m); i += bytes) {
+        if ((bytes = recv(sock, msg +i, sizeof(m)  - i, 0)) == -1){
+            std::cout<<"error"<<std::endl;
+        }
+    }
+    memcpy(&m, msg, sizeof(m));
+
+    std::cout<<"Got test Message from "<<from<<" => "<<to<<" message '"<<m.text<<"'"<<std::endl;
+}
+
 void ServerConnection::awaitConnection()
 {
     if (!connected.get())
     {
         Color::ColorMode yel(Color::FG_YELLOW);
         Color::ColorMode def(Color::FG_DEFAULT);
-        std::cout <<yel<< "trying to build Connection "<<def<< "from "<<from<<" to "<< to << std::endl;
+        std::cout <<yel<< "Awaiting for Connection "<<def<< "from "<<from<<" to "<< to << std::endl;
         std::thread thr([this]() {
             struct sockaddr_in address;
             int opt = 1;
@@ -144,6 +165,17 @@ void ServerConnection::sendMessage(PingMessage m)
 {
     HarbingerMessage h;
     h.type = HarbingerMessage::PING_MESSAGE;
+    h.code = 239;
+    sendMutex.lock();
+    send(sock, &h, sizeof(h), 0);
+    send(sock, &m, sizeof(m), 0);
+    sendMutex.unlock();
+}
+
+void ServerConnection::sendMessage(TestMessage m)
+{
+    HarbingerMessage h;
+    h.type = HarbingerMessage::TEST_MESSAGE;
     h.code = 239;
     sendMutex.lock();
     send(sock, &h, sizeof(h), 0);

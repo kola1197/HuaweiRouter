@@ -51,7 +51,8 @@ struct PingMessage{
 };
 
 struct TestMessage{
-    std::string testTexst;
+    char text[200];
+    //std::string testTexst;
 };
 
 //class Messages {

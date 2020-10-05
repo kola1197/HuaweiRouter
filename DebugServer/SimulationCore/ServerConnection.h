@@ -16,6 +16,13 @@ public:
     void connectTo();
     void awaitConnection();
     MutexBool connected {false};
+    void sendMessage(PingMessage m);
+    void sendMessage(SystemMessage m);
+    void sendMessage(TestMessage m);
+
+    void getMessage();
+    void getPingMessage();
+    void getTestMessage();
     void stop();
 private:
     int from = -1;
@@ -30,13 +37,10 @@ private:
 
     std::string ip = "127.0.0.2";
 
-    void getPingMessage();
+
 
     std::mutex sendMutex;
-    void sendMessage(PingMessage m);
-    void sendMessage(SystemMessage m);
 
-    void getMessage();
 };
 
 

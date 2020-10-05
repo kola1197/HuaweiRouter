@@ -14,16 +14,17 @@ Graph::Graph(QObject *parent) : QObject(parent)
 
 Graph& Graph::operator = (const Graph &obj)
 {
-    Graph result;
+    ellipses.clear();
+    edges.clear();
     for (int i=0;i<obj.ellipses.size();i++)
     {
-        result.addEllips(obj.ellipses[i]);
+        addEllips(obj.ellipses[i]);
     }
     for (int i=0;i<obj.edges.size();i++)
     {
-        result.addEdge(obj.edges[i]);
+        addEdge(obj.edges[i]);
     }
-    return result;
+    return *this;
 }
 
 Graph::Graph(const Graph &obj)

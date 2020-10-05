@@ -13,6 +13,7 @@ class DebugServer: public ServerNode {
 public:
     DebugServer(int debugSocketAdress, Graph g);
     void Start();
+    MutexBool isReady {false};   //true when all connections for nodes are ready
 private:
 };
 
