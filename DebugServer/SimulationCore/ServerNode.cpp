@@ -28,22 +28,28 @@ void ServerNode::Start()       //on start we connect to debug server
             usleep(400);
         }
         std::cout<<"Node "<<serverNum<<": debugServer active now "<<std::endl;
-        for (int i=0;i<3;i++){
-        TestMessage testMessage;
-        for (int i =0;i<200;i++){
-            testMessage.text[i] = ' ';
-        }
-        std::string s = "Hello to debug server from " +std::to_string(serverNum);
-        //const char* text = s.c_str();
-        if (s.length() < 200)                        //200 - m.text.size
-        {
-            for (int i=0;i<s.length();i++) {
-                testMessage.text[i] = s[i];
-            }
-        }
-        std::cout<<"test text "<<testMessage.text<<std::endl;
-        debugConnection->sendMessage(testMessage);
-    }});
+        DebugMessage d;
+        d.type = DebugMessage::CONNECTION_STATUS;
+        d.i[0]=serverNum;
+        d.i[1]=1;
+        debugConnection->sendMessage(d);
+//        for (int i=0;i<3;i++){
+//            TestMessage testMessage;
+//            for (int i =0;i<200;i++){
+//                testMessage.text[i] = ' ';
+//            }
+//            std::string s = "Hello to debug server from " +std::to_string(serverNum);
+//            //const char* text = s.c_str();
+//            if (s.length() < 200)                        //200 - m.text.size
+//            {
+//                for (int i=0;i<s.length();i++) {
+//                    testMessage.text[i] = s[i];
+//                }
+//            }
+//            std::cout<<"test text "<<testMessage.text<<std::endl;
+//            debugConnection->sendMessage(testMessage);
+//        }
+    });
     thr.detach();
 }
 

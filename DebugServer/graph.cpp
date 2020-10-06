@@ -262,3 +262,29 @@ void Graph::deleteEllips(int number)
         }
     }
 }
+
+void Graph::get_system_message(SystemMessage m)
+{
+    std::cout<<m.authorNum<<" send system message "<<std::endl;
+}
+
+void Graph::get_system_message(DebugMessage m)
+{
+    Ellips *e = getEllipseByNumber(m.i[0]);
+    e->connected = m.i[1]==1;
+    e->colorStatus=2;
+    emit repaint();
+    //std::cout<<m.i[0]<<" send connection status "<<m.i[1]<<std::endl;
+}
+
+void Graph::addPacket()
+{
+    PacketMessage m;
+    m.id = packetIdCounter;
+    packetIdCounter++;
+    m.type = PacketMessage::DEFAULT_PACKET;
+    m.from = -1;
+    m.to = -1;
+    packets.push_back(m);
+    emit repaint();
+}

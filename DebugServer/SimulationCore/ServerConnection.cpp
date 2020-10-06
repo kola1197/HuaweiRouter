@@ -69,6 +69,42 @@ void ServerConnection::getMessage()
     {
         getTestMessage();
     }
+    if (h.type == HarbingerMessage::SYSTEM_MESSAGE)
+    {
+        getSystemMessage();
+    }
+    if (h.type == HarbingerMessage::DEBUG_MESSAGE)
+    {
+        getDebugMessage();
+    }
+}
+
+void ServerConnection::getDebugMessage()
+{
+    DebugMessage m;
+    char msg[sizeof (m)];
+    int bytes;
+    for (int i = 0; i < sizeof(m); i += bytes) {
+        if ((bytes = recv(sock, msg +i, sizeof(m)  - i, 0)) == -1){
+            std::cout<<"error"<<std::endl;
+        }
+    }
+    memcpy(&m, msg, sizeof(m));
+    emit transmit_to_gui(m);
+}
+
+void ServerConnection::getSystemMessage()
+{
+    SystemMessage m;
+    char msg[sizeof (m)];
+    int bytes;
+    for (int i = 0; i < sizeof(m); i += bytes) {
+        if ((bytes = recv(sock, msg +i, sizeof(m)  - i, 0)) == -1){
+            std::cout<<"error"<<std::endl;
+        }
+    }
+    memcpy(&m, msg, sizeof(m));
+    emit transmit_to_gui(m);
 }
 
 void ServerConnection::getPingMessage()
@@ -183,6 +219,17 @@ void ServerConnection::sendMessage(TestMessage m)
     sendMutex.unlock();
 }
 
+void ServerConnection::sendMessage(DebugMessage m)
+{
+    HarbingerMessage h;
+    h.type = HarbingerMessage::DEBUG_MESSAGE;
+    h.code = 239;
+    sendMutex.lock();
+    send(sock, &h, sizeof(h), 0);
+    send(sock, &m, sizeof(m), 0);
+    sendMutex.unlock();
+}
+
 void ServerConnection::sendMessage(SystemMessage m)
 {
     HarbingerMessage h;
@@ -194,3 +241,4 @@ void ServerConnection::sendMessage(SystemMessage m)
     send(sock, &m, sizeof(m), 0);
     sendMutex.unlock();
 }
+

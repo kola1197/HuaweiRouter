@@ -10,7 +10,7 @@
 #define int64 int64_t
 
 struct HarbingerMessage {                                           //sends before other messages, to set resiver to it
-    enum Type {PING_MESSAGE, TEST_MESSAGE, SYSTEM_MESSAGE};
+    enum Type {PING_MESSAGE, TEST_MESSAGE, SYSTEM_MESSAGE, DEBUG_MESSAGE, PACKET_MESSAGE};
     Type type;
     int code;
 };
@@ -43,6 +43,14 @@ struct SystemMessage {
     enum Type {TEXT_ALLERT};
     char text[200];
     int i[8];
+    int authorNum;
+    Type type;
+};
+
+struct DebugMessage{
+    enum Type {CONNECTION_STATUS};
+    char text[200];
+    int i[8];
     Type type;
 };
 
@@ -53,6 +61,14 @@ struct PingMessage{
 struct TestMessage{
     char text[200];
     //std::string testTexst;
+};
+
+struct PacketMessage{
+    enum Type {DEFAULT_PACKET};
+    int from;
+    int to;
+    int id;
+    Type type;
 };
 
 //class Messages {

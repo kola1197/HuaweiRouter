@@ -23,11 +23,21 @@ private slots:
     void on_loadButton_released();
 
     void on_deleteButton_released();
-
+    void AddButtonClick();
+    void SavePacketClick();
     void on_startButton_released();
+    void cellChangedCheck(int row,int column);
 
+    void cellFromTextChanged();
+    void cellToTextChanged();
+public slots:
+    void repaintOGLWidget();
+    void onBtnClicked();
+    //void get_system_message(SystemMessage m);
 private:
     Simulation simulation;
     Ui::MainWindow *ui;
+    void connectSlots();
+    void createUI();
 };
 #endif // MAINWINDOW_H

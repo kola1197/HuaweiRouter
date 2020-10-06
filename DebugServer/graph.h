@@ -3,13 +3,14 @@
 
 #include <vector>
 #include <QObject>
-
+#include <SimulationCore/Messages.h>
 
 
 struct Ellips
 {
     float x;
     float y;
+    bool connected = false;
     int number = -1;
     int colorStatus = 0; // 0 - orange - default but not connected, 1 - blue - active for movement, 2 - green - conected
 };
@@ -47,6 +48,15 @@ public:
     void addEllips(Ellips e);
 
     void deleteActiveEllips();
+
+    std::vector<PacketMessage> packets;
+    void addPacket();
+    int packetIdCounter = 0;
+public slots:
+    void get_system_message(SystemMessage m);
+    void get_system_message(DebugMessage m);
+signals:
+    void repaint();
 private:
     float dist(float x1, float y1, float x2, float y2);
     int ellipseCounter = 0;

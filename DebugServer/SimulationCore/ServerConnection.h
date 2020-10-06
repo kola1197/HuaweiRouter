@@ -19,11 +19,20 @@ public:
     void sendMessage(PingMessage m);
     void sendMessage(SystemMessage m);
     void sendMessage(TestMessage m);
+    void sendMessage(DebugMessage m);
+
 
     void getMessage();
     void getPingMessage();
     void getTestMessage();
+    void getSystemMessage();
+    void getDebugMessage();
     void stop();
+
+signals:
+    void transmit_to_gui(SystemMessage m);
+    void transmit_to_gui(DebugMessage m);
+
 private:
     int from = -1;
     int to = -1;
