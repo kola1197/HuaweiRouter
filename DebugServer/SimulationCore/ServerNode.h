@@ -10,13 +10,17 @@
 #include <functional>
 #include "ServerConnection.h"
 
-class ServerNode {
+class ServerNode :public QObject{
+Q_OBJECT
 public:
     ServerNode(int serverNum,int debugSocketAdress, Graph g);
     void Start();
     //std::vector<std::shared_ptr<ServerConnection>> connections;
     std::vector<ServerConnection*> connections;
     ServerConnection* debugConnection;
+    std::vector<PacketMessage> messagesStack;
+public slots:
+    void get_message(PacketMessage m);
 protected:
     void addConnection(int to);
     Graph graph;

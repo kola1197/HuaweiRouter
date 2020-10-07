@@ -115,29 +115,6 @@
      <string>Add Packet</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="SavePacketButton">
-    <property name="geometry">
-     <rect>
-      <x>1650</x>
-      <y>930</y>
-      <width>89</width>
-      <height>25</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Save Packet</string>
-    </property>
-   </widget>
-   <widget class="QComboBox" name="comboBox">
-    <property name="geometry">
-     <rect>
-      <x>1660</x>
-      <y>620</y>
-      <width>86</width>
-      <height>25</height>
-     </rect>
-    </property>
-   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -169,22 +146,6 @@
     <hint type="sourcelabel">
      <x>1694</x>
      <y>854</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>890</x>
-     <y>499</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>SavePacketButton</sender>
-   <signal>released()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>SavePacketClick()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>1694</x>
-     <y>964</y>
     </hint>
     <hint type="destinationlabel">
      <x>890</x>

@@ -11,8 +11,10 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
-    qRegisterMetaType<DebugMessage>("DebugMessage");
+    qRegisterMetaType<DebugMessage>("DebugMessage");             //now we can use this messages in signal/slot system as QObjects
     qRegisterMetaType<SystemMessage>("SystemMessage");
+    qRegisterMetaType<PacketMessage>("PacketMessage");
+
     ui->setupUi(this);
     createUI();
     connect(ui->openGLWidget,SIGNAL(transmit_info(QString)),this,SLOT(setEllipseInfo(QString)));

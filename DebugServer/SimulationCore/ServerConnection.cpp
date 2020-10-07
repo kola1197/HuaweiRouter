@@ -77,6 +77,24 @@ void ServerConnection::getMessage()
     {
         getDebugMessage();
     }
+    if (h.type == HarbingerMessage::PACKET_MESSAGE)
+    {
+        getPacketMessage();
+    }
+}
+
+void ServerConnection::getPacketMessage()
+{
+    PacketMessage m;
+    char msg[sizeof (m)];
+    int bytes;
+    for (int i = 0; i < sizeof(m); i += bytes) {
+        if ((bytes = recv(sock, msg + i, sizeof(m)  - i, 0)) == -1){
+            std::cout<<"error"<<std::endl;
+        }
+    }
+    memcpy(&m, msg, sizeof(m));
+    emit transmit_to_node(m);
 }
 
 void ServerConnection::getDebugMessage()
@@ -85,7 +103,7 @@ void ServerConnection::getDebugMessage()
     char msg[sizeof (m)];
     int bytes;
     for (int i = 0; i < sizeof(m); i += bytes) {
-        if ((bytes = recv(sock, msg +i, sizeof(m)  - i, 0)) == -1){
+        if ((bytes = recv(sock, msg + i, sizeof(m)  - i, 0)) == -1){
             std::cout<<"error"<<std::endl;
         }
     }
@@ -234,6 +252,18 @@ void ServerConnection::sendMessage(SystemMessage m)
 {
     HarbingerMessage h;
     h.type = HarbingerMessage::SYSTEM_MESSAGE;
+    h.code = 239;
+    sendMutex.lock();
+    send(sock, &h, sizeof(h), 0);
+    //std::cout<<"sizeof m"<< sizeof(m)<<std::endl;
+    send(sock, &m, sizeof(m), 0);
+    sendMutex.unlock();
+}
+
+void ServerConnection::sendMessage(PacketMessage m)
+{
+    HarbingerMessage h;
+    h.type = HarbingerMessage::PACKET_MESSAGE;
     h.code = 239;
     sendMutex.lock();
     send(sock, &h, sizeof(h), 0);

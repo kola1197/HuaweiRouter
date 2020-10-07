@@ -48,7 +48,7 @@ struct SystemMessage {
 };
 
 struct DebugMessage{
-    enum Type {CONNECTION_STATUS};
+    enum Type {CONNECTION_STATUS, PACKET_STATUS};
     char text[200];
     int i[8];
     Type type;
@@ -68,6 +68,7 @@ struct PacketMessage{
     int from;
     int to;
     int id;
+    int currentPosition;
     Type type;
 };
 

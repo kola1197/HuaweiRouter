@@ -20,6 +20,7 @@ public:
     void sendMessage(SystemMessage m);
     void sendMessage(TestMessage m);
     void sendMessage(DebugMessage m);
+    void sendMessage(PacketMessage m);
 
 
     void getMessage();
@@ -27,11 +28,15 @@ public:
     void getTestMessage();
     void getSystemMessage();
     void getDebugMessage();
+    void getPacketMessage();
+
     void stop();
 
 signals:
     void transmit_to_gui(SystemMessage m);
     void transmit_to_gui(DebugMessage m);
+
+    void transmit_to_node(PacketMessage m);
 
 private:
     int from = -1;

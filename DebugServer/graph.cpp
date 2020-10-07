@@ -175,6 +175,7 @@ void Graph::addPacketmessage(int _type, int _from, int _to)
     }
     m.from = _from;
     m.to = _to;
+    m.currentPosition = -1;
     packets.push_back(m);
 }
 
@@ -310,6 +311,7 @@ void Graph::addPacket()
     m.type = PacketMessage::DEFAULT_PACKET;
     m.from = -1;
     m.to = -1;
+    m.currentPosition = -1;
     packets.push_back(m);
     emit repaint();
 }

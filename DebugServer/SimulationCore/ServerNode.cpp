@@ -8,9 +8,10 @@
 #include <unistd.h>
 #include <iostream>
 #include <thread>
+#include "QObject"
 
 
-ServerNode::ServerNode(int _serverNum,int _debugSocketAdress, Graph g)
+ServerNode::ServerNode(int _serverNum,int _debugSocketAdress, Graph g):QObject()
 {
     graph = Graph(g);
     serverNum= _serverNum;
@@ -83,3 +84,12 @@ void ServerNode::addConnection(int to)
     }
 }
 
+void ServerNode::get_message(PacketMessage m)
+{
+    DebugMessage d;
+    d.type = DebugMessage::PACKET_STATUS;
+    d.i[0] = m.id;
+    d.i[1] = serverNum;
+    debugConnection->sendMessage(d);
+
+}
