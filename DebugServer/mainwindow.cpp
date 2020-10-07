@@ -53,6 +53,7 @@ void MainWindow::createUI()
         box->addItems(QStringList() <<trUtf8("DEFAULT"));      //enums from PacketMessage in right order!!!!
         box->setCurrentIndex(ui->openGLWidget->graph.packets[j].type);
         ui->tableWidget->setCellWidget(j,2,box);
+        connect(box, SIGNAL(currentIndexChanged(int)),this, SLOT(cellIndexChanged(int)));
 
         QTextEdit *editFrom = new QTextEdit();
         editFrom->setToolTip(QString::number(j));
@@ -64,7 +65,7 @@ void MainWindow::createUI()
         QTextEdit *editTo = new QTextEdit();
         editTo->setToolTip(QString::number(j));
         editTo->setToolTipDuration(0);
-        editTo->setText(QString::number(ui->openGLWidget->graph.packets[j].from));
+        editTo->setText(QString::number(ui->openGLWidget->graph.packets[j].to));
         ui->tableWidget->setCellWidget(j,4,editTo);
         connect(editTo, SIGNAL(textChanged()),this,SLOT(cellToTextChanged()));
 
@@ -74,6 +75,7 @@ void MainWindow::createUI()
         btn->setToolTip(QString::number(j));
         btn->setToolTipDuration(0);
         ui->tableWidget->setCellWidget(j,5,btn);
+
 
         connect( btn, SIGNAL( clicked( bool ) ), SLOT( onBtnClicked() ) );
     }
@@ -89,6 +91,18 @@ void MainWindow::onBtnClicked()
         ui->openGLWidget->graph.packets.erase(ui->openGLWidget->graph.packets.begin()+index);
         createUI();
         repaintOGLWidget();
+    }
+}
+
+void MainWindow::cellIndexChanged(int i)
+{
+    if (QComboBox* box = qobject_cast< QComboBox* >( sender() ))
+    {
+        int index = box->toolTip().toInt();
+        if (i == 0)
+        {
+            ui->openGLWidget->graph.packets[index].type = PacketMessage::DEFAULT_PACKET;
+        }
     }
 }
 
@@ -181,6 +195,7 @@ void MainWindow::on_loadButton_released()
     QString q = QFileDialog::getOpenFileName(this,"Load Graph From File","", "Graph (*.grf);;All Files (*)");
     ui->openGLWidget->graph.load(q);
     ui->openGLWidget->update();
+    createUI();
 }
 
 void MainWindow::setEllipseInfo(QString q)

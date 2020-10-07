@@ -95,19 +95,26 @@ void Graph::save(QString path)
     {
         ofs<<edges[i].from<<" "<<edges[i].to<<".\n";
     }
+    ofs<<"*.\n";
+    for (int i = 0; i<packets.size();i++)
+    {
+        ofs<<packets[i].type<<" "<<packets[i].from<<" "<<packets[i].to<<".\n";
+    }
     ofs.close();
 }
 
 void Graph::load(QString path)
 {
+    packetIdCounter = 0;
     std::string line;
     std::ifstream in(path.toStdString());
     ellipses.clear();
     edges.clear();
+    packets.clear();
     ellipseCounter = 0;
     if (in.is_open())
     {
-        int loadPart = 0;       //0 - ellipses, 1 edges
+        int loadPart = 0;       //0 - ellipses, 1 - edges, 2 - PacketMessages
         while( getline(in, line))
         {
             std::cout<< line<<'\n';
@@ -140,6 +147,10 @@ void Graph::load(QString path)
                     addEdge((int)arr[0]);
                     addEdge((int)arr[1]);
                 }
+                if (loadPart == 2)
+                {
+                    addPacketmessage(arr[0],arr[1],arr[2]);
+                }
             }
             else{
                 loadPart++;
@@ -151,6 +162,20 @@ void Graph::load(QString path)
     {
         std::cout<<"unable load file";
     }
+}
+
+void Graph::addPacketmessage(int _type, int _from, int _to)
+{
+    PacketMessage m;
+    m.id = packetIdCounter;
+    packetIdCounter++;
+    if (_type == 0)
+    {
+        m.type = PacketMessage::DEFAULT_PACKET;
+    }
+    m.from = _from;
+    m.to = _to;
+    packets.push_back(m);
 }
 
 void Graph::addEllips(float x,float y)

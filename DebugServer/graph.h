@@ -51,6 +51,7 @@ public:
 
     std::vector<PacketMessage> packets;
     void addPacket();
+    void addPacketmessage(int _type, int _from, int _to);
     int packetIdCounter = 0;
 public slots:
     void get_system_message(SystemMessage m);

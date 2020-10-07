@@ -30,6 +30,7 @@ private slots:
 
     void cellFromTextChanged();
     void cellToTextChanged();
+    void cellIndexChanged(int i);
 public slots:
     void repaintOGLWidget();
     void onBtnClicked();

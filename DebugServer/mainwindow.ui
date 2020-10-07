@@ -128,13 +128,13 @@
      <string>Save Packet</string>
     </property>
    </widget>
-   <widget class="QTextEdit" name="textEdit">
+   <widget class="QComboBox" name="comboBox">
     <property name="geometry">
      <rect>
-      <x>1630</x>
-      <y>580</y>
-      <width>104</width>
-      <height>70</height>
+      <x>1660</x>
+      <y>620</y>
+      <width>86</width>
+      <height>25</height>
      </rect>
     </property>
    </widget>

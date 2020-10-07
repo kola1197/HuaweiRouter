@@ -64,7 +64,7 @@ struct TestMessage{
 };
 
 struct PacketMessage{
-    enum Type {DEFAULT_PACKET};
+    enum Type {DEFAULT_PACKET=0};
     int from;
     int to;
     int id;
