@@ -47,7 +47,7 @@ void ServerNode::Start()       //on start we connect to debug server
         DebugMessage d;
         d.type = DebugMessage::CONNECTION_STATUS;
         d.i[0]=serverNum;
-        d.i[1]=1;
+        d.i[1]=2;
         debugConnection->sendMessage(d);
         //here we adding all other connections
         int c =0;
@@ -116,6 +116,11 @@ void ServerNode::Start()       //on start we connect to debug server
         m.i[0] = serverNum;
         m.i[1] = 1;
         debugConnection->sendMessage(m);
+        DebugMessage dd;
+        dd.type = DebugMessage::CONNECTION_STATUS;
+        dd.i[0] = serverNum;
+        dd.i[1] = 3;
+        debugConnection->sendMessage(dd);
         Color::ColorMode grn(Color::FG_GREEN);
         Color::ColorMode def(Color::FG_DEFAULT);
         Color::ColorMode red(Color::FG_RED);
@@ -133,7 +138,7 @@ void ServerNode::Start()       //on start we connect to debug server
                 PacketMessage m(messagesStack[0]);
                 messagesStack.erase(messagesStack.begin());
                 int i = rand() % (connections.size());
-                std::cout<<"Node "<<serverNum<<":"<<grn<<" sending "<<m.id<<" to "<<i<<def<<std::endl;
+                std::cout<<"Node "<<serverNum<<":"<<grn<<" sending packet with id "<<m.id<<" to "<<connections[i]->to<<def<<std::endl;
                 connections[i]->sendMessage(m);
             }
             else{

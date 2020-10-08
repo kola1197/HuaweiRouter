@@ -321,7 +321,7 @@ void Graph::get_system_message(DebugMessage m)
     {
         Ellips *e = getEllipseByNumber(m.i[0]);
         e->connected = m.i[1]==1;
-        e->colorStatus=2;
+        e->colorStatus=m.i[1];
         emit repaint();
     }
     if (m.type = DebugMessage::PACKET_STATUS)

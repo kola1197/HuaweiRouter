@@ -224,7 +224,7 @@ void MainWindow::on_startButton_released()   // lock the screen and start simula
 void MainWindow::updateTable()
 {
     createUI();
-    std::cout<<"updating table"<<std::endl;
+    //std::cout<<"updating table"<<std::endl;
 }
 
 void MainWindow::connectSlots()
