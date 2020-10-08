@@ -317,14 +317,15 @@ void Graph::get_system_message(SystemMessage m)
 
 void Graph::get_system_message(DebugMessage m)
 {
-    if (m.type = DebugMessage::CONNECTION_STATUS)
+    if (m.type == DebugMessage::CONNECTION_STATUS)
     {
         Ellips *e = getEllipseByNumber(m.i[0]);
         e->connected = m.i[1]==1;
-        e->colorStatus=m.i[1];
+        e->colorStatus = m.i[1];
+        //std::cout<<m.i[0]<<" send system message, colorStatus now is "<<e->colorStatus<<std::endl;
         emit repaint();
     }
-    if (m.type = DebugMessage::PACKET_STATUS)
+    if (m.type == DebugMessage::PACKET_STATUS)
     {
         //std::cout<<"GOT PACKET STATUS "<<m.i[0]<<"   "<<m.i[1]<<std::endl;
         for (int i = 0;i < packets.size();i++)

@@ -178,12 +178,7 @@ void MainWindow::SavePacketClick()
         QWidget *_editTo = ui->tableWidget->cellWidget(i,3);
         QPushButton *editTo = new QPushButton(_editTo);
         QMessageBox::information( this, "The button was clicked", editTo->text());
-
         //QString s = ui->tableWidget->itemAt(i,3)->data().toReal();
-
-
-
-
     }
 }
 

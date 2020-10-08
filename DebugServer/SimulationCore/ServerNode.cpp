@@ -116,6 +116,7 @@ void ServerNode::Start()       //on start we connect to debug server
         m.i[0] = serverNum;
         m.i[1] = 1;
         debugConnection->sendMessage(m);
+
         DebugMessage dd;
         dd.type = DebugMessage::CONNECTION_STATUS;
         dd.i[0] = serverNum;
