@@ -16,6 +16,7 @@ Graph& Graph::operator = (const Graph &obj)
 {
     ellipses.clear();
     edges.clear();
+    packets.clear();
     for (int i=0;i<obj.ellipses.size();i++)
     {
         addEllips(obj.ellipses[i]);
@@ -23,6 +24,10 @@ Graph& Graph::operator = (const Graph &obj)
     for (int i=0;i<obj.edges.size();i++)
     {
         addEdge(obj.edges[i]);
+    }
+    for (int i=0;i<obj.packets.size();i++)
+    {
+        addPacket(obj.packets[i]);
     }
     return *this;
 }
@@ -36,6 +41,10 @@ Graph::Graph(const Graph &obj)
     for (int i=0;i<obj.edges.size();i++)
     {
         addEdge(obj.edges[i]);
+    }
+    for (int i=0;i<obj.packets.size();i++)
+    {
+        addPacket(obj.packets[i]);
     }
 }
 
@@ -202,6 +211,16 @@ void Graph::addEllips(float x,float y, int num)
     ellipses.push_back(d);
 }
 
+void Graph::addPacket(PacketMessage m)
+{
+    PacketMessage p;
+    p.id = m.id;
+    p.type = m.type;
+    p.from = m.from;
+    p.to = m.to;
+    packets.push_back(p);
+}
+
 Ellips * Graph::getEllipseByNumber(int num)
 {
     Ellips *result;
@@ -259,6 +278,8 @@ bool Graph::addEdge(int number)
         if (number != -1)
         {
             Edge e;
+            e.id = edgeCounter;
+            edgeCounter++;
             e.from = activeNumberForEdge;
             e.to = number;
             edges.push_back(e);
@@ -296,10 +317,26 @@ void Graph::get_system_message(SystemMessage m)
 
 void Graph::get_system_message(DebugMessage m)
 {
-    Ellips *e = getEllipseByNumber(m.i[0]);
-    e->connected = m.i[1]==1;
-    e->colorStatus=2;
-    emit repaint();
+    if (m.type = DebugMessage::CONNECTION_STATUS)
+    {
+        Ellips *e = getEllipseByNumber(m.i[0]);
+        e->connected = m.i[1]==1;
+        e->colorStatus=2;
+        emit repaint();
+    }
+    if (m.type = DebugMessage::PACKET_STATUS)
+    {
+        //std::cout<<"GOT PACKET STATUS "<<m.i[0]<<"   "<<m.i[1]<<std::endl;
+        for (int i = 0;i < packets.size();i++)
+        {
+            if (packets[i].id == m.i[0])
+            {
+                packets[i].currentPosition = m.i[1];
+            }
+        }
+        //emit repaint();
+        emit updateTable();
+    }
     //std::cout<<m.i[0]<<" send connection status "<<m.i[1]<<std::endl;
 }
 

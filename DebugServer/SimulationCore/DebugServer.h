@@ -10,10 +10,15 @@
 #include "ServerNode.h"
 
 class DebugServer: public ServerNode {
+    Q_OBJECT
 public:
     DebugServer(int debugSocketAdress, Graph g);
     void Start();
     MutexBool isReady {false};   //true when all connections for nodes are ready
+
+public slots:
+    void get_message_for_debug(SystemMessage);
+
 private:
 };
 

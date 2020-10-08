@@ -40,7 +40,7 @@ struct HarbingerMessage {                                           //sends befo
 //};
 
 struct SystemMessage {
-    enum Type {TEXT_ALLERT};
+    enum Type {TEXT_ALLERT, START_SIMULATION_FLAG, SERVERS_READY};
     char text[200];
     int i[8];
     int authorNum;

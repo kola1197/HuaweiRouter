@@ -20,25 +20,29 @@ ServerConnection::ServerConnection(int _port, int _from, int _to):QObject()
 
 void ServerConnection::connectTo()
 {
+    started.set(true);
     if (!connected.get())
     {
         std::thread thr([this]() {
-            std::cout<<"trying to connect "<<from<<" => "<<to<<". Port: "<<port<<std::endl;
-            struct sockaddr_in serv_addr;
-            if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-                std::cout << "\n Socket creation error \n" << std::endl;
-            }
-            serv_addr.sin_family = AF_INET;
-            serv_addr.sin_port = htons(port);
-            // Convert IPv4 and IPv6 addresses from text to binary form
-            if (inet_pton(AF_INET, ip.c_str(), &serv_addr.sin_addr) <= 0) {
-                std::cout << "\nInvalid address/ Address not supported \n" << std::endl;
-            }
-            if (::connect(sock, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
-                printf("\nConnection Failed \n");
-            } else{
-                connected.set(true);
-                std::cout<<"connection "<<from<<" => "<<to<<" status is now: CONNECTED"<<std::endl;
+            while (!connected.get())
+            {
+                std::cout<<"trying to connect "<<from<<" => "<<to<<". Port: "<<port<<std::endl;
+                struct sockaddr_in serv_addr;
+                if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+                    std::cout << "\n Socket creation error \n" << std::endl;
+                }
+                serv_addr.sin_family = AF_INET;
+                serv_addr.sin_port = htons(port);
+                // Convert IPv4 and IPv6 addresses from text to binary form
+                if (inet_pton(AF_INET, ip.c_str(), &serv_addr.sin_addr) <= 0) {
+                    std::cout << "\nInvalid address/ Address not supported \n" << std::endl;
+                }
+                if (::connect(sock, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
+                    printf("\nConnection Failed \n");
+                } else{
+                    connected.set(true);
+                    //std::cout<<"connection "<<from<<" => "<<to<<" status is now: CONNECTED"<<std::endl;
+                }
             }
             while (!needToStop.get())
             {
@@ -56,7 +60,7 @@ void ServerConnection::getMessage()
     int hbytes;
     for (int i = 0; i < sizeof(h); i += hbytes) {
         if ((hbytes = recv(sock, hmsg +i, sizeof(h)  - i, 0)) == -1){
-            std::cout<<"error"<<std::endl;
+            std::cout<<"error on receive HarbingerMessage"<<std::endl;
             //errorServerStop();
         }
     }
@@ -90,7 +94,7 @@ void ServerConnection::getPacketMessage()
     int bytes;
     for (int i = 0; i < sizeof(m); i += bytes) {
         if ((bytes = recv(sock, msg + i, sizeof(m)  - i, 0)) == -1){
-            std::cout<<"error"<<std::endl;
+            std::cout<<"error on receive PacketMessage "<<std::endl;
         }
     }
     memcpy(&m, msg, sizeof(m));
@@ -104,7 +108,7 @@ void ServerConnection::getDebugMessage()
     int bytes;
     for (int i = 0; i < sizeof(m); i += bytes) {
         if ((bytes = recv(sock, msg + i, sizeof(m)  - i, 0)) == -1){
-            std::cout<<"error"<<std::endl;
+            std::cout<<"error on receive DebugMessage"<<std::endl;
         }
     }
     memcpy(&m, msg, sizeof(m));
@@ -118,11 +122,12 @@ void ServerConnection::getSystemMessage()
     int bytes;
     for (int i = 0; i < sizeof(m); i += bytes) {
         if ((bytes = recv(sock, msg +i, sizeof(m)  - i, 0)) == -1){
-            std::cout<<"error"<<std::endl;
+            std::cout<<"error on receive SystemMessage"<<std::endl;
         }
     }
     memcpy(&m, msg, sizeof(m));
     emit transmit_to_gui(m);
+    emit transmit_to_node(m);
 }
 
 void ServerConnection::getPingMessage()
@@ -132,7 +137,7 @@ void ServerConnection::getPingMessage()
     int bytes;
     for (int i = 0; i < sizeof(m); i += bytes) {
         if ((bytes = recv(sock, msg +i, sizeof(m)  - i, 0)) == -1){
-            std::cout<<"error"<<std::endl;
+            std::cout<<"error on receive PingMessage"<<std::endl;
         }
     }
     memcpy(&m, msg, sizeof(m));
@@ -158,6 +163,7 @@ void ServerConnection::getTestMessage()
 
 void ServerConnection::awaitConnection()
 {
+    started.set(true);
     if (!connected.get())
     {
         Color::ColorMode yel(Color::FG_YELLOW);
@@ -191,11 +197,12 @@ void ServerConnection::awaitConnection()
                 perror("bind failed");
                 exit(EXIT_FAILURE);
             }
+            waitingForConnection.set(true);
+
             if (listen(server_fd, 3) < 0) {
                 perror("listen");
                 exit(EXIT_FAILURE);
             }
-
             if ((sock = accept(server_fd, (struct sockaddr *) &address,
                                (socklen_t *) &addrlen)) < 0) {
                 perror("accept");

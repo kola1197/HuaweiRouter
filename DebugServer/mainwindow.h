@@ -31,6 +31,7 @@ private slots:
     void cellFromTextChanged();
     void cellToTextChanged();
     void cellIndexChanged(int i);
+    void updateTable();
 public slots:
     void repaintOGLWidget();
     void onBtnClicked();

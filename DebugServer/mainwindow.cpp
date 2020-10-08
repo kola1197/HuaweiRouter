@@ -39,11 +39,11 @@ void MainWindow::createUI()
         ui->tableWidget->removeRow(0);
     }
     //connect(ui->tableWidget, SIGNAL(cellChanged(int,int)),this,SLOT(cellChangedCheck(int,int)));
-    ui->tableWidget->setColumnCount(6);
+    ui->tableWidget->setColumnCount(7);
     ui->tableWidget->setShowGrid(true);
     ui->tableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
     //QStringList headers =
-    ui->tableWidget->setHorizontalHeaderLabels(QStringList() <<trUtf8("№") <<trUtf8("id") <<trUtf8("Type") <<trUtf8("From") <<trUtf8("To") <<trUtf8("Delete"));
+    ui->tableWidget->setHorizontalHeaderLabels(QStringList() <<trUtf8("№") <<trUtf8("id") <<trUtf8("Type") <<trUtf8("From") <<trUtf8("To")<<trUtf8("Current Position") <<trUtf8("Delete"));
     ui->tableWidget->horizontalHeader()->setStretchLastSection(true);
     ui->tableWidget->hideColumn(0);
     for (int j=0;j<ui->openGLWidget->graph.packets.size();j++){
@@ -71,12 +71,13 @@ void MainWindow::createUI()
         ui->tableWidget->setCellWidget(j,4,editTo);
         connect(editTo, SIGNAL(textChanged()),this,SLOT(cellToTextChanged()));
 
+        ui->tableWidget->setItem(j,5, new QTableWidgetItem(QString::number(ui->openGLWidget->graph.packets[j].currentPosition)));
 
         QPushButton *btn = new QPushButton();
         btn->setText("Delete");
         btn->setToolTip(QString::number(j));
         btn->setToolTipDuration(0);
-        ui->tableWidget->setCellWidget(j,5,btn);
+        ui->tableWidget->setCellWidget(j,6,btn);
 
 
         connect( btn, SIGNAL( clicked( bool ) ), SLOT( onBtnClicked() ) );
@@ -220,12 +221,21 @@ void MainWindow::on_startButton_released()   // lock the screen and start simula
     connectSlots();
 }
 
+void MainWindow::updateTable()
+{
+    createUI();
+    std::cout<<"updating table"<<std::endl;
+}
+
 void MainWindow::connectSlots()
 {
     connect(&ui->openGLWidget->graph,SIGNAL(repaint()),this,SLOT(repaintOGLWidget()));
+    connect(&ui->openGLWidget->graph,SIGNAL(updateTable()),this,SLOT(updateTable()));
+
     for (int i=0;i<simulation.debugServer->connections.size();i++ )
     {
-        connect(simulation.debugServer->connections[i],SIGNAL(transmit_to_gui(SystemMessage)),&ui->openGLWidget->graph,SLOT(get_system_message(SystemMessage)));
+        //connect(simulation.debugServer->connections[i],SIGNAL(transmit_to_gui(SystemMessage)),&ui->openGLWidget->graph,SLOT(get_system_message(SystemMessage)));
+        connect(simulation.debugServer->connections[i],SIGNAL(transmit_to_gui(SystemMessage)),simulation.debugServer,SLOT(get_message_for_debug(SystemMessage)));
         connect(simulation.debugServer->connections[i],SIGNAL(transmit_to_gui(DebugMessage)),&ui->openGLWidget->graph,SLOT(get_system_message(DebugMessage)));
     }
     //connect(simulation.debugServer->debugConnection,SIGNAL(transmit_to_gui(SystemMessage)),&ui->openGLWidget->graph,SLOT(get_system_message(SystemMessage)));
@@ -236,6 +246,7 @@ void MainWindow::connectSlots()
 void MainWindow::repaintOGLWidget()
 {
     ui->openGLWidget->update();
+
 }
 
 void MainWindow::AddButtonClick()

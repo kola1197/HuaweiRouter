@@ -19,8 +19,13 @@ public:
     std::vector<ServerConnection*> connections;
     ServerConnection* debugConnection;
     std::vector<PacketMessage> messagesStack;
+    MutexBool startTest{false};
+    MutexBool stopNode{false};
+    MutexBool allClientsReady{false};
+
 public slots:
     void get_message(PacketMessage m);
+    void get_message(SystemMessage m);
 protected:
     void addConnection(int to);
     Graph graph;

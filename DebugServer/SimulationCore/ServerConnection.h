@@ -32,15 +32,20 @@ public:
 
     void stop();
 
+
+    int from = -1;
+    int to = -1;
+
+    MutexBool started {false};
+    MutexBool waitingForConnection{false};
 signals:
     void transmit_to_gui(SystemMessage m);
     void transmit_to_gui(DebugMessage m);
 
     void transmit_to_node(PacketMessage m);
-
+    void transmit_to_node(SystemMessage m);
 private:
-    int from = -1;
-    int to = -1;
+
 
     int port = 0;
 

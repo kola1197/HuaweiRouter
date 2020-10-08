@@ -51,8 +51,8 @@ void OGLWidget::paintGL()
         Ellips *el2 = graph.getEllipseByNumber(e.to);
         if (el1!=NULL && el2!=NULL)
         {
-            std::cout<<"Edge output "<<e.from<<" "<<e.to<<std::endl;
-            std::cout<<"Ellips "<<el1->x<<" "<<el1->y<<" -*- "<<el2->x<<" "<<el2->y<<std::endl;
+            //std::cout<<"Edge output "<<e.from<<" "<<e.to<<std::endl;
+            //std::cout<<"Ellips "<<el1->x<<" "<<el1->y<<" -*- "<<el2->x<<" "<<el2->y<<std::endl;
             drawEdge(el1->x,el1->y,el2->x,el2->y);
         }
     }
@@ -91,6 +91,10 @@ void OGLWidget::drawEllipse(Ellips *e)      //color 0 - default, 1 - active elli
         glColor3f(0.5, 0.3, 0.5);
     }
     if (e->colorStatus == 2)
+    {
+        glColor3f(1, 0.8, 0);
+    }
+    if (e->colorStatus == 3)
     {
         glColor3f(0, 0.8, 0);
     }

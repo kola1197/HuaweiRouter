@@ -1,14 +1,23 @@
 //
 // Created by nickolay on 28.09.2020.
 //
-
+#pragma ones
 #ifndef HUAWEIROUTER_SETTINGS_H
 #define HUAWEIROUTER_SETTINGS_H
+class Settings
 
-int DebugFirstPortNum = 5555;
-int ConnectionsFirstPortNum = 6666;
+{
+public:
+    static int DebugFirstPortNum()
+    {
+        return 5555;
+    };
+    static int ConnectionsFirstPortNum()
+    {
+        return 6666;
+    };
 
-
+};
 
 
 
