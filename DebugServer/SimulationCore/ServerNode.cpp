@@ -212,7 +212,10 @@ void ServerNode::get_message(PacketMessage m)
     d.i[0] = m.id;
     d.i[1] = serverNum;
     debugConnection->sendMessage(d);
+    if (m.to != serverNum)
+    {
     messagesStack.push_back(m);
+    }
 }
 
 void ServerNode::get_message(SystemMessage m)

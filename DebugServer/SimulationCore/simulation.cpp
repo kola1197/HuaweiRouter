@@ -31,7 +31,6 @@ void Simulation::Start()
         node->Start();
         std::cout<<"node "<<graph->ellipses[i].number<<" started"<<std::endl;
     }
-
 }
 
 
