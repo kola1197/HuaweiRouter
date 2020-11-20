@@ -12,6 +12,42 @@ Graph::Graph(QObject *parent) : QObject(parent)
     testInit();
 }
 
+Graph& Graph::operator = (const Graph &obj)
+{
+    ellipses.clear();
+    edges.clear();
+    packets.clear();
+    for (int i=0;i<obj.ellipses.size();i++)
+    {
+        addEllips(obj.ellipses[i]);
+    }
+    for (int i=0;i<obj.edges.size();i++)
+    {
+        addEdge(obj.edges[i]);
+    }
+    for (int i=0;i<obj.packets.size();i++)
+    {
+        addPacket(obj.packets[i]);
+    }
+    return *this;
+}
+
+Graph::Graph(const Graph &obj)
+{
+    for (int i=0;i<obj.ellipses.size();i++)
+    {
+        addEllips(obj.ellipses[i]);
+    }
+    for (int i=0;i<obj.edges.size();i++)
+    {
+        addEdge(obj.edges[i]);
+    }
+    for (int i=0;i<obj.packets.size();i++)
+    {
+        addPacket(obj.packets[i]);
+    }
+}
+
 void Graph::testInit()
 {
 //    addEllips(0.0,0.0);
@@ -68,19 +104,26 @@ void Graph::save(QString path)
     {
         ofs<<edges[i].from<<" "<<edges[i].to<<".\n";
     }
+    ofs<<"*.\n";
+    for (int i = 0; i<packets.size();i++)
+    {
+        ofs<<packets[i].type<<" "<<packets[i].from<<" "<<packets[i].to<<".\n";
+    }
     ofs.close();
 }
 
 void Graph::load(QString path)
 {
+    packetIdCounter = 0;
     std::string line;
     std::ifstream in(path.toStdString());
     ellipses.clear();
     edges.clear();
+    packets.clear();
     ellipseCounter = 0;
     if (in.is_open())
     {
-        int loadPart = 0;       //0 - ellipses, 1 edges
+        int loadPart = 0;       //0 - ellipses, 1 - edges, 2 - PacketMessages
         while( getline(in, line))
         {
             std::cout<< line<<'\n';
@@ -113,6 +156,10 @@ void Graph::load(QString path)
                     addEdge((int)arr[0]);
                     addEdge((int)arr[1]);
                 }
+                if (loadPart == 2)
+                {
+                    addPacketmessage(arr[0],arr[1],arr[2]);
+                }
             }
             else{
                 loadPart++;
@@ -126,9 +173,29 @@ void Graph::load(QString path)
     }
 }
 
+void Graph::addPacketmessage(int _type, int _from, int _to)
+{
+    PacketMessage m;
+    m.id = packetIdCounter;
+    packetIdCounter++;
+    if (_type == 0)
+    {
+        m.type = PacketMessage::DEFAULT_PACKET;
+    }
+    m.from = _from;
+    m.to = _to;
+    m.currentPosition = -1;
+    packets.push_back(m);
+}
+
 void Graph::addEllips(float x,float y)
 {
     addEllips(x,y,ellipseCounter);
+}
+
+void Graph::addEllips(Ellips e)
+{
+    addEllips(e.x,e.y,e.number);
 }
 
 void Graph::addEllips(float x,float y, int num)
@@ -142,6 +209,16 @@ void Graph::addEllips(float x,float y, int num)
         ellipseCounter = num + 1;
     }
     ellipses.push_back(d);
+}
+
+void Graph::addPacket(PacketMessage m)
+{
+    PacketMessage p;
+    p.id = m.id;
+    p.type = m.type;
+    p.from = m.from;
+    p.to = m.to;
+    packets.push_back(p);
 }
 
 Ellips * Graph::getEllipseByNumber(int num)
@@ -183,6 +260,13 @@ float Graph::dist(float x1,float y1,float x2,float y2)
     return result;
 }
 
+void Graph::addEdge(Edge e)
+{
+    edges.push_back(e);
+//    addEdge(e.from);
+//    addEdge(e.to);
+}
+
 bool Graph::addEdge(int number)
 {
     bool result = false;
@@ -194,6 +278,8 @@ bool Graph::addEdge(int number)
         if (number != -1)
         {
             Edge e;
+            e.id = edgeCounter;
+            edgeCounter++;
             e.from = activeNumberForEdge;
             e.to = number;
             edges.push_back(e);
@@ -222,4 +308,48 @@ void Graph::deleteEllips(int number)
             ellipses.erase(ellipses.begin()+i);
         }
     }
+}
+
+void Graph::get_system_message(SystemMessage m)
+{
+    std::cout<<m.authorNum<<" send system message "<<std::endl;
+}
+
+void Graph::get_system_message(DebugMessage m)
+{
+    if (m.type == DebugMessage::CONNECTION_STATUS)
+    {
+        Ellips *e = getEllipseByNumber(m.i[0]);
+        e->connected = m.i[1]==1;
+        e->colorStatus = m.i[1];
+        //std::cout<<m.i[0]<<" send system message, colorStatus now is "<<e->colorStatus<<std::endl;
+        emit repaint();
+    }
+    if (m.type == DebugMessage::PACKET_STATUS)
+    {
+        //std::cout<<"GOT PACKET STATUS "<<m.i[0]<<"   "<<m.i[1]<<std::endl;
+        for (int i = 0;i < packets.size();i++)
+        {
+            if (packets[i].id == m.i[0])
+            {
+                packets[i].currentPosition = m.i[1];
+            }
+        }
+        //emit repaint();
+        emit updateTable();
+    }
+    //std::cout<<m.i[0]<<" send connection status "<<m.i[1]<<std::endl;
+}
+
+void Graph::addPacket()
+{
+    PacketMessage m;
+    m.id = packetIdCounter;
+    packetIdCounter++;
+    m.type = PacketMessage::DEFAULT_PACKET;
+    m.from = -1;
+    m.to = -1;
+    m.currentPosition = -1;
+    packets.push_back(m);
+    emit repaint();
 }

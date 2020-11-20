@@ -5,12 +5,15 @@
 #ifndef DRONEAPP_MESSAGES_H
 #define DRONEAPP_MESSAGES_H
 
+#include <string>
 
-//struct HarbingerMessage {                                           //sends before other messages, to set resiver to it
-//    enum Type {TEST_MESSAGE, MESSAGE_WITH_IMAGE, MESSAGE_WITH_GRAY_IMAGE, SYSTEM_MESSAGE, PING_MESSAGE};
-//    Type type;
-//    int code;
-//};
+#define int64 int64_t
+
+struct HarbingerMessage {                                           //sends before other messages, to set resiver to it
+    enum Type {PING_MESSAGE, TEST_MESSAGE, SYSTEM_MESSAGE, DEBUG_MESSAGE, PACKET_MESSAGE};
+    Type type;
+    int code;
+};
 
 //struct MessageWithImage {                                           //get image from vehicle
 //    enum Type {LEFT_IMAGE, RIGHT_IMAGE};
@@ -36,16 +39,38 @@
 //    Type type;
 //};
 
-//struct SystemMessage {
-//    enum Type {START_VIDEO_STREAM, VIDEO_STREAM_STATUS, VIDEO_CAPTURE_STATUS, START_IMAGE_CAPTURE, STOP_IMAGE_CAPTURE, STOP_VIDEO_STREAM, TEXT_ALLERT};
-//    char text[200];
-//    int i[8];
-//    Type type;
-//};
+struct SystemMessage {
+    enum Type {TEXT_ALLERT, START_SIMULATION_FLAG, SERVERS_READY};
+    char text[200];
+    int i[8];
+    int authorNum;
+    Type type;
+};
 
-//struct PingMessage{
-//    int64 time[2];
-//};
+struct DebugMessage{
+    enum Type {CONNECTION_STATUS, PACKET_STATUS};
+    char text[200];
+    int i[8];
+    Type type;
+};
+
+struct PingMessage{
+    int64 time[2];
+};
+
+struct TestMessage{
+    char text[200];
+    //std::string testTexst;
+};
+
+struct PacketMessage{
+    enum Type {DEFAULT_PACKET=0};
+    int from;
+    int to;
+    int id;
+    int currentPosition;
+    Type type;
+};
 
 //class Messages {
 

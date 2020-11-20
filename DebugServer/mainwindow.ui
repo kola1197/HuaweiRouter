@@ -23,7 +23,7 @@
       <x>30</x>
       <y>10</y>
       <width>1600</width>
-      <height>900</height>
+      <height>801</height>
      </rect>
     </property>
    </widget>
@@ -92,6 +92,29 @@
      <string>START</string>
     </property>
    </widget>
+   <widget class="QTableWidget" name="tableWidget">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>821</y>
+      <width>1601</width>
+      <height>141</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="AddButton">
+    <property name="geometry">
+     <rect>
+      <x>1650</x>
+      <y>820</y>
+      <width>89</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Add Packet</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -113,5 +136,26 @@
   </customwidget>
  </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>AddButton</sender>
+   <signal>released()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>AddButtonClick()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1694</x>
+     <y>854</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>890</x>
+     <y>499</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>AddButtonClick()</slot>
+  <slot>SavePacketClick()</slot>
+ </slots>
 </ui>
