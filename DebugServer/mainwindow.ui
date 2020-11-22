@@ -17,16 +17,6 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="OGLWidget" name="openGLWidget">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>10</y>
-      <width>1600</width>
-      <height>801</height>
-     </rect>
-    </property>
-   </widget>
    <widget class="QPushButton" name="saveButton">
     <property name="geometry">
      <rect>
@@ -115,6 +105,16 @@
      <string>Add Packet</string>
     </property>
    </widget>
+   <widget class="QWidget" name="WidgetForVulkan" native="true">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>60</y>
+      <width>1601</width>
+      <height>751</height>
+     </rect>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -128,13 +128,6 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>OGLWidget</class>
-   <extends>QOpenGLWidget</extends>
-   <header>oglwidget.h</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections>
   <connection>

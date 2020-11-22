@@ -74,7 +74,14 @@ else()
           SimulationCore/ServerConnection.h
           Utils/MutexBool.cpp
           Utils/MutexBool.h
-          SimulationCore/DebugServer.cpp SimulationCore/DebugServer.h Utils/Settings.h Utils/ColorMode.cpp Utils/ColorMode.h)
+          SimulationCore/DebugServer.cpp
+          SimulationCore/DebugServer.h
+          Utils/Settings.h
+          Utils/ColorMode.cpp
+          Utils/ColorMode.h
+          VulkanWidget/trianglerenderer.cpp
+          VulkanWidget/trianglerenderer.h
+          )
 endif()
 
 target_link_libraries(HuaweiRouter PRIVATE Qt5::Widgets  ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES})

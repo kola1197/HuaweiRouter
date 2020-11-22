@@ -104,6 +104,7 @@ void OGLWidget::drawEllipse(Ellips *e)      //color 0 - default, 1 - active elli
         const float dy = 25 * sinf(angle);
         glVertex2f(dx + e->x, dy + e->y);
     }
+
     glEnd();
 }
 
@@ -133,6 +134,8 @@ void OGLWidget::drawEllipse(float xCenter, float yCenter, int color)      //colo
     }
     glEnd();
 }
+
+
 
 void OGLWidget::resizeGL(int w, int h)
 {

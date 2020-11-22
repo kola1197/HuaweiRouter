@@ -3,6 +3,7 @@
 #include <Network/node.h>
 #include <Network/network.h>
 #include <QApplication>
+#include <QVulkanInstance>
 using namespace std;
 
 static void setLeftToSendRight(Channel& left, Channel& right) {
@@ -85,9 +86,31 @@ void testMultiThreading(int sendingThreadsAmount) {
 
 int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
-    MainWindow w;
+
+    QVulkanInstance inst;
+#ifndef Q_OS_ANDROID
+    inst.setLayers(QByteArrayList() << "VK_LAYER_LUNARG_standard_validation");
+#else
+    inst.setLayers(QByteArrayList()
+                   << "VK_LAYER_GOOGLE_threading"
+                   << "VK_LAYER_LUNARG_parameter_validation"
+                   << "VK_LAYER_LUNARG_object_tracker"
+                   << "VK_LAYER_LUNARG_core_validation"
+                   << "VK_LAYER_LUNARG_image"
+                   << "VK_LAYER_LUNARG_swapchain"
+                   << "VK_LAYER_GOOGLE_unique_objects");
+#endif
+    if (!inst.create())
+        qFatal("Failed to create Vulkan instance: %d", inst.errorCode());
+
+    VulkanWindow *vulkanWindow = new VulkanWindow;
+    vulkanWindow->setVulkanInstance(&inst);
+    MainWindow w(nullptr, vulkanWindow);
+    QObject::connect(vulkanWindow, &VulkanWindow::vulkanInfoReceived, &w, &MainWindow::onVulkanInfoReceived);
+    QObject::connect(vulkanWindow, &VulkanWindow::frameQueued, &w, &MainWindow::onFrameQueued);
     w.show();
     return a.exec();
+
 
     //using namespace std;
     //TestNetworkDebug();

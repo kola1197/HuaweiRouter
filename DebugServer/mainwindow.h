@@ -3,6 +3,9 @@
 
 #include <QMainWindow>
 #include <SimulationCore/simulation.h>
+#include <VulkanWidget/trianglerenderer.h>
+
+class VulkanWindow;
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -15,7 +18,7 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-
+    MainWindow(QWidget *parent = nullptr, VulkanWindow *w = nullptr);
     void draw();
 private slots:
     void on_saveButton_released();
@@ -33,6 +36,9 @@ private slots:
     void cellIndexChanged(int i);
     void updateTable();
 public slots:
+    void onVulkanInfoReceived(const QString &text);
+    void onFrameQueued(int colorValue);
+
     void repaintOGLWidget();
     void onBtnClicked();
     //void get_system_message(SystemMessage m);
@@ -42,4 +48,26 @@ private:
     void connectSlots();
     void createUI();
 };
+
+class VulkanRenderer : public TriangleRenderer
+{
+public:
+    VulkanRenderer(VulkanWindow *w);
+
+    void initResources() override;
+    void startNextFrame() override;
+};
+
+class VulkanWindow : public QVulkanWindow
+{
+    Q_OBJECT
+
+public:
+    QVulkanWindowRenderer *createRenderer() override;
+
+signals:
+    void vulkanInfoReceived(const QString &text);
+    void frameQueued(int colorValue);
+};
+
 #endif // MAINWINDOW_H
