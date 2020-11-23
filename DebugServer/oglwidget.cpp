@@ -26,6 +26,7 @@ void OGLWidget::initializeGL()
     glEnable(GL_COLOR_MATERIAL);
 }
 
+
 void OGLWidget::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -50,8 +51,8 @@ void OGLWidget::paintGL()
         Ellips *el2 = graph.getEllipseByNumber(e.to);
         if (el1!=NULL && el2!=NULL)
         {
-            std::cout<<"Edge output "<<e.from<<" "<<e.to<<std::endl;
-            std::cout<<"Ellips "<<el1->x<<" "<<el1->y<<" -*- "<<el2->x<<" "<<el2->y<<std::endl;
+            //std::cout<<"Edge output "<<e.from<<" "<<e.to<<std::endl;
+            //std::cout<<"Ellips "<<el1->x<<" "<<el1->y<<" -*- "<<el2->x<<" "<<el2->y<<std::endl;
             drawEdge(el1->x,el1->y,el2->x,el2->y);
         }
     }
@@ -88,6 +89,14 @@ void OGLWidget::drawEllipse(Ellips *e)      //color 0 - default, 1 - active elli
     if (e->colorStatus == 1)
     {
         glColor3f(0.5, 0.3, 0.5);
+    }
+    if (e->colorStatus == 2)
+    {
+        glColor3f(1, 0.8, 0);
+    }
+    if (e->colorStatus == 3)
+    {
+        glColor3f(0, 0.8, 0);
     }
     for (float angle = 0; angle < float(2 * M_PI); angle += step)
     {
@@ -131,7 +140,8 @@ void OGLWidget::resizeGL(int w, int h)
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     //gluPerspective(45, (float)9/16, 1.0, 1.0);
-    gluOrtho2D(0,1600,900,0);
+    gluOrtho2D(0,this->width(),this->height(),0);
+    //gluOrtho2D(0,1600,900,0);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     //gluLookAt(0,0,5,0,0,0,0,1,0);
