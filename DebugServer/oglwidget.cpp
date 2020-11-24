@@ -54,7 +54,11 @@ void OGLWidget::paintGL()
         {
             //std::cout<<"Edge output "<<e.from<<" "<<e.to<<std::endl;
             //std::cout<<"Ellips "<<el1->x<<" "<<el1->y<<" -*- "<<el2->x<<" "<<el2->y<<std::endl;
-            drawEdge(el1->x,el1->y,el2->x,el2->y);
+            std::tuple<float,float,float,float> newCoords = countCoords(el1,el2);
+            float x1,x2,y1,y2;
+            std::tie(x1,y1,x2,y2) = newCoords;
+            drawEdge(x1,y1,x2,y2);
+            //drawEdge(el1->x,el1->y,el2->x,el2->y);
         }
     }
 }
@@ -108,7 +112,51 @@ void OGLWidget::drawEllipse(Ellips *e)      //color 0 - default, 1 - active elli
     glEnd();
     const QFont f;
     renderText(e->x,e->y,0,QString::number(e->number),f);
+}
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "cppcoreguidelines-narrowing-conversions"
+std::tuple<float,float,float,float> OGLWidget::countCoords(Ellips* el1, Ellips* el2)
+{
+    float x1 = el1->x;
+    float x2 = el2->x;
+    float y1 = el1->y;
+    float y2 = el2->y;
+    if (x1!=x2) {
+        float k = (y1 - y2) / (x1 - x2);
+        float b = el1->y - el1->x * k;
+
+        float a = el1->x;
+        float c = el1->y;
+        float resX1 = (a - 4*b*k +4*c*k - sign(el1->x - el2->x)*2*sqrt(-a*a*k*k -2*a*b*k + 2*a*c*k -b*b +2*b*c - c*c + 2500*k*k +625))
+                / (4 * k * k +1);
+        float resY1 = resX1 * k + b;
+
+        a = el2->x;
+        c = el2->y;
+        float resX2 = (a - 4*b*k +4*c*k - sign(el2->x - el1->x)*2*sqrt(-a*a*k*k -2*a*b*k + 2*a*c*k -b*b +2*b*c - c*c + 2500*k*k +625))
+                      / (4 * k * k +1);
+        float resY2 = resX2 * k + b;
+
+
+        //float resX = (-8*b*k + sign(el2->x - el1->x) * sqrt(64 * k * k * b * b - 4 * ( 4 * (4 * k * k + 1)) * ( 4 * b * b - 50 * 50 )))
+        //        /(2*(4*k*k+1));
+        //float resX1 = resX + el1->x;
+        //float resY1 = k * resX1 + b;
+        //float resX2 = resX + el2->x;
+        //float resY2 = k * resX2 + b;
+        return std::tuple<float,float, float, float>(resX1, resY1, resX2, resY2 );
+    } else {
+        return std::tuple<float,float, float, float>(el1->x, el1->y + sign(el2->y - el1->y) * 25,el2->x , el2->y + sign(el1->y - el2->y) * 25);
+    }
+}
+#pragma clang diagnostic pop
+
+
+
+int OGLWidget::sign(float i)
+{
+    return i>0 ? 1 : -1;
 }
 
 void OGLWidget::renderText(double x, double y, double z, const QString &str, const QFont & font = QFont())

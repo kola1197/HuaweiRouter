@@ -31,6 +31,9 @@ protected:
     void initializeGL();
     void resizeGL(int w, int h);
     void paintGL();
+    std::tuple<float, float, float, float> countCoords(Ellips *el1, Ellips *el2);
+    int sign(float i);
+
 signals:
     void transmit_info(QString);
 
