@@ -16,6 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
     qRegisterMetaType<PacketMessage>("PacketMessage");
 
     ui->setupUi(this);
+    setCentralWidget(ui->scrollArea);
     createUI();
     connect(ui->openGLWidget,SIGNAL(transmit_info(QString)),this,SLOT(setEllipseInfo(QString)));
     draw();
