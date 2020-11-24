@@ -34,6 +34,8 @@ protected:
 private:
     void addDebugConnection();
     std::chrono::milliseconds timeNow();
+    void updatePacketCountForDebugServer();
+
 };
 
 

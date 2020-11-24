@@ -354,6 +354,12 @@ void Graph::get_system_message(DebugMessage m)
         }
         emit updateTable();
     }
+    if (m.type == DebugMessage::PACKET_COUNT_STATUS)
+    {
+        Ellips *e = getEllipseByNumber(m.i[0]);
+        e->packetCount = m.i[1];
+        emit repaint();
+    }
     //std::cout<<m.i[0]<<" send connection status "<<m.i[1]<<std::endl;
 }
 

@@ -49,7 +49,7 @@ struct SystemMessage {
 };
 
 struct DebugMessage{
-    enum Type {CONNECTION_STATUS, PACKET_STATUS, PACKET_STATUS_DELIVERED};
+    enum Type {CONNECTION_STATUS, PACKET_STATUS, PACKET_STATUS_DELIVERED, PACKET_COUNT_STATUS};
     char text[200];
     int i[8];
     Type type;

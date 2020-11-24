@@ -111,7 +111,10 @@ void OGLWidget::drawEllipse(Ellips *e)      //color 0 - default, 1 - active elli
     }
     glEnd();
     const QFont f;
-    renderText(e->x,e->y,0,QString::number(e->number),f);
+    QString ellipseNum = QString::number(e->number);
+    renderText(e->x-1,e->y,0,ellipseNum,f);
+    QString ellipseCount = "Packets: " + QString::number(e->packetCount);
+    renderText(e->x-20,e->y+10,0,ellipseCount,f);
 }
 
 #pragma clang diagnostic push
