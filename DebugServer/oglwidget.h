@@ -2,6 +2,7 @@
 #define OGLWIDGET_H
 
 #include "graph.h"
+#include "TextureImage.h"
 
 #include <QWidget>
 #include <QOpenGLWidget>
@@ -23,6 +24,9 @@ public:
     void drawEllipse(Ellips *e);
     void deactivate();
     void deactivateNewEdge();
+    oglFont *glFont;
+    void renderText(double x, double y, double z, const QString &str, const QFont &font);
+
 protected:
     void initializeGL();
     void resizeGL(int w, int h);

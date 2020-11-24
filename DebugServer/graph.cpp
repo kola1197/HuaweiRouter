@@ -185,6 +185,7 @@ void Graph::addPacketmessage(int _type, int _from, int _to)
     m.from = _from;
     m.to = _to;
     m.currentPosition = -1;
+    m.delivered = false;
     packets.push_back(m);
 }
 
@@ -218,6 +219,8 @@ void Graph::addPacket(PacketMessage m)
     p.type = m.type;
     p.from = m.from;
     p.to = m.to;
+    p.delivered = m.delivered;
+    p.timeOnCreation = m.timeOnCreation;
     packets.push_back(p);
 }
 
@@ -338,6 +341,19 @@ void Graph::get_system_message(DebugMessage m)
         //emit repaint();
         emit updateTable();
     }
+    if (m.type == DebugMessage::PACKET_STATUS_DELIVERED)
+    {
+        for (int i = 0;i < packets.size();i++)
+        {
+            if (packets[i].id == m.i[0])
+            {
+                packets[i].currentPosition = m.i[1];
+                packets[i].delivered = true;
+                packets[i].timeOnCreation = m.deliveringTime;
+            }
+        }
+        emit updateTable();
+    }
     //std::cout<<m.i[0]<<" send connection status "<<m.i[1]<<std::endl;
 }
 
@@ -350,6 +366,8 @@ void Graph::addPacket()
     m.from = -1;
     m.to = -1;
     m.currentPosition = -1;
+    m.timeOnCreation;
+    m.delivered = false;
     packets.push_back(m);
     emit repaint();
 }

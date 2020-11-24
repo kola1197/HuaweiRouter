@@ -130,6 +130,11 @@ void ServerNode::Start()       //on start we connect to debug server
         {
             usleep(1000);
         }
+        std::chrono::milliseconds ms = timeNow();
+        for (int i=0;i<messagesStack.size();i++)
+        {
+            messagesStack[i].timeOnCreation = ms;
+        }
         std::cout<<"Node "<<serverNum<<":"<<grn<<" STARTING WORK"<<def<<std::endl;
         while (!stopNode.get())
         {
@@ -149,6 +154,11 @@ void ServerNode::Start()       //on start we connect to debug server
         }
     });
     thr.detach();
+}
+
+std::chrono::milliseconds ServerNode::timeNow()
+{
+    return std::chrono::duration_cast< std::chrono::milliseconds >(std::chrono::system_clock::now().time_since_epoch());
 }
 
 void ServerNode::addDebugConnection()
@@ -214,7 +224,17 @@ void ServerNode::get_message(PacketMessage m)
     debugConnection->sendMessage(d);
     if (m.to != serverNum)
     {
-    messagesStack.push_back(m);
+        messagesStack.push_back(m);
+    }
+    else{
+        m.delivered =true;
+        std::chrono::milliseconds ms = timeNow();
+        DebugMessage msg;
+        msg.type = DebugMessage::PACKET_STATUS_DELIVERED;
+        msg.deliveringTime = ms - m.timeOnCreation;
+        msg.i[0] = m.id;
+        msg.i[1] = serverNum;
+        debugConnection->sendMessage(msg);
     }
 }
 

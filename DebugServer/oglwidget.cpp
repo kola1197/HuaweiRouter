@@ -4,6 +4,7 @@
 #include <QtOpenGL/QtOpenGL>
 #include <GL/glu.h>
 #include <GL/gl.h>
+#include "TextureImage.h"
 
 OGLWidget::OGLWidget(QWidget *parent)
     : QOpenGLWidget(parent)
@@ -105,6 +106,31 @@ void OGLWidget::drawEllipse(Ellips *e)      //color 0 - default, 1 - active elli
         glVertex2f(dx + e->x, dy + e->y);
     }
     glEnd();
+    const QFont f;
+    renderText(e->x,e->y,0,QString::number(e->number),f);
+
+}
+
+void OGLWidget::renderText(double x, double y, double z, const QString &str, const QFont & font = QFont())
+{
+    // Identify x and y locations to render text within widget
+    int height = this->height();
+    GLdouble textPosX = 0, textPosY = 0, textPosZ = 0;
+    //project(x, y, 0, &textPosX, &textPosY, &textPosZ);
+    textPosY = height - textPosY; // y is inverted
+
+    // Retrieve last OpenGL color to use as a font color
+    GLdouble glColor[4];
+    glGetDoublev(GL_CURRENT_COLOR, glColor);
+    QColor fontColor = QColor(glColor[0], glColor[1], glColor[2], glColor[3]);
+
+    // Render text
+    QPainter painter(this);
+    painter.setPen(Qt::black);
+    painter.setFont(QFont("Helvetica", 8));
+    painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
+    painter.drawText(x, y, str);
+    painter.end();
 }
 
 void OGLWidget::drawEllipse(float xCenter, float yCenter, int color)      //color 0 - default, 1 - active ellipse
