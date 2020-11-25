@@ -222,8 +222,29 @@ void MainWindow::on_startButton_released()   // lock the screen and start simula
 
 void MainWindow::updateTable()
 {
+    checkSimulationStatus();
     createUI();
     //std::cout<<"updating table"<<std::endl;
+}
+
+void MainWindow::checkSimulationStatus()
+{
+    bool allPacketsDelivered = true;
+    float time = 0;
+    for (int i=0;i< ui->openGLWidget->graph.packets.size();i++)
+    {
+        std::cout<<"Packet "<<i<<" delivering  status = "<<ui->openGLWidget->graph.packets[i].delivered<<std::endl;
+        //allPacketsDelivered *= ui->openGLWidget->graph.packets[i].delivered;
+        allPacketsDelivered = allPacketsDelivered ? ui->openGLWidget->graph.packets[i].delivered : false;
+        time += ui->openGLWidget->graph.packets[i].timeOnCreation.count();
+    }
+    if (allPacketsDelivered)
+    {
+        time /= ui->openGLWidget->graph.packets.size();
+        QMessageBox msgBox;
+        msgBox.setText("All packets delivered. \nAverage time: " + QString::number(time));
+        msgBox.exec();
+    }
 }
 
 void MainWindow::connectSlots()

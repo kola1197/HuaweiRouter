@@ -352,7 +352,7 @@ void Graph::get_system_message(DebugMessage m)
                 packets[i].timeOnCreation = m.deliveringTime;
             }
         }
-        emit updateTable();
+            emit updateTable();
     }
     if (m.type == DebugMessage::PACKET_COUNT_STATUS)
     {

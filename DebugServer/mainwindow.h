@@ -41,5 +41,7 @@ private:
     Ui::MainWindow *ui;
     void connectSlots();
     void createUI();
+
+    void checkSimulationStatus();
 };
 #endif // MAINWINDOW_H
