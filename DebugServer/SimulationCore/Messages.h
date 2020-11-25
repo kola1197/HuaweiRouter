@@ -6,6 +6,7 @@
 #define DRONEAPP_MESSAGES_H
 
 #include <string>
+#include <chrono>
 
 #define int64 int64_t
 
@@ -48,10 +49,11 @@ struct SystemMessage {
 };
 
 struct DebugMessage{
-    enum Type {CONNECTION_STATUS, PACKET_STATUS};
+    enum Type {CONNECTION_STATUS, PACKET_STATUS, PACKET_STATUS_DELIVERED, PACKET_COUNT_STATUS};
     char text[200];
     int i[8];
     Type type;
+    std::chrono::milliseconds deliveringTime;
 };
 
 struct PingMessage{
@@ -69,6 +71,8 @@ struct PacketMessage{
     int to;
     int id;
     int currentPosition;
+    bool delivered;
+    std::chrono::milliseconds timeOnCreation;
     Type type;
 };
 

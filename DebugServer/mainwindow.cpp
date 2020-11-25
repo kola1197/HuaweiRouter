@@ -16,6 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
     qRegisterMetaType<PacketMessage>("PacketMessage");
 
     ui->setupUi(this);
+    setCentralWidget(ui->scrollArea);
     createUI();
     connect(ui->openGLWidget,SIGNAL(transmit_info(QString)),this,SLOT(setEllipseInfo(QString)));
     draw();
@@ -43,7 +44,7 @@ void MainWindow::createUI()
     ui->tableWidget->setShowGrid(true);
     ui->tableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
     //QStringList headers =
-    ui->tableWidget->setHorizontalHeaderLabels(QStringList() <<trUtf8("№") <<trUtf8("id") <<trUtf8("Type") <<trUtf8("From") <<trUtf8("To")<<trUtf8("Current Position") <<trUtf8("Delete"));
+    ui->tableWidget->setHorizontalHeaderLabels(QStringList() <<trUtf8("№") <<trUtf8("id") <<trUtf8("Type") <<trUtf8("From") <<trUtf8("To")<< trUtf8("Current Position")<<trUtf8("Delivering time (ms)")<<trUtf8("Delete"));
     ui->tableWidget->horizontalHeader()->setStretchLastSection(true);
     ui->tableWidget->hideColumn(0);
     for (int j=0;j<ui->openGLWidget->graph.packets.size();j++){
@@ -73,11 +74,14 @@ void MainWindow::createUI()
 
         ui->tableWidget->setItem(j,5, new QTableWidgetItem(QString::number(ui->openGLWidget->graph.packets[j].currentPosition)));
 
+        QString deliveringTime = ui->openGLWidget->graph.packets[j].delivered ? QString::number(ui->openGLWidget->graph.packets[j].timeOnCreation.count()) : "Not delivered";
+        ui->tableWidget->setItem(j,6, new QTableWidgetItem(deliveringTime));
+
         QPushButton *btn = new QPushButton();
         btn->setText("Delete");
         btn->setToolTip(QString::number(j));
         btn->setToolTipDuration(0);
-        ui->tableWidget->setCellWidget(j,6,btn);
+        ui->tableWidget->setCellWidget(j,7,btn);
 
 
         connect( btn, SIGNAL( clicked( bool ) ), SLOT( onBtnClicked() ) );

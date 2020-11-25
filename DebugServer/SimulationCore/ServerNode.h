@@ -33,6 +33,8 @@ protected:
     int debugSocketAdress = -1;
 private:
     void addDebugConnection();
+    std::chrono::milliseconds timeNow();
+    void updatePacketCountForDebugServer();
 
 };
 
