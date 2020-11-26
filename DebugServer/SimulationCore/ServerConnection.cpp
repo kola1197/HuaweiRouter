@@ -7,6 +7,8 @@
 #include <arpa/inet.h>
 #include <thread>
 #include <Utils/ColorMode.h>
+#include <QtCore/QThread>
+#include <zconf.h>
 #include "ServerConnection.h"
 #include "Messages.h"
 #include "QObject"
@@ -43,6 +45,18 @@ void ServerConnection::connectTo()
                     connected.set(true);
                     //std::cout<<"connection "<<from<<" => "<<to<<" status is now: CONNECTED"<<std::endl;
                 }
+            }
+            //connect(timer, SIGNAL(timeout()), this, SLOT(sendMessagesFromBufferTick()));
+            //timer->start();
+            std::thread thr1([this]()
+            {
+                while (!needToStop.get()){
+                    sendMessagesFromBufferTick();
+                    usleep(sendIntervalMS);
+                }
+            });
+            if (!oldway){
+                thr1.detach();
             }
             while (!needToStop.get())
             {
@@ -213,6 +227,16 @@ void ServerConnection::awaitConnection()
             Color::ColorMode grn(Color::FG_GREEN);
             Color::ColorMode def(Color::FG_DEFAULT);
             std::cout <<grn<< "CONNECTED "<<def<< " "<<from<<" <---> "<< to << std::endl;
+            std::thread thr1([this]()
+            {
+                while (!needToStop.get()){
+                    sendMessagesFromBufferTick();
+                    usleep(sendIntervalMS);
+                }
+            });
+            if (!oldway){
+                thr1.detach();
+            }
             while (!needToStop.get())
             {
                 getMessage();
@@ -267,15 +291,60 @@ void ServerConnection::sendMessage(SystemMessage m)
     sendMutex.unlock();
 }
 
+void ServerConnection::sendMessagesFromBufferTick()
+{
+    if (!messagesDataQueue.empty()) {
+        std::cout<<"tick from "<<from<<" to"<<to<<" messagesDataQueue size: "<<messagesDataQueue.size()<<std::endl;
+        int size = messagesDataQueue.size()>sendBytesPerInterval ? sendBytesPerInterval : messagesDataQueue.size();
+        char data[size];
+        int counter = 0;
+        while (counter < sendBytesPerInterval && messagesDataQueue.size() > 0)
+        {
+            char c = messagesDataQueue[0];
+            messagesDataQueue.erase(messagesDataQueue.begin());
+            data[counter] = c;
+            counter++;
+        }
+        std::cout<<"Second tick from "<<from<<" to"<<to<<" messagesDataQueue size: "<<messagesDataQueue.size()<<" data: "<< data <<std::endl;
+        sendMutex.lock();
+        send(sock, &data, sizeof(data), 0);
+        //std::cout<<"sizeof m"<< sizeof(m)<<std::endl;
+        //send(sock, &data, sizeof(data), 0);
+        sendMutex.unlock();
+    }
+}
+
 void ServerConnection::sendMessage(PacketMessage m)
 {
     HarbingerMessage h;
     h.type = HarbingerMessage::PACKET_MESSAGE;
     h.code = 239;
-    sendMutex.lock();
-    send(sock, &h, sizeof(h), 0);
-    //std::cout<<"sizeof m"<< sizeof(m)<<std::endl;
-    send(sock, &m, sizeof(m), 0);
-    sendMutex.unlock();
+
+    if (!oldway)
+    {
+        char hData[sizeof(h)];
+        memcpy(hData, &h, sizeof(h));
+        for (int i=0; i<sizeof(h); i++)
+        {
+            messagesDataQueue.push_back(hData[i]);
+        }
+        char mData[sizeof(m)];
+        memcpy(mData, &m, sizeof(m));
+        for (int i=0; i<sizeof(m); i++)
+        {
+            messagesDataQueue.push_back(mData[i]);
+        }
+    }
+    else{
+        sendMutex.lock();
+        char hData[sizeof(h)];
+        memcpy(hData, &h, sizeof(h));
+        send(sock, &hData, sizeof(h), 0);
+        //std::cout<<"sizeof m"<< sizeof(m)<<std::endl;
+        char mData[sizeof(m)];
+        memcpy(mData, &m, sizeof(m));
+        send(sock, &mData, sizeof(m), 0);
+        sendMutex.unlock();
+    }
 }
 

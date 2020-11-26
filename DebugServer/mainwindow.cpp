@@ -260,7 +260,7 @@ void MainWindow::checkSimulationStatus()
     float time = 0;
     for (int i=0;i< ui->openGLWidget->graph.packets.size();i++)
     {
-        std::cout<<"Packet "<<i<<" delivering  status = "<<ui->openGLWidget->graph.packets[i].delivered<<std::endl;
+        //std::cout<<"Packet "<<i<<" delivering  status = "<<ui->openGLWidget->graph.packets[i].delivered<<std::endl;
         //allPacketsDelivered *= ui->openGLWidget->graph.packets[i].delivered;
         allPacketsDelivered = allPacketsDelivered ? ui->openGLWidget->graph.packets[i].delivered : false;
         time += ui->openGLWidget->graph.packets[i].timeOnCreation.count();

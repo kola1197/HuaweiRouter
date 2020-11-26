@@ -46,7 +46,7 @@ if(ANDROID)
     network.h
     network.cpp
     dir/channel.cpp
-          SimulationCore/ServerNode.cpp SimulationCore/ServerNode.h SimulationCore/ServerConnection.cpp SimulationCore/ServerConnection.h SimulationCore/DebugServer.cpp SimulationCore/DebugServer.h TextureImage.cpp TextureImage.h)
+          SimulationCore/ServerNode.cpp SimulationCore/ServerNode.h SimulationCore/ServerConnection.cpp SimulationCore/ServerConnection.h SimulationCore/DebugServer.cpp SimulationCore/DebugServer.h TextureImage.cpp TextureImage.h Utils/MutexInt.cpp Utils/MutexInt.h Utils/AsyncVar.cpp Utils/AsyncVar.h)
 else()
   add_executable(HuaweiRouter
           Network/main.cpp
@@ -74,7 +74,7 @@ else()
           SimulationCore/ServerConnection.h
           Utils/MutexBool.cpp
           Utils/MutexBool.h
-          SimulationCore/DebugServer.cpp SimulationCore/DebugServer.h Utils/Settings.h Utils/ColorMode.cpp Utils/ColorMode.h TextureImage.cpp TextureImage.h)
+          SimulationCore/DebugServer.cpp SimulationCore/DebugServer.h Utils/Settings.h Utils/ColorMode.cpp Utils/ColorMode.h TextureImage.cpp TextureImage.h Utils/MutexInt.cpp Utils/MutexInt.h Utils/AsyncVar.cpp Utils/AsyncVar.h)
 endif()
 
 target_link_libraries(HuaweiRouter PRIVATE Qt5::Widgets  ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES})

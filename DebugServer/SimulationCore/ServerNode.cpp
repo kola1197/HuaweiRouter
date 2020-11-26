@@ -128,7 +128,7 @@ void ServerNode::Start()       //on start we connect to debug server
         std::cout<<"Node "<<serverNum<<":"<<grn<<" AWAITING FOR TEST START"<<def<<std::endl;
         while (!startTest.get())
         {
-            usleep(1000);
+            usleep(50);
         }
         std::chrono::milliseconds ms = timeNow();
         for (int i=0;i<messagesStack.size();i++)
@@ -228,8 +228,10 @@ void ServerNode::addConnection(int to)
     }
 }
 
+//TODO: more templates for the god of templates
 void ServerNode::get_message(PacketMessage m)
 {
+    std::cout<<m.id<<" CHECKSUM = "<<m.checkSum<<std::endl;
     DebugMessage d;
     d.type = DebugMessage::PACKET_STATUS;
     d.i[0] = m.id;

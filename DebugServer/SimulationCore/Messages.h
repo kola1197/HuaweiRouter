@@ -71,6 +71,7 @@ struct PacketMessage{
     int to;
     int id;
     int currentPosition;
+    int checkSum = 239239239;
     bool delivered;
     std::chrono::milliseconds timeOnCreation;
     Type type;
