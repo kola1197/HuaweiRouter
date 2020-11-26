@@ -14,6 +14,7 @@ struct Ellips
     bool ready = false;  // all packets are loaded to Node
     bool serversReady = false;
     int number = -1;
+    int maxPacketCount = 0;
     int packetCount = 0;
     int colorStatus = 0; // 0 - orange - default but not connected, 1 - blue - active for movement, 2 - yellow - conected, packets not loaded, 3 - green packets loaded, started //
 };

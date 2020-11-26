@@ -35,7 +35,7 @@ private:
     void addDebugConnection();
     std::chrono::milliseconds timeNow();
     void updatePacketCountForDebugServer();
-
+    int maxPacketsCount = 0;
 };
 
 

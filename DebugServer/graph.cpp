@@ -358,6 +358,7 @@ void Graph::get_system_message(DebugMessage m)
     {
         Ellips *e = getEllipseByNumber(m.i[0]);
         e->packetCount = m.i[1];
+        e->maxPacketCount = m.i[2];
         emit repaint();
     }
     //std::cout<<m.i[0]<<" send connection status "<<m.i[1]<<std::endl;

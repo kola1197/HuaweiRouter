@@ -141,7 +141,7 @@ void ServerNode::Start()       //on start we connect to debug server
         {
             if (messagesStack.size()>0)
             {
-                //here our alghoritm. now random.
+                //here our algorithm. now random.
                 PacketMessage m(messagesStack[0]);
                 messagesStack.erase(messagesStack.begin());
                 int i = rand() % (connections.size());
@@ -165,10 +165,12 @@ std::chrono::milliseconds ServerNode::timeNow()
 
 void ServerNode::updatePacketCountForDebugServer()
 {
+    maxPacketsCount = maxPacketsCount>messagesStack.size() ? maxPacketsCount : messagesStack.size();
     DebugMessage dmsg;
     dmsg.type = DebugMessage::PACKET_COUNT_STATUS;
     dmsg.i[0] = serverNum;
     dmsg.i[1] = messagesStack.size();
+    dmsg.i[2] = maxPacketsCount;
     debugConnection->sendMessage(dmsg);
 }
 

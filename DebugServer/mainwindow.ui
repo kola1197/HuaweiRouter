@@ -72,7 +72,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>Сохранить</string>
+       <string>Save</string>
       </property>
      </widget>
      <widget class="QLabel" name="infoLabel">
@@ -85,7 +85,10 @@
        </rect>
       </property>
       <property name="text">
-       <string>TextLabel</string>
+       <string/>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
      <widget class="QPushButton" name="startButton">
@@ -104,10 +107,10 @@
      <widget class="QPushButton" name="AddButton">
       <property name="geometry">
        <rect>
-        <x>1670</x>
-        <y>820</y>
-        <width>89</width>
-        <height>25</height>
+        <x>1660</x>
+        <y>810</y>
+        <width>101</width>
+        <height>31</height>
        </rect>
       </property>
       <property name="text">
@@ -117,14 +120,14 @@
      <widget class="QPushButton" name="deleteButton">
       <property name="geometry">
        <rect>
-        <x>1660</x>
-        <y>510</y>
+        <x>1650</x>
+        <y>590</y>
         <width>111</width>
-        <height>25</height>
+        <height>31</height>
        </rect>
       </property>
       <property name="text">
-       <string>Удалить узел</string>
+       <string>Delete node</string>
       </property>
      </widget>
      <widget class="QPushButton" name="loadButton">
@@ -137,7 +140,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>Загрузить</string>
+       <string>Load</string>
       </property>
      </widget>
      <widget class="QTableWidget" name="tableWidget">

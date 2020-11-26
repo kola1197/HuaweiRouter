@@ -40,17 +40,31 @@ void MainWindow::createUI()
         ui->tableWidget->removeRow(0);
     }
     //connect(ui->tableWidget, SIGNAL(cellChanged(int,int)),this,SLOT(cellChangedCheck(int,int)));
-    ui->tableWidget->setColumnCount(7);
+    ui->tableWidget->setColumnCount(8);
     ui->tableWidget->setShowGrid(true);
     ui->tableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
     //QStringList headers =
-    ui->tableWidget->setHorizontalHeaderLabels(QStringList() <<trUtf8("№") <<trUtf8("id") <<trUtf8("Type") <<trUtf8("From") <<trUtf8("To")<< trUtf8("Current Position")<<trUtf8("Delivering time (ms)")<<trUtf8("Delete"));
+    ui->tableWidget->setHorizontalHeaderLabels(QStringList() <<trUtf8("№") <<trUtf8("    id    ") <<trUtf8("    Type    ") <<trUtf8("    From    ") <<trUtf8("    To    ")<< trUtf8("    Current Position    ")<<trUtf8("    Delivering time (ms)    ")<<trUtf8("Delete"));
     ui->tableWidget->horizontalHeader()->setStretchLastSection(true);
     ui->tableWidget->hideColumn(0);
+
+    QTableWidgetItem * protoitem = new QTableWidgetItem();
+    protoitem->setTextAlignment(Qt::AlignmentFlag::AlignCenter);
+
     for (int j=0;j<ui->openGLWidget->graph.packets.size();j++){
         ui->tableWidget->insertRow(j);
-        ui->tableWidget->setItem(j,0, new QTableWidgetItem(QString::number(j)));
-        ui->tableWidget->setItem(j,1, new QTableWidgetItem(QString::number(ui->openGLWidget->graph.packets[j].id)));
+
+        QTableWidgetItem * newitem = protoitem->clone();
+        newitem->setText(QString::number(j));
+        ui->tableWidget->setItem(j,0, newitem);
+
+        QTableWidgetItem * newitem1 = protoitem->clone();
+        newitem1->setText(QString::number(ui->openGLWidget->graph.packets[j].id));
+        ui->tableWidget->setItem(j,1, newitem1);
+
+
+        //ui->tableWidget->setItem(j,0, new QTableWidgetItem(QString::number(j)));
+        //ui->tableWidget->setItem(j,1, new QTableWidgetItem(QString::number(ui->openGLWidget->graph.packets[j].id)));
 
         QComboBox *box = new QComboBox();
         box->addItems(QStringList() <<trUtf8("DEFAULT"));      //enums from PacketMessage in right order!!!!
@@ -61,6 +75,7 @@ void MainWindow::createUI()
         QTextEdit *editFrom = new QTextEdit();
         editFrom->setToolTip(QString::number(j));
         editFrom->setToolTipDuration(0);
+        editFrom->setAlignment(Qt::AlignmentFlag::AlignCenter);
         editFrom->setText(QString::number(ui->openGLWidget->graph.packets[j].from));
         ui->tableWidget->setCellWidget(j,3,editFrom);
         connect(editFrom, SIGNAL(textChanged()),this,SLOT(cellFromTextChanged()));
@@ -68,14 +83,21 @@ void MainWindow::createUI()
         QTextEdit *editTo = new QTextEdit();
         editTo->setToolTip(QString::number(j));
         editTo->setToolTipDuration(0);
+        editTo->setAlignment(Qt::AlignmentFlag::AlignCenter);
         editTo->setText(QString::number(ui->openGLWidget->graph.packets[j].to));
         ui->tableWidget->setCellWidget(j,4,editTo);
         connect(editTo, SIGNAL(textChanged()),this,SLOT(cellToTextChanged()));
 
-        ui->tableWidget->setItem(j,5, new QTableWidgetItem(QString::number(ui->openGLWidget->graph.packets[j].currentPosition)));
+        QTableWidgetItem * newitem2 = protoitem->clone();
+        newitem2->setText(QString::number(ui->openGLWidget->graph.packets[j].currentPosition));
+        ui->tableWidget->setItem(j,5, newitem2);
+        //ui->tableWidget->setItem(j,5, new QTableWidgetItem(QString::number(ui->openGLWidget->graph.packets[j].currentPosition)));
 
         QString deliveringTime = ui->openGLWidget->graph.packets[j].delivered ? QString::number(ui->openGLWidget->graph.packets[j].timeOnCreation.count()) : "Not delivered";
-        ui->tableWidget->setItem(j,6, new QTableWidgetItem(deliveringTime));
+        QTableWidgetItem * newitem3 = protoitem->clone();
+        newitem3->setText(deliveringTime);
+        ui->tableWidget->setItem(j,6, newitem3);
+        //ui->tableWidget->setItem(j,6, new QTableWidgetItem(deliveringTime));
 
         QPushButton *btn = new QPushButton();
         btn->setText("Delete");
@@ -83,10 +105,15 @@ void MainWindow::createUI()
         btn->setToolTipDuration(0);
         ui->tableWidget->setCellWidget(j,7,btn);
 
-
         connect( btn, SIGNAL( clicked( bool ) ), SLOT( onBtnClicked() ) );
     }
-    ui->tableWidget->resizeColumnsToContents();
+    if (!tableResized) {
+        ui->tableWidget->resizeColumnsToContents();
+        //ui->tableWidget->setColumnWidth(7, 10);
+        if (ui->openGLWidget->graph.packets.size() > 0){
+            tableResized = true;
+        }
+    }
 }
 
 void MainWindow::onBtnClicked()

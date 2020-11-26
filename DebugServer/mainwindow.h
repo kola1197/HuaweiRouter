@@ -43,5 +43,6 @@ private:
     void createUI();
 
     void checkSimulationStatus();
+    bool tableResized = false;
 };
 #endif // MAINWINDOW_H
