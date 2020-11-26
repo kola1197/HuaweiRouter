@@ -91,7 +91,7 @@ int main(int argc, char *argv[]) {
     MainWindow w;
     w.setWindowTitle("Simulation");
     QIcon icon;
-    icon.addFile(QStringLiteral("../icon.ico"), QSize(), QIcon::Normal, QIcon::Off);
+    icon.addFile(QStringLiteral("../icon1.ico"), QSize(), QIcon::Normal, QIcon::Off);
     w.setWindowIcon(icon);
     w.setWindowIconText("Simulation");
     w.show();
