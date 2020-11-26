@@ -58,9 +58,35 @@ void OGLWidget::paintGL()
             float x1,x2,y1,y2;
             std::tie(x1,y1,x2,y2) = newCoords;
             drawEdge(x1,y1,x2,y2);
+            drawLableCircle(x1,y1,x2,y2);
+            drawLableCircle(x2,y2,x1,y1);
+
             //drawEdge(el1->x,el1->y,el2->x,el2->y);
         }
     }
+}
+
+void OGLWidget::drawLableCircle(float x1, float y1, float x2,float y2)
+{
+    float x = (x1*9+x2)/10;
+    float y = (y1*9+y2)/10;
+    int radius = 15;
+    glColor3f(1.0, 1.0, 1.0);
+    glBegin(GL_TRIANGLE_FAN);
+    glVertex2f(x, y); // center of circle
+    for (int i = 0; i <= 20; i++)   {
+        glVertex2f ((x + (radius * cos(i * float(2 * M_PI) / 20))), (y + (radius * sin(i * float(2 * M_PI) / 20))));
+    }
+    glEnd();
+    radius++;
+    glColor3f(0.0, 0.0, 1.0);
+    glBegin(GL_LINE_LOOP);
+    for (int i = 0; i <= 20; i++)   {
+        glVertex2f ((x + (radius * cos(i * float(2 * M_PI) / 20))), (y + (radius * sin(i * float(2 * M_PI) / 20))) );
+    }
+    glEnd();
+    QString edgeUsage("100%");
+    renderText(x - 14,y + 5 ,edgeUsage, true, Qt::red);
 }
 
 void OGLWidget::drawEdge(float x1, float y1, float x2,float y2)
@@ -110,13 +136,12 @@ void OGLWidget::drawEllipse(Ellips *e)      //color 0 - default, 1 - active elli
         glVertex2f(dx + e->x, dy + e->y);
     }
     glEnd();
-    const QFont f;
     QString ellipseNum = QString::number(e->number);
-    renderText(e->x-1,e->y-10,0,ellipseNum,f);
+    renderText(e->x-1,e->y-10,ellipseNum);
     QString ellipseCount = "Packets: " + QString::number(e->packetCount);
-    renderText(e->x-24,e->y+0,0,ellipseCount,f);
+    renderText(e->x-24,e->y+0,ellipseCount);
     QString ellipseMaxCount = "MaxPackets: " + QString::number(e->maxPacketCount);
-    renderText(e->x-34,e->y+10,0,ellipseMaxCount,f);
+    renderText(e->x-34,e->y+10,ellipseMaxCount);
 }
 
 #pragma clang diagnostic push
@@ -164,7 +189,7 @@ int OGLWidget::sign(float i)
     return i>0 ? 1 : -1;
 }
 
-void OGLWidget::renderText(double x, double y, double z, const QString &str, const QFont & font = QFont())
+void OGLWidget::renderText(double x, double y, const QString &str, bool bold, QColor color)
 {
     // Identify x and y locations to render text within widget
     int height = this->height();
@@ -173,14 +198,14 @@ void OGLWidget::renderText(double x, double y, double z, const QString &str, con
     textPosY = height - textPosY; // y is inverted
 
     // Retrieve last OpenGL color to use as a font color
-    GLdouble glColor[4];
-    glGetDoublev(GL_CURRENT_COLOR, glColor);
-    QColor fontColor = QColor(glColor[0], glColor[1], glColor[2], glColor[3]);
 
     // Render text
     QPainter painter(this);
-    painter.setPen(Qt::black);
-    painter.setFont(QFont("Helvetica", 8));
+    //painter.setPen(color);
+    painter.setPen(color);
+    QFont font("Helvetica", 8);
+    font.setBold(bold);
+    painter.setFont(font);
     painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
     painter.drawText(x, y, str);
     painter.end();
