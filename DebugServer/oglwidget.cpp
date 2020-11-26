@@ -114,9 +114,9 @@ void OGLWidget::drawEllipse(Ellips *e)      //color 0 - default, 1 - active elli
     QString ellipseNum = QString::number(e->number);
     renderText(e->x-1,e->y-10,0,ellipseNum,f);
     QString ellipseCount = "Packets: " + QString::number(e->packetCount);
-    renderText(e->x-20,e->y+0,0,ellipseCount,f);
+    renderText(e->x-24,e->y+0,0,ellipseCount,f);
     QString ellipseMaxCount = "MaxPackets: " + QString::number(e->maxPacketCount);
-    renderText(e->x-24,e->y+10,0,ellipseMaxCount,f);
+    renderText(e->x-34,e->y+10,0,ellipseMaxCount,f);
 }
 
 #pragma clang diagnostic push

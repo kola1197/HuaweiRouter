@@ -3,6 +3,8 @@
 #include <Network/node.h>
 #include <Network/network.h>
 #include <QApplication>
+#include <QtCore/QDir>
+
 using namespace std;
 
 static void setLeftToSendRight(Channel& left, Channel& right) {
@@ -85,8 +87,13 @@ void testMultiThreading(int sendingThreadsAmount) {
 
 int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
+    a.setApplicationName("Simulation");
     MainWindow w;
     w.setWindowTitle("Simulation");
+    QIcon icon;
+    icon.addFile(QStringLiteral("../icon.ico"), QSize(), QIcon::Normal, QIcon::Off);
+    w.setWindowIcon(icon);
+    w.setWindowIconText("Simulation");
     w.show();
     return a.exec();
 
