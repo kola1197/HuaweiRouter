@@ -214,10 +214,12 @@ void ServerNode::addConnection(int to)
     //int portDelta = serverNum>to?serverNum:to;
     //int port = debugSocketAdress + portDelta;
     int port = -1;
+    int edgeID = -1;
     for (int i =0;i<graph.edges.size();i++){
         if ((graph.edges[i].from == serverNum && graph.edges[i].to == to) || (graph.edges[i].to == serverNum && graph.edges[i].from == to)  )
         {
             port = graph.edges[i].id + Settings::ConnectionsFirstPortNum();
+            edgeID = graph.edges[i].id;
         }
     }
     if (serverNum == -1)
@@ -228,7 +230,7 @@ void ServerNode::addConnection(int to)
     {
         //std::cout<<"debugSocketAdress = "<<debugSocketAdress<<std::endl;
 
-        ServerConnection* newConnection = new ServerConnection(port, serverNum, to);
+        ServerConnection* newConnection = new ServerConnection(port, serverNum, to, edgeID);
 
         connections.push_back(newConnection);
         if (serverNum > to)
@@ -252,7 +254,7 @@ void ServerNode::addConnection(int to)
 //TODO: more templates for the god of templates
 void ServerNode::get_message(PacketMessage m)
 {
-    std::cout<<"Node"<< serverNum<<", message with id "<<m.id<<" got CHECKSUM = "<<m.checkSum<<std::endl;
+    //std::cout<<"Node"<< serverNum<<", message with id "<<m.id<<" got CHECKSUM = "<<m.checkSum<<std::endl;
     if (m.checkSum!=239239239)
     {
         //qFatal("Error on Node %s !!! Packet with id %s got wrong checksum ( %s )",serverNum,m.id, m.checkSum);

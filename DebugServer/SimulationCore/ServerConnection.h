@@ -40,7 +40,7 @@ public:
     int id = -1;
     MutexBool started {false};
     MutexBool waitingForConnection{false};
-
+    std::mutex messageBuffer;
     //connection limit settings
     float sendIntervalMS = 33;
     float sendBytesPerInterval = 6;//64;

@@ -113,6 +113,7 @@ void ServerConnection::getPacketMessage()
         }
     }
     memcpy(&m, msg, sizeof(m));
+    //std::cout<<"From "<<from<<" to "<<to<<" got message with id "<<m.id<<" checksum: "<<m.checkSum <<std::endl;
     emit transmit_to_node(m);
 }
 
@@ -294,6 +295,7 @@ void ServerConnection::sendMessage(SystemMessage m)
 
 void ServerConnection::sendMessagesFromBufferTick()
 {
+    messageBuffer.lock();
     if (!messagesDataQueue.empty()) {
         //std::cout<<"tick from "<<from<<" to"<<to<<" messagesDataQueue size: "<<messagesDataQueue.size()<<std::endl;
         int size = messagesDataQueue.size()>sendBytesPerInterval ? sendBytesPerInterval : messagesDataQueue.size();
@@ -314,6 +316,7 @@ void ServerConnection::sendMessagesFromBufferTick()
         sendMutex.unlock();
         bufferLoad.set(messagesDataQueue.size()*100/sendBytesPerInterval);
     }
+    messageBuffer.unlock();
 }
 
 void ServerConnection::sendMessage(PacketMessage m)
@@ -324,18 +327,20 @@ void ServerConnection::sendMessage(PacketMessage m)
 
     if (!oldway)
     {
+        messageBuffer.lock();
         char hData[sizeof(h)];
         memcpy(hData, &h, sizeof(h));
-        for (int i=0; i<sizeof(h); i++)
+        for (int i=0; i<sizeof(hData); i++)
         {
             messagesDataQueue.push_back(hData[i]);
         }
         char mData[sizeof(m)];
         memcpy(mData, &m, sizeof(m));
-        for (int i=0; i<sizeof(m); i++)
+        for (int i=0; i<sizeof(mData); i++)
         {
             messagesDataQueue.push_back(mData[i]);
         }
+        messageBuffer.unlock();
     }
     else{
         sendMutex.lock();
