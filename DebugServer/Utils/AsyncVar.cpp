@@ -3,7 +3,7 @@
 //
 
 #include "AsyncVar.h"
-
+/*
 template <typename T> void AsyncVar<T>::set(T i)
 {
     mutex.lock();
@@ -27,4 +27,4 @@ template <typename T> AsyncVar<T>::AsyncVar(T t)
 template <typename T> AsyncVar<T>::AsyncVar()
 {
     targetVar = T();
-}
+}*/

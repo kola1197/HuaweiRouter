@@ -15,7 +15,7 @@
 class ServerConnection : public QObject{
     Q_OBJECT
 public:
-    ServerConnection(int _port, int _from, int _to);
+    ServerConnection(int _port, int _from, int _to, int _id = -1);
     void connectTo();
     void awaitConnection();
     MutexBool connected {false};
@@ -37,13 +37,16 @@ public:
 
     int from = -1;
     int to = -1;
+    int id = -1;
     MutexBool started {false};
     MutexBool waitingForConnection{false};
 
     //connection limit settings
     float sendIntervalMS = 33;
     float sendBytesPerInterval = 6;//64;
-    //AsyncVar<float> bufferLoad{0};
+    int updateUsageDataPerTicks = 5;
+    int updateUsageDataCounter = 0;
+    AsyncVar<float> bufferLoad{0};
 signals:
     void transmit_to_gui(SystemMessage m);
     void transmit_to_gui(DebugMessage m);

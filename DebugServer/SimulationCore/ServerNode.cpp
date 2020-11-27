@@ -34,7 +34,7 @@ void ServerNode::Start()       //on start we connect to debug server
                 messagesStack.push_back(m);
             }
         }
-        std::cout<<"Node "<<serverNum<<": GOT  "<<counter<<" packets"<<std::endl;
+        //std::cout<<"Node "<<serverNum<<": GOT  "<<counter<<" packets"<<std::endl;
 
 
         addDebugConnection();
@@ -43,12 +43,18 @@ void ServerNode::Start()       //on start we connect to debug server
         {
             usleep(400);
         }
-        std::cout<<"Node "<<serverNum<<": debugServer active now "<<std::endl;
+        //std::cout<<"Node "<<serverNum<<": debugServer active now "<<std::endl;
         DebugMessage d;
         d.type = DebugMessage::CONNECTION_STATUS;
         d.i[0]=serverNum;
         d.i[1]=2;
         debugConnection->sendMessage(d);
+
+        while (!debugServerReady.get())
+        {
+            usleep(400);
+        }
+
         //here we adding all other connections
         int c =0;
         for (int i=0;i<graph.edges.size();i++)       //trying to set server sockets, when they are ready - starting client sockets
@@ -65,7 +71,7 @@ void ServerNode::Start()       //on start we connect to debug server
             }
         }
         bool allServerConnectionsReady = false;
-        std::cout<<"Node "<<serverNum<<": waiting for our server connections "<<std::endl;
+        //std::cout<<"Node "<<serverNum<<": waiting for our server connections "<<std::endl;
 
         while (!allServerConnectionsReady)
         {
@@ -78,7 +84,7 @@ void ServerNode::Start()       //on start we connect to debug server
                 allServerConnectionsReady = b;
             }
         }
-        std::cout<<"Node "<<serverNum<<": Servers are ready, waiting for clients connections "<<std::endl;
+        //std::cout<<"Node "<<serverNum<<": Servers are ready, waiting for clients connections "<<std::endl;
         SystemMessage mm;
         mm.type = SystemMessage::SERVERS_READY;
         mm.i[0] = serverNum;
@@ -88,7 +94,7 @@ void ServerNode::Start()       //on start we connect to debug server
         {
             usleep(1000);
         }
-        std::cout<<"Node "<<serverNum<<": Starting client connections "<<std::endl;
+        //std::cout<<"Node "<<serverNum<<": Starting client connections "<<std::endl;
 
         for (int i =0; i<connections.size();i++)
         {
@@ -125,7 +131,7 @@ void ServerNode::Start()       //on start we connect to debug server
         Color::ColorMode grn(Color::FG_GREEN);
         Color::ColorMode def(Color::FG_DEFAULT);
         Color::ColorMode red(Color::FG_RED);
-        std::cout<<"Node "<<serverNum<<":"<<grn<<" AWAITING FOR TEST START"<<def<<std::endl;
+        //std::cout<<"Node "<<serverNum<<":"<<grn<<" AWAITING FOR TEST START"<<def<<std::endl;
         while (!startTest.get())
         {
             usleep(50);
@@ -136,9 +142,10 @@ void ServerNode::Start()       //on start we connect to debug server
             messagesStack[i].timeOnCreation = ms;
         }
         updatePacketCountForDebugServer();
-        std::cout<<"Node "<<serverNum<<":"<<grn<<" STARTING WORK"<<def<<std::endl;
+        //std::cout<<"Node "<<serverNum<<":"<<grn<<" STARTING WORK"<<def<<std::endl;
         while (!stopNode.get())
         {
+            updateEdgesUsage();
             if (messagesStack.size()>0)
             {
                 //here our algorithm. now random.
@@ -156,6 +163,20 @@ void ServerNode::Start()       //on start we connect to debug server
         }
     });
     thr.detach();
+}
+
+void ServerNode::updateEdgesUsage()      // it will be broken with more than 99 edges in one node
+{
+    DebugMessage d;
+    d.type = DebugMessage::EDGES_USAGE_STATUS;
+    d.i[0] = connections.size();
+    for (int j=0;j<d.i[0];j++)
+    {
+        d.i[1+j*3] = connections[j]->id;
+        d.i[2+j*3] = connections[j]->from;
+        d.i[3+j*3] = qRound(connections[j]->bufferLoad.get());
+    }
+    debugConnection->sendMessage(d);
 }
 
 std::chrono::milliseconds ServerNode::timeNow()
@@ -231,7 +252,11 @@ void ServerNode::addConnection(int to)
 //TODO: more templates for the god of templates
 void ServerNode::get_message(PacketMessage m)
 {
-    std::cout<<m.id<<" CHECKSUM = "<<m.checkSum<<std::endl;
+    std::cout<<"Node"<< serverNum<<", message with id "<<m.id<<" got CHECKSUM = "<<m.checkSum<<std::endl;
+    if (m.checkSum!=239239239)
+    {
+        //qFatal("Error on Node %s !!! Packet with id %s got wrong checksum ( %s )",serverNum,m.id, m.checkSum);
+    }
     DebugMessage d;
     d.type = DebugMessage::PACKET_STATUS;
     d.i[0] = m.id;
@@ -264,5 +289,10 @@ void ServerNode::get_message(SystemMessage m)
     {
         std::cout<<"Node "<<serverNum<<" got SERVERS_READY status "<<m.i[0]<<std::endl;
         allClientsReady.set(m.i[0]==1);
+    }
+    if (m.type == SystemMessage::DEBUG_SERVER_READY)
+    {
+        std::cout<<"Node "<<serverNum<<" got DEBUG_SERVER_READY status "<<m.i[0]<<std::endl;
+        debugServerReady.set(m.i[0]==1);
     }
 }

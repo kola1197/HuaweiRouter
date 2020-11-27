@@ -19,6 +19,7 @@ public:
     std::vector<ServerConnection*> connections;
     ServerConnection* debugConnection;
     std::vector<PacketMessage> messagesStack;
+    MutexBool debugServerReady {false};
     MutexBool startTest{false};
     MutexBool stopNode{false};
     MutexBool allClientsReady{false};
@@ -36,6 +37,7 @@ private:
     std::chrono::milliseconds timeNow();
     void updatePacketCountForDebugServer();
     int maxPacketsCount = 0;
+    void updateEdgesUsage();
 };
 
 

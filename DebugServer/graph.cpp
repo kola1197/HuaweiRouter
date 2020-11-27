@@ -361,6 +361,28 @@ void Graph::get_system_message(DebugMessage m)
         e->maxPacketCount = m.i[2];
         emit repaint();
     }
+    if (m.type == DebugMessage::EDGES_USAGE_STATUS)
+    {
+        int count = m.i[0];
+        for (int j = 0;j<count;j++)
+        {
+            for (int i=0;i<edges.size();i++)
+            {
+                if (edges[i].id == m.i[j*3 + 1])
+                {
+                    if (edges[i].from == m.i[j*3 +2])
+                    {
+                        edges[i].loadFromTo = m.i[j*3 + 3];
+                    }
+                    if (edges[i].to == m.i[j*3 +2])
+                    {
+                        edges[i].loadToFrom = m.i[j*3 + 3];
+                    }
+                }
+            }
+        }
+        emit repaint();
+    }
     //std::cout<<m.i[0]<<" send connection status "<<m.i[1]<<std::endl;
 }
 

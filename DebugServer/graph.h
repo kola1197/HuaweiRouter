@@ -24,6 +24,8 @@ struct Edge
     int id;
     int  from;
     int  to;
+    float loadFromTo = 0;
+    float loadToFrom = 0;
 };
 
 class Graph: public QObject

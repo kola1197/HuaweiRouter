@@ -41,7 +41,7 @@ struct HarbingerMessage {                                           //sends befo
 //};
 
 struct SystemMessage {
-    enum Type {TEXT_ALLERT, START_SIMULATION_FLAG, SERVERS_READY};
+    enum Type {TEXT_ALLERT, START_SIMULATION_FLAG, SERVERS_READY, DEBUG_SERVER_READY};
     char text[200];
     int i[8];
     int authorNum;
@@ -49,9 +49,9 @@ struct SystemMessage {
 };
 
 struct DebugMessage{
-    enum Type {CONNECTION_STATUS, PACKET_STATUS, PACKET_STATUS_DELIVERED, PACKET_COUNT_STATUS};
-    char text[200];
-    int i[8];
+    enum Type {CONNECTION_STATUS, PACKET_STATUS, PACKET_STATUS_DELIVERED, PACKET_COUNT_STATUS, EDGES_USAGE_STATUS};
+    //char text[200];
+    int i[200];
     Type type;
     std::chrono::milliseconds deliveringTime;
 };
@@ -71,8 +71,9 @@ struct PacketMessage{
     int to;
     int id;
     int currentPosition;
-    int checkSum = 239239239;
     bool delivered;
+    char uselessData [239];
+    int checkSum = 239239239;
     std::chrono::milliseconds timeOnCreation;
     Type type;
 };

@@ -13,11 +13,12 @@
 #include "Messages.h"
 #include "QObject"
 
-ServerConnection::ServerConnection(int _port, int _from, int _to):QObject()
+ServerConnection::ServerConnection(int _port, int _from, int _to, int _id):QObject()
 {
     port = _port;
     from = _from;
     to = _to;
+    id = _id;
 }
 
 void ServerConnection::connectTo()
@@ -182,7 +183,7 @@ void ServerConnection::awaitConnection()
     {
         Color::ColorMode yel(Color::FG_YELLOW);
         Color::ColorMode def(Color::FG_DEFAULT);
-        std::cout <<yel<< "Awaiting for Connection "<<def<< "from "<<from<<" to "<< to << std::endl;
+        //std::cout <<yel<< "Awaiting for Connection "<<def<< "from "<<from<<" to "<< to << std::endl;
         std::thread thr([this]() {
             struct sockaddr_in address;
             int opt = 1;
@@ -226,7 +227,7 @@ void ServerConnection::awaitConnection()
             connected.set(true);
             Color::ColorMode grn(Color::FG_GREEN);
             Color::ColorMode def(Color::FG_DEFAULT);
-            std::cout <<grn<< "CONNECTED "<<def<< " "<<from<<" <---> "<< to << std::endl;
+            //std::cout <<grn<< "CONNECTED "<<def<< " "<<from<<" <---> "<< to << std::endl;
             std::thread thr1([this]()
             {
                 while (!needToStop.get()){
@@ -294,7 +295,7 @@ void ServerConnection::sendMessage(SystemMessage m)
 void ServerConnection::sendMessagesFromBufferTick()
 {
     if (!messagesDataQueue.empty()) {
-        std::cout<<"tick from "<<from<<" to"<<to<<" messagesDataQueue size: "<<messagesDataQueue.size()<<std::endl;
+        //std::cout<<"tick from "<<from<<" to"<<to<<" messagesDataQueue size: "<<messagesDataQueue.size()<<std::endl;
         int size = messagesDataQueue.size()>sendBytesPerInterval ? sendBytesPerInterval : messagesDataQueue.size();
         char data[size];
         int counter = 0;
@@ -305,12 +306,13 @@ void ServerConnection::sendMessagesFromBufferTick()
             data[counter] = c;
             counter++;
         }
-        std::cout<<"Second tick from "<<from<<" to"<<to<<" messagesDataQueue size: "<<messagesDataQueue.size()<<" data: "<< data <<std::endl;
+        //std::cout<<"Second tick from "<<from<<" to"<<to<<" messagesDataQueue size: "<<messagesDataQueue.size()<<" data: "<< data <<std::endl;
         sendMutex.lock();
         send(sock, &data, sizeof(data), 0);
         //std::cout<<"sizeof m"<< sizeof(m)<<std::endl;
         //send(sock, &data, sizeof(data), 0);
         sendMutex.unlock();
+        bufferLoad.set(messagesDataQueue.size()*100/sendBytesPerInterval);
     }
 }
 

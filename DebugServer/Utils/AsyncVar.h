@@ -11,10 +11,25 @@
 template <typename T>
 class AsyncVar {
 public:
-    AsyncVar();
-    AsyncVar(T i);
-    T get();
-    void set(T i);
+    AsyncVar(){
+        targetVar = T();
+    };
+    AsyncVar(T t){
+        targetVar = t;
+    };
+    T get(){
+        T result;
+        mutex.lock();
+        result = targetVar;
+        mutex.unlock();
+        return result;
+    };
+    void set(T i)
+    {
+        mutex.lock();
+        targetVar = i;
+        mutex.unlock();
+    };
 private:
     std::mutex mutex;
     T targetVar;

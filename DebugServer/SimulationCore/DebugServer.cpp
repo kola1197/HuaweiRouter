@@ -37,6 +37,14 @@ void DebugServer::Start()
         Color::ColorMode def(Color::FG_DEFAULT);
         std::cout<<"Debug server:"<<grn<<" ALL "<<connections.size() <<" NODES CONNECTED"<<def<<std::endl;
 
+        for (int i=0;i<connections.size();i++)
+        {
+            SystemMessage m;
+            m.type = SystemMessage::DEBUG_SERVER_READY;
+            m.i[0]=1;
+            connections[i]->sendMessage(m);
+        }
+
         bool allServersReady =false;
         while (!allServersReady)
         {

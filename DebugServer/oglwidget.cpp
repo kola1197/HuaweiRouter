@@ -58,15 +58,15 @@ void OGLWidget::paintGL()
             float x1,x2,y1,y2;
             std::tie(x1,y1,x2,y2) = newCoords;
             drawEdge(x1,y1,x2,y2);
-            drawLableCircle(x1,y1,x2,y2);
-            drawLableCircle(x2,y2,x1,y1);
+            drawLableCircle(x1,y1,x2,y2, QString::number(e.loadToFrom));
+            drawLableCircle(x2,y2,x1,y1, QString::number(e.loadFromTo));
 
             //drawEdge(el1->x,el1->y,el2->x,el2->y);
         }
     }
 }
 
-void OGLWidget::drawLableCircle(float x1, float y1, float x2,float y2)
+void OGLWidget::drawLableCircle(float x1, float y1, float x2,float y2, QString edgeUsage)
 {
     float x = (x1*9+x2)/10;
     float y = (y1*9+y2)/10;
@@ -85,7 +85,7 @@ void OGLWidget::drawLableCircle(float x1, float y1, float x2,float y2)
         glVertex2f ((x + (radius * cos(i * float(2 * M_PI) / 20))), (y + (radius * sin(i * float(2 * M_PI) / 20))) );
     }
     glEnd();
-    QString edgeUsage("100%");
+    //QString edgeUsage("100%");
     renderText(x - 14,y + 5 ,edgeUsage, true, Qt::red);
 }
 
