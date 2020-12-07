@@ -72,7 +72,7 @@ struct PacketMessage{
     int id;
     int currentPosition;
     bool delivered;
-    char uselessData [2390];
+    char uselessData [239000];
     int checkSum = 239239239;
     std::chrono::milliseconds timeOnCreation;
     Type type;

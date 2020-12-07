@@ -28,6 +28,11 @@ struct Edge
     float loadToFrom = 0;
 };
 
+enum Algorithms
+        {
+            RANDOM
+        };
+
 class Graph: public QObject
 {
 Q_OBJECT
@@ -61,6 +66,7 @@ public:
     void addPacket(PacketMessage m);
     void addPacketmessage(int _type, int _from, int _to);
     int packetIdCounter = 0;
+    Algorithms selectedAlgorithm = Algorithms::RANDOM;
 public slots:
     void get_system_message(SystemMessage m);
     void get_system_message(DebugMessage m);

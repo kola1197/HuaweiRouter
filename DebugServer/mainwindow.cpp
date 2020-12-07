@@ -18,6 +18,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     setCentralWidget(ui->scrollArea);
     createUI();
+    createAlgprithmComboBox();
     connect(ui->openGLWidget,SIGNAL(transmit_info(QString)),this,SLOT(setEllipseInfo(QString)));
     draw();
 }
@@ -26,6 +27,13 @@ MainWindow::~MainWindow()
 {
     delete ui;
 }
+
+void MainWindow::createAlgprithmComboBox()
+{
+    ui->algorithmBox->addItems(QStringList() <<trUtf8("RANDOM"));
+}
+
+
 
 void MainWindow::draw()
 {
@@ -118,13 +126,16 @@ void MainWindow::createUI()
 
 void MainWindow::onBtnClicked()
 {
-    if( QPushButton* btn = qobject_cast< QPushButton* >( sender() ) )
+    if (!ui->openGLWidget->screenLocked)
     {
-        int index = btn->toolTip().toInt();
-        //QMessageBox::information( this, "The button was clicked", QString::number(index));
-        ui->openGLWidget->graph.packets.erase(ui->openGLWidget->graph.packets.begin()+index);
-        createUI();
-        repaintOGLWidget();
+        if( QPushButton* btn = qobject_cast< QPushButton* >( sender() ) )
+        {
+            int index = btn->toolTip().toInt();
+            //QMessageBox::information( this, "The button was clicked", QString::number(index));
+            ui->openGLWidget->graph.packets.erase(ui->openGLWidget->graph.packets.begin()+index);
+            createUI();
+            repaintOGLWidget();
+        }
     }
 }
 
@@ -241,10 +252,30 @@ void MainWindow::on_deleteButton_released()
 
 void MainWindow::on_startButton_released()   // lock the screen and start simulation
 {
-    ui->openGLWidget->screenLocked = true;
+    blockInterface();
     simulation = Simulation(&ui->openGLWidget->graph);
     simulation.Start();
     connectSlots();
+}
+
+void MainWindow::blockInterface()
+{
+    ui->openGLWidget->screenLocked = true;
+    ui->algorithmBox->setEnabled(false);
+    ui->loadButton->setEnabled(false);
+    ui->saveButton->setEnabled(false);
+    ui->AddButton->setEnabled(false);
+    ui->deleteButton->setEnabled(false);
+}
+
+void MainWindow::unBlockInterface()
+{
+    ui->openGLWidget->screenLocked = false;
+    ui->algorithmBox->setEnabled(true);
+    ui->loadButton->setEnabled(true);
+    ui->saveButton->setEnabled(true);
+    ui->AddButton->setEnabled(true);
+    ui->deleteButton->setEnabled(true);
 }
 
 void MainWindow::updateTable()
@@ -271,6 +302,7 @@ void MainWindow::checkSimulationStatus()
         QMessageBox msgBox;
         msgBox.setText("All packets delivered. \nAverage time: " + QString::number(time));
         msgBox.exec();
+        unBlockInterface();
     }
 }
 
@@ -278,7 +310,6 @@ void MainWindow::connectSlots()
 {
     connect(&ui->openGLWidget->graph,SIGNAL(repaint()),this,SLOT(repaintOGLWidget()));
     connect(&ui->openGLWidget->graph,SIGNAL(updateTable()),this,SLOT(updateTable()));
-
     for (int i=0;i<simulation.debugServer->connections.size();i++ )
     {
         //connect(simulation.debugServer->connections[i],SIGNAL(transmit_to_gui(SystemMessage)),&ui->openGLWidget->graph,SLOT(get_system_message(SystemMessage)));
@@ -293,11 +324,15 @@ void MainWindow::connectSlots()
 void MainWindow::repaintOGLWidget()
 {
     ui->openGLWidget->update();
-
 }
 
 void MainWindow::AddButtonClick()
 {
     ui->openGLWidget->graph.addPacket();
     createUI();
+}
+
+void MainWindow::on_algorithmBox_currentIndexChanged(int index)
+{
+    ui->openGLWidget->graph.selectedAlgorithm = static_cast<Algorithms>(index);
 }

@@ -165,6 +165,20 @@ void ServerNode::Start()       //on start we connect to debug server
     thr.detach();
 }
 
+int ServerNode::selectPacketPath()
+{
+    switch (graph.selectedAlgorithm) {
+        case Algorithms::RANDOM:
+            return randomSelectionAlgorithm();
+            break;
+    }
+}
+
+int ServerNode::randomSelectionAlgorithm()
+{
+    return rand() % (connections.size());
+}
+
 void ServerNode::updateEdgesUsage()      // it will be broken with more than 99 edges in one node
 {
     DebugMessage d;

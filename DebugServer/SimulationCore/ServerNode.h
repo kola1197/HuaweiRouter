@@ -38,6 +38,10 @@ private:
     void updatePacketCountForDebugServer();
     int maxPacketsCount = 0;
     void updateEdgesUsage();
+
+    int randomSelectionAlgorithm();
+
+    int selectPacketPath();
 };
 
 

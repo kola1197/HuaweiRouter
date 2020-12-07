@@ -32,9 +32,13 @@ private slots:
     void cellToTextChanged();
     void cellIndexChanged(int i);
     void updateTable();
+    void on_algorithmBox_currentIndexChanged(int index);
+
 public slots:
     void repaintOGLWidget();
     void onBtnClicked();
+    void unBlockInterface();
+
     //void get_system_message(SystemMessage m);
 private:
     Simulation simulation;
@@ -44,5 +48,8 @@ private:
 
     void checkSimulationStatus();
     bool tableResized = false;
+
+    void createAlgprithmComboBox();
+    void blockInterface();
 };
 #endif // MAINWINDOW_H

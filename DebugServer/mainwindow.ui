@@ -163,6 +163,32 @@
        </rect>
       </property>
      </widget>
+     <widget class="QComboBox" name="algorithmBox">
+      <property name="geometry">
+       <rect>
+        <x>1650</x>
+        <y>520</y>
+        <width>111</width>
+        <height>25</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="infoLabel_2">
+      <property name="geometry">
+       <rect>
+        <x>1650</x>
+        <y>490</y>
+        <width>111</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Algorithm</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
     </widget>
    </widget>
   </widget>

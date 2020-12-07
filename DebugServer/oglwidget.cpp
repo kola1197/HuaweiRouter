@@ -52,16 +52,23 @@ void OGLWidget::paintGL()
         Ellips *el2 = graph.getEllipseByNumber(e.to);
         if (el1!=NULL && el2!=NULL)
         {
-            //std::cout<<"Edge output "<<e.from<<" "<<e.to<<std::endl;
-            //std::cout<<"Ellips "<<el1->x<<" "<<el1->y<<" -*- "<<el2->x<<" "<<el2->y<<std::endl;
             std::tuple<float,float,float,float> newCoords = countCoords(el1,el2);
             float x1,x2,y1,y2;
             std::tie(x1,y1,x2,y2) = newCoords;
             drawEdge(x1,y1,x2,y2);
-            drawLableCircle(x1,y1,x2,y2, QString::number(e.loadToFrom));
-            drawLableCircle(x2,y2,x1,y1, QString::number(e.loadFromTo));
-
-            //drawEdge(el1->x,el1->y,el2->x,el2->y);
+        }
+    }
+    for (Edge e:graph.edges)
+    {
+        Ellips *el1 = graph.getEllipseByNumber(e.from);
+        Ellips *el2 = graph.getEllipseByNumber(e.to);
+        if (el1!=NULL && el2!=NULL)
+        {
+            std::tuple<float,float,float,float> newCoords = countCoords(el1,el2);
+            float x1,x2,y1,y2;
+            std::tie(x1,y1,x2,y2) = newCoords;
+            drawLableCircle(x1,y1,x2,y2, QString::number(e.loadFromTo));
+            drawLableCircle(x2,y2,x1,y1, QString::number(e.loadToFrom));
         }
     }
 }
