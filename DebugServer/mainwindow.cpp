@@ -5,7 +5,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <qtextedit.h>
-
+#include <zconf.h>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -252,10 +252,40 @@ void MainWindow::on_deleteButton_released()
 
 void MainWindow::on_startButton_released()   // lock the screen and start simulation
 {
-    blockInterface();
-    simulation = Simulation(&ui->openGLWidget->graph);
-    simulation.Start();
-    connectSlots();
+    std::cout<<"START PRESS"<<std::endl;
+    if (!simulationIsActive){
+        simulationIsActive = true;
+        blockInterface();
+        savedGraph = Graph(ui->openGLWidget->graph);
+        simulation = new Simulation(&ui->openGLWidget->graph);
+        simulation->Start();
+        connectSlots();
+    }
+    else {
+        disconnectSlots();
+        simulationIsActive = false;
+        simulation->stop();
+        usleep(100000);
+        ui->openGLWidget->graph = Graph(savedGraph);
+        std::cout<<ui->openGLWidget->graph.edges.size()<<std::endl;
+        updateStartButtonText();
+        updateTable();
+        repaintOGLWidget();
+        //simulation = Simulation(&ui->openGLWidget->graph);
+        //simulation.~Simulation();
+    }
+}
+
+void MainWindow::disconnectSlots()
+{
+    disconnect(&ui->openGLWidget->graph,SIGNAL(repaint()),this,SLOT(repaintOGLWidget()));
+    disconnect(&ui->openGLWidget->graph,SIGNAL(updateTable()),this,SLOT(updateTable()));
+    for (int i=0;i<simulation->debugServer->connections.size();i++ )
+    {
+        //connect(simulation.debugServer->connections[i],SIGNAL(transmit_to_gui(SystemMessage)),&ui->openGLWidget->graph,SLOT(get_system_message(SystemMessage)));
+        disconnect(simulation->debugServer->connections[i],SIGNAL(transmit_to_gui(SystemMessage)),simulation->debugServer,SLOT(get_message_for_debug(SystemMessage)));
+        disconnect(simulation->debugServer->connections[i],SIGNAL(transmit_to_gui(DebugMessage)),&ui->openGLWidget->graph,SLOT(get_system_message(DebugMessage)));
+    }
 }
 
 void MainWindow::blockInterface()
@@ -266,6 +296,7 @@ void MainWindow::blockInterface()
     ui->saveButton->setEnabled(false);
     ui->AddButton->setEnabled(false);
     ui->deleteButton->setEnabled(false);
+    ui->startButton->setEnabled(false);
 }
 
 void MainWindow::unBlockInterface()
@@ -276,6 +307,19 @@ void MainWindow::unBlockInterface()
     ui->saveButton->setEnabled(true);
     ui->AddButton->setEnabled(true);
     ui->deleteButton->setEnabled(true);
+    ui->startButton->setEnabled(true);
+    updateStartButtonText();
+}
+
+void MainWindow::updateStartButtonText()
+{
+    if (simulationIsActive)
+    {
+        ui->startButton->setText("Finish simulation");
+    }
+    else{
+        ui->startButton->setText("Start");
+    }
 }
 
 void MainWindow::updateTable()
@@ -310,11 +354,11 @@ void MainWindow::connectSlots()
 {
     connect(&ui->openGLWidget->graph,SIGNAL(repaint()),this,SLOT(repaintOGLWidget()));
     connect(&ui->openGLWidget->graph,SIGNAL(updateTable()),this,SLOT(updateTable()));
-    for (int i=0;i<simulation.debugServer->connections.size();i++ )
+    for (int i=0;i<simulation->debugServer->connections.size();i++ )
     {
         //connect(simulation.debugServer->connections[i],SIGNAL(transmit_to_gui(SystemMessage)),&ui->openGLWidget->graph,SLOT(get_system_message(SystemMessage)));
-        connect(simulation.debugServer->connections[i],SIGNAL(transmit_to_gui(SystemMessage)),simulation.debugServer,SLOT(get_message_for_debug(SystemMessage)));
-        connect(simulation.debugServer->connections[i],SIGNAL(transmit_to_gui(DebugMessage)),&ui->openGLWidget->graph,SLOT(get_system_message(DebugMessage)));
+        connect(simulation->debugServer->connections[i],SIGNAL(transmit_to_gui(SystemMessage)),simulation->debugServer,SLOT(get_message_for_debug(SystemMessage)));
+        connect(simulation->debugServer->connections[i],SIGNAL(transmit_to_gui(DebugMessage)),&ui->openGLWidget->graph,SLOT(get_system_message(DebugMessage)));
     }
     //connect(simulation.debugServer->debugConnection,SIGNAL(transmit_to_gui(SystemMessage)),&ui->openGLWidget->graph,SLOT(get_system_message(SystemMessage)));
 

@@ -21,48 +21,80 @@ ServerConnection::ServerConnection(int _port, int _from, int _to, int _id):QObje
     id = _id;
 }
 
+ServerConnection::~ServerConnection() noexcept
+{
+    //needToStop.set(true);
+    //connected.set(true); // for cases, when we has not connected yet
+}
+
+void ServerConnection::stop()
+{
+    std::cout<<"GOT STOP COMMAND ( "<<from<<" ==> "<<to<<" )"<<std::endl;
+    needToStop.set(true);
+    std::cout<<"connection ( "<<from<<" ==> "<<to<<" ) needToStop = "<<needToStop.get()<<std::endl;
+    connected.set(true); // for cases, when we has not connected yet
+    if (isServer){
+        while (!mayCloseSocket.get())
+        {
+            usleep(100);
+        }
+        //shutdown(sock, 2);
+        close(sock);
+        close(server_fd);
+    }
+}
+
 void ServerConnection::connectTo()
 {
-    started.set(true);
-    if (!connected.get())
+started.set(true);
+if (!connected.get())
+{
+thr = std::thread([this]() {
+    while (!connected.get())
     {
-        std::thread thr([this]() {
-            while (!connected.get())
-            {
-                std::cout<<"trying to connect "<<from<<" => "<<to<<". Port: "<<port<<std::endl;
-                struct sockaddr_in serv_addr;
-                if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-                    std::cout << "\n Socket creation error \n" << std::endl;
-                }
-                serv_addr.sin_family = AF_INET;
-                serv_addr.sin_port = htons(port);
-                // Convert IPv4 and IPv6 addresses from text to binary form
-                if (inet_pton(AF_INET, ip.c_str(), &serv_addr.sin_addr) <= 0) {
-                    std::cout << "\nInvalid address/ Address not supported \n" << std::endl;
-                }
-                if (::connect(sock, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
-                    printf("\nConnection Failed \n");
-                } else{
-                    connected.set(true);
-                    //std::cout<<"connection "<<from<<" => "<<to<<" status is now: CONNECTED"<<std::endl;
-                }
-            }
-            //connect(timer, SIGNAL(timeout()), this, SLOT(sendMessagesFromBufferTick()));
-            //timer->start();
-            std::thread thr1([this]()
-            {
-                while (!needToStop.get()){
-                    sendMessagesFromBufferTick();
-                    usleep(sendIntervalMS);
-                }
-            });
-            if (!oldway){
-                thr1.detach();
-            }
-            while (!needToStop.get())
-            {
-                getMessage();
-            }
+        std::cout<<"trying to connect "<<from<<" => "<<to<<". Port: "<<port<<std::endl;
+        struct sockaddr_in serv_addr;
+        if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+            std::cout << "\n Socket creation error \n" << std::endl;
+        }
+        serv_addr.sin_family = AF_INET;
+        serv_addr.sin_port = htons(port);
+        // Convert IPv4 and IPv6 addresses from text to binary form
+        if (inet_pton(AF_INET, ip.c_str(), &serv_addr.sin_addr) <= 0) {
+            std::cout << "\nInvalid address/ Address not supported \n" << std::endl;
+        }
+        if (::connect(sock, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
+            printf("\nConnection Failed \n");
+        } else{
+            connected.set(true);
+            //std::cout<<"connection "<<from<<" => "<<to<<" status is now: CONNECTED"<<std::endl;
+        }
+    }
+    //connect(timer, SIGNAL(timeout()), this, SLOT(sendMessagesFromBufferTick()));
+    //timer->start();
+    thr1 = std::thread([this]()
+    {
+        while (!needToStop.get()){
+            sendMessagesFromBufferTick();
+            usleep(sendIntervalMS);
+        }
+    });
+    if (!oldway){
+        thr1.detach();
+    }
+    while (!needToStop.get())
+    {
+        getMessage();
+        //std::cout<<"ALIVE"<<std::endl;
+    }
+    //sendMutex.lock();
+    //close(server_fd);
+    //shutdown(sock, 2);
+    //close(sock);
+    mayCloseSocket.set(true);
+    Color::ColorMode grn(Color::FG_GREEN);
+    Color::ColorMode def(Color::FG_DEFAULT);
+    std::cout<<"Node "<<from<<grn<<" CONNECTION TO "<<def<<to<<grn<<" SUCCESSFULLY CLOSED (To)"<<def<<std::endl;
         });
         thr.detach();
     }
@@ -75,30 +107,32 @@ void ServerConnection::getMessage()
     int hbytes;
     for (int i = 0; i < sizeof(h); i += hbytes) {
         if ((hbytes = recv(sock, hmsg +i, sizeof(h)  - i, 0)) == -1){
-            std::cout<<"error on receive HarbingerMessage"<<std::endl;
-            //errorServerStop();
+            //std::cout<<"error on receive HarbingerMessage"<<std::endl;
+            return;
         }
     }
-    memcpy(&h,hmsg , sizeof(h));
-    if (h.type == HarbingerMessage::PING_MESSAGE)
-    {
-        getPingMessage();
-    }
-    if (h.type == HarbingerMessage::TEST_MESSAGE)
-    {
-        getTestMessage();
-    }
-    if (h.type == HarbingerMessage::SYSTEM_MESSAGE)
-    {
-        getSystemMessage();
-    }
-    if (h.type == HarbingerMessage::DEBUG_MESSAGE)
-    {
-        getDebugMessage();
-    }
-    if (h.type == HarbingerMessage::PACKET_MESSAGE)
-    {
-        getPacketMessage();
+    if (!needToStop.get()){
+        memcpy(&h,hmsg , sizeof(h));
+        if (h.type == HarbingerMessage::PING_MESSAGE)
+        {
+            getPingMessage();
+        }
+        if (h.type == HarbingerMessage::TEST_MESSAGE)
+        {
+            getTestMessage();
+        }
+        if (h.type == HarbingerMessage::SYSTEM_MESSAGE)
+        {
+            getSystemMessage();
+        }
+        if (h.type == HarbingerMessage::DEBUG_MESSAGE)
+        {
+            getDebugMessage();
+        }
+        if (h.type == HarbingerMessage::PACKET_MESSAGE)
+        {
+            getPacketMessage();
+        }
     }
 }
 
@@ -110,6 +144,7 @@ void ServerConnection::getPacketMessage()
     for (int i = 0; i < sizeof(m); i += bytes) {
         if ((bytes = recv(sock, msg + i, sizeof(m)  - i, 0)) == -1){
             std::cout<<"error on receive PacketMessage "<<std::endl;
+            return;
         }
     }
     memcpy(&m, msg, sizeof(m));
@@ -125,6 +160,7 @@ void ServerConnection::getDebugMessage()
     for (int i = 0; i < sizeof(m); i += bytes) {
         if ((bytes = recv(sock, msg + i, sizeof(m)  - i, 0)) == -1){
             std::cout<<"error on receive DebugMessage"<<std::endl;
+            return;
         }
     }
     memcpy(&m, msg, sizeof(m));
@@ -139,6 +175,7 @@ void ServerConnection::getSystemMessage()
     for (int i = 0; i < sizeof(m); i += bytes) {
         if ((bytes = recv(sock, msg +i, sizeof(m)  - i, 0)) == -1){
             std::cout<<"error on receive SystemMessage"<<std::endl;
+            return;
         }
     }
     memcpy(&m, msg, sizeof(m));
@@ -154,6 +191,7 @@ void ServerConnection::getPingMessage()
     for (int i = 0; i < sizeof(m); i += bytes) {
         if ((bytes = recv(sock, msg +i, sizeof(m)  - i, 0)) == -1){
             std::cout<<"error on receive PingMessage"<<std::endl;
+            return;
         }
     }
     memcpy(&m, msg, sizeof(m));
@@ -170,6 +208,7 @@ void ServerConnection::getTestMessage()
     for (int i = 0; i < sizeof(m); i += bytes) {
         if ((bytes = recv(sock, msg +i, sizeof(m)  - i, 0)) == -1){
             std::cout<<"error"<<std::endl;
+            return;
         }
     }
     memcpy(&m, msg, sizeof(m));
@@ -179,6 +218,7 @@ void ServerConnection::getTestMessage()
 
 void ServerConnection::awaitConnection()
 {
+    isServer = true;
     started.set(true);
     if (!connected.get())
     {
@@ -188,6 +228,7 @@ void ServerConnection::awaitConnection()
         std::thread thr([this]() {
             struct sockaddr_in address;
             int opt = 1;
+
             int addrlen = sizeof(address);
             char buffer[1024] = {0};
             if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
@@ -196,9 +237,15 @@ void ServerConnection::awaitConnection()
             }
             //std::cout<<"here2"<<std::endl;
 
-            // Forcefully attaching socket to the port 8080
-            if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT,
-                           &opt, sizeof(opt))) {
+            struct timeval tv;
+            tv.tv_sec = 1;
+            tv.tv_usec = 0;
+            //if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT | SO_RCVTIMEO, &opt, sizeof(opt))) {
+            if (setsockopt(server_fd, SOL_SOCKET, SO_RCVTIMEO , (const char *)&tv, sizeof(tv))) {
+                perror("setsockopt");
+                exit(EXIT_FAILURE);
+            }
+            if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR , (const char *)&tv, sizeof(tv))) {
                 perror("setsockopt");
                 exit(EXIT_FAILURE);
             }
@@ -243,6 +290,12 @@ void ServerConnection::awaitConnection()
             {
                 getMessage();
             }
+            //sendMutex.lock();
+            //close(server_fd);
+            //shutdown(sock, 2);
+            //close(sock);
+            mayCloseSocket.set(true);
+            std::cout<<"Node "<<from<<grn<<" CONNECTION TO "<<def<<to<<grn<<" SUCCESSFULLY CLOSED (FROm)"<<def<<std::endl;
         });
         thr.detach();
     }
@@ -314,7 +367,7 @@ void ServerConnection::sendMessagesFromBufferTick()
         //std::cout<<"sizeof m"<< sizeof(m)<<std::endl;
         //send(sock, &data, sizeof(data), 0);
         sendMutex.unlock();
-        bufferLoad.set(messagesDataQueue.size()*100/sendBytesPerInterval);
+        bufferLoad.set(messagesDataQueue.size() * 100 / (1000000 * sendBytesPerInterval / sendIntervalMS));
     }
     messageBuffer.unlock();
 }

@@ -21,6 +21,27 @@ ServerNode::ServerNode(int _serverNum,int _debugSocketAdress, Graph g):QObject()
     connections.clear();
 }
 
+ServerNode::~ServerNode() noexcept
+{
+ /*   for (int i=0; i < connections.size();i++)
+    {
+        connections[i]->~ServerConnection();
+    }
+    debugConnection->~ServerConnection();*/
+}
+
+void ServerNode::Stop()
+{
+    stopNode.set(true);
+    //usleep(15000);
+    for (int i=0; i < connections.size();i++)
+    {
+        connections[i]->stop();
+    }
+    usleep(15000);
+    debugConnection->stop();
+}
+
 void ServerNode::Start()       //on start we connect to debug server
 {
     std::thread thr([this]() {
@@ -161,6 +182,7 @@ void ServerNode::Start()       //on start we connect to debug server
                 usleep(10000);
             }
         }
+        std::cout<<"NODE "<<serverNum<<" STOPPED"<<std::endl;
     });
     thr.detach();
 }

@@ -14,6 +14,7 @@ class ServerNode :public QObject{
 Q_OBJECT
 public:
     ServerNode(int serverNum,int debugSocketAdress, Graph g);
+    ~ServerNode();
     void Start();
     //std::vector<std::shared_ptr<ServerConnection>> connections;
     std::vector<ServerConnection*> connections;
@@ -23,7 +24,7 @@ public:
     MutexBool startTest{false};
     MutexBool stopNode{false};
     MutexBool allClientsReady{false};
-
+    void Stop();
 public slots:
     void get_message(PacketMessage m);
     void get_message(SystemMessage m);

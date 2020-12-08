@@ -38,18 +38,21 @@ public slots:
     void repaintOGLWidget();
     void onBtnClicked();
     void unBlockInterface();
-
     //void get_system_message(SystemMessage m);
 private:
-    Simulation simulation;
+    Simulation* simulation;
     Ui::MainWindow *ui;
     void connectSlots();
     void createUI();
+    Graph savedGraph;
 
     void checkSimulationStatus();
     bool tableResized = false;
 
     void createAlgprithmComboBox();
     void blockInterface();
+    bool simulationIsActive = false;
+    void updateStartButtonText();
+    void disconnectSlots();
 };
 #endif // MAINWINDOW_H

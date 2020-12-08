@@ -14,9 +14,34 @@ Simulation::Simulation(Graph *_graph)
     graph = _graph;
 }
 
+Simulation::~Simulation()
+{
+/*    if (started){
+        std::cout<<"SIMULATION DESTRUCTION"<<std::endl;
+        for (int i=0;i<serverNodes.size();i++)
+        {
+            serverNodes[i]->~ServerNode();
+        }
+        debugServer->~DebugServer();
+    }*/
+}
+
+void Simulation::stop()
+{
+    if (started){
+        std::cout<<"SIMULATION STOP"<<std::endl;
+        for (int i=0;i<serverNodes.size();i++)
+        {
+            serverNodes[i]->Stop();
+        }
+        debugServer->Stop();
+    }
+}
+
 void Simulation::Start()
 {
-    std::cout<<"Packet count "<<graph->packets.size()<<std::endl;
+    //std::cout<<"Packet count "<<graph->packets.size()<<std::endl;
+    started = true;
     debugServer = new DebugServer(Settings::DebugFirstPortNum(), *graph);
     debugServer->Start();
     usleep(100000);

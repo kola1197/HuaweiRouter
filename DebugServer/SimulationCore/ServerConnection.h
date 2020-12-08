@@ -16,6 +16,7 @@ class ServerConnection : public QObject{
     Q_OBJECT
 public:
     ServerConnection(int _port, int _from, int _to, int _id = -1);
+    ~ServerConnection();
     void connectTo();
     void awaitConnection();
     MutexBool connected {false};
@@ -42,8 +43,8 @@ public:
     MutexBool waitingForConnection{false};
     std::mutex messageBuffer;
     //connection limit settings
-    float sendIntervalMS = 33;
-    float sendBytesPerInterval = 6;//64;
+    float sendIntervalMS = 330;
+    float sendBytesPerInterval = 64;//64;
     int updateUsageDataPerTicks = 5;
     int updateUsageDataCounter = 0;
     AsyncVar<float> bufferLoad{0};
@@ -62,12 +63,17 @@ private:
     int sock = 0;
     int server_fd = 0;
     MutexBool needToStop{false};
+    MutexBool mayCloseSocket{false};
     std::string ip = "127.0.0.2";
     std::mutex sendMutex;
     //std::vector<PacketMessage> messagesQueue;
     std::vector<char> messagesDataQueue;
     QTimer* timer = new QTimer();
     bool oldway = false;
+    bool isServer = false;
+    std::thread thr1;
+    std::thread thr;
+
 };
 
 

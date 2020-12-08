@@ -14,6 +14,22 @@ DebugServer::DebugServer(int debugSocketAdress, Graph g) : ServerNode(-1,debugSo
     //std::cout<<"Debug server: now we have got "<<graph.ellipses.size()<<" nodes"<<std::endl;
 }
 
+DebugServer::~DebugServer() noexcept
+{
+    /*for (int i=0;i<connections.size();i++)
+    {
+        connections[i]->~ServerConnection();
+    };*/
+}
+
+void DebugServer::Stop()
+{
+    for (int i=0;i<connections.size();i++)
+    {
+        connections[i]->stop();
+    };
+}
+
 void DebugServer::Start()
 {
     std::cout<<"Debug server started his work "<<std::endl;
