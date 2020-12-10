@@ -21,7 +21,6 @@ private slots:
     void on_saveButton_released();
     void setEllipseInfo(QString info);
     void on_loadButton_released();
-
     void on_deleteButton_released();
     void AddButtonClick();
     void SavePacketClick();
@@ -35,6 +34,7 @@ private slots:
     void on_algorithmBox_currentIndexChanged(int index);
 
 public slots:
+    void on_settingsButton_released();
     void repaintOGLWidget();
     void onBtnClicked();
     void unBlockInterface();

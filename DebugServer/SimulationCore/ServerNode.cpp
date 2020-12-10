@@ -11,7 +11,8 @@
 #include <Utils/ColorMode.h>
 #include <Utils/Settings.h>
 #include "QObject"
-
+#include <cstdlib>
+#include <ctime>
 
 ServerNode::ServerNode(int _serverNum,int _debugSocketAdress, Graph g):QObject()
 {
@@ -167,12 +168,12 @@ void ServerNode::Start()       //on start we connect to debug server
         while (!stopNode.get())
         {
             updateEdgesUsage();
-            if (messagesStack.size()>0)
+            if (!messagesStack.empty())
             {
                 //here our algorithm. now random.
                 PacketMessage m(messagesStack[0]);
                 messagesStack.erase(messagesStack.begin());
-                int i = rand() % (connections.size());
+                int i = selectPacketPath();
                 std::cout<<"Node "<<serverNum<<":"<<grn<<" sending packet with id "<<m.id<<" to "<<connections[i]->to<<def<<std::endl;
                 connections[i]->sendMessage(m);
                 updatePacketCountForDebugServer();
@@ -193,12 +194,36 @@ int ServerNode::selectPacketPath()
         case Algorithms::RANDOM:
             return randomSelectionAlgorithm();
             break;
+        case Algorithms::DRILL:
+            return drillSelectionAlgorithm();
+            break;
+        case Algorithms::DE_TAILS:
+            return drillSelectionAlgorithm();
+            break;
+        case Algorithms::LOCAL_FLOW:
+            return drillSelectionAlgorithm();
+            break;
+
     }
 }
 
 int ServerNode::randomSelectionAlgorithm()
 {
-    return rand() % (connections.size());
+    srand(time(0));
+    int a = rand() % (connections.size());
+    return a;
+}
+
+int ServerNode::drillSelectionAlgorithm()
+{
+    srand(time(0));
+    int a = rand() % (connections.size());
+    int b = a;
+    while (b == a)
+    {
+        b = rand() % (connections.size());
+    }
+    return connections[a]->bufferLoad.get() > connections[b]->bufferLoad.get() ? b : a;
 }
 
 void ServerNode::updateEdgesUsage()      // it will be broken with more than 99 edges in one node

@@ -30,7 +30,7 @@ struct Edge
 
 enum Algorithms
         {
-            RANDOM
+            RANDOM, DRILL, DE_TAILS, LOCAL_FLOW
         };
 
 class Graph: public QObject

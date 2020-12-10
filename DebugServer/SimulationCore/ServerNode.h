@@ -41,7 +41,7 @@ private:
     void updateEdgesUsage();
 
     int randomSelectionAlgorithm();
-
+    int drillSelectionAlgorithm();
     int selectPacketPath();
 };
 

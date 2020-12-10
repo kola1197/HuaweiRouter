@@ -4,6 +4,8 @@
 #include <Network/network.h>
 #include <QApplication>
 #include <QtCore/QDir>
+#include <cstdlib>
+#include <ctime>
 
 using namespace std;
 
@@ -84,8 +86,17 @@ void testMultiThreading(int sendingThreadsAmount) {
 //vector<pair<int,int>> adjList = { {0, 1}, {0, 2} }; //last clock was like 7 000 000
 //vector<pair<int,int>> adjList = { {0, 1} }; //last clock was like 3 500 000 //oriented was 2 000 000, btw difs are 2 900 000 1 500 000
 
+void randomTest()
+{
+    srand(time(NULL));
+    int a = rand() % (10);
+    int b = rand() % (10);
+    int c = rand() % (10);
+    std::cout<<a<<", "<<b<<", "<<c<<std::endl;
+}
 
 int main(int argc, char *argv[]) {
+
     QApplication a(argc, argv);
     a.setApplicationName("Simulation");
     MainWindow w;
@@ -101,3 +112,4 @@ int main(int argc, char *argv[]) {
     //TestNetworkDebug();
     //testMultiThreading(4);
 }
+

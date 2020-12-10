@@ -30,7 +30,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::createAlgprithmComboBox()
 {
-    ui->algorithmBox->addItems(QStringList() <<trUtf8("RANDOM"));
+    ui->algorithmBox->addItems(QStringList() <<trUtf8("RANDOM") << trUtf8("DRILL") << trUtf8("DeTails") << trUtf8("LocalFlow"));
 }
 
 
@@ -379,4 +379,11 @@ void MainWindow::AddButtonClick()
 void MainWindow::on_algorithmBox_currentIndexChanged(int index)
 {
     ui->openGLWidget->graph.selectedAlgorithm = static_cast<Algorithms>(index);
+    std::string  res = ui->openGLWidget->graph.selectedAlgorithm == Algorithms::DRILL? "Drill": "notDrill";
+    std::cout<<ui->openGLWidget->graph.selectedAlgorithm<<"   "<<res<<std::endl;
+}
+
+void MainWindow::on_settingsButton_released()
+{
+    std::cout<<"SETTINGS"<<std::endl;
 }
