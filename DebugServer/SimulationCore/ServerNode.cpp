@@ -279,7 +279,7 @@ void ServerNode::addConnection(int to)
     for (int i =0;i<graph.edges.size();i++){
         if ((graph.edges[i].from == serverNum && graph.edges[i].to == to) || (graph.edges[i].to == serverNum && graph.edges[i].from == to)  )
         {
-            port = graph.edges[i].id + Settings::ConnectionsFirstPortNum();
+            port = graph.edges[i].id + Settings::getConnectionsFirstPortNum();
             edgeID = graph.edges[i].id;
         }
     }

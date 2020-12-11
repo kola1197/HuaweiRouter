@@ -42,7 +42,7 @@ void Simulation::Start()
 {
     //std::cout<<"Packet count "<<graph->packets.size()<<std::endl;
     started = true;
-    debugServer = new DebugServer(Settings::DebugFirstPortNum(), *graph);
+    debugServer = new DebugServer(Settings::getDebugFirstPortNum(), *graph);
     debugServer->Start();
     usleep(100000);
     while (!debugServer->isReady.get())
@@ -51,7 +51,7 @@ void Simulation::Start()
     }
     for (int i=0;i<graph->ellipses.size();i++)
     {
-        QSharedPointer<ServerNode> node = QSharedPointer<ServerNode>(new ServerNode(graph->ellipses[i].number,Settings::DebugFirstPortNum(),*graph));
+        QSharedPointer<ServerNode> node = QSharedPointer<ServerNode>(new ServerNode(graph->ellipses[i].number,Settings::getDebugFirstPortNum(),*graph));
         serverNodes.push_back(node);
         node->Start();
         std::cout<<"node "<<graph->ellipses[i].number<<" started"<<std::endl;

@@ -74,7 +74,20 @@ else()
           SimulationCore/ServerConnection.h
           Utils/MutexBool.cpp
           Utils/MutexBool.h
-          SimulationCore/DebugServer.cpp SimulationCore/DebugServer.h Utils/Settings.h Utils/ColorMode.cpp Utils/ColorMode.h TextureImage.cpp TextureImage.h Utils/MutexInt.cpp Utils/MutexInt.h Utils/AsyncVar.cpp Utils/AsyncVar.h)
+          SimulationCore/DebugServer.cpp
+          SimulationCore/DebugServer.h
+          Utils/Settings.h Utils/ColorMode.cpp
+          Utils/ColorMode.h
+          TextureImage.cpp
+          TextureImage.h
+          Utils/MutexInt.cpp
+          Utils/MutexInt.h
+          Utils/AsyncVar.cpp
+          Utils/AsyncVar.h
+          settingsform.cpp
+          settingsform.h
+          settingsform.ui
+          Utils/Settings.cpp)
 endif()
 
 target_link_libraries(HuaweiRouter PRIVATE Qt5::Widgets  ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES})

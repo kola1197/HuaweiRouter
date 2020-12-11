@@ -1,11 +1,13 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 #include "iostream"
+#include "settingsform.h"
 #include <QComboBox>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <qtextedit.h>
 #include <zconf.h>
+#include <Utils/Settings.h>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -19,8 +21,17 @@ MainWindow::MainWindow(QWidget *parent)
     setCentralWidget(ui->scrollArea);
     createUI();
     createAlgprithmComboBox();
+    setDefaultSettings();
     connect(ui->openGLWidget,SIGNAL(transmit_info(QString)),this,SLOT(setEllipseInfo(QString)));
     draw();
+}
+
+void MainWindow::setDefaultSettings()
+{
+    Settings::setsendIntervalMS(330);
+    Settings::setSendBytesPerInterval(64);
+    ui->CountOfBytes->setText(QString::number(Settings::getSendBytesPerInterval()));
+    ui->sendIntervalMS->setText(QString::number(Settings::getsendIntervalMS()));
 }
 
 MainWindow::~MainWindow()
@@ -297,6 +308,8 @@ void MainWindow::blockInterface()
     ui->AddButton->setEnabled(false);
     ui->deleteButton->setEnabled(false);
     ui->startButton->setEnabled(false);
+    ui->CountOfBytes->setEnabled(false);
+    ui->sendIntervalMS->setEnabled(false);
 }
 
 void MainWindow::unBlockInterface()
@@ -308,6 +321,8 @@ void MainWindow::unBlockInterface()
     ui->AddButton->setEnabled(true);
     ui->deleteButton->setEnabled(true);
     ui->startButton->setEnabled(true);
+    ui->CountOfBytes->setEnabled(true);
+    ui->sendIntervalMS->setEnabled(true);
     updateStartButtonText();
 }
 
@@ -385,5 +400,49 @@ void MainWindow::on_algorithmBox_currentIndexChanged(int index)
 
 void MainWindow::on_settingsButton_released()
 {
+    settingsForm = new SettingsForm;
+    settingsForm->setWindowTitle("Simulation settings");
+    QIcon icon;
+    icon.addFile(QStringLiteral("../icon1.ico"), QSize(), QIcon::Normal, QIcon::Off);
+    settingsForm->setWindowIcon(icon);
+    settingsForm->setWindowIconText("Simulation");
+    settingsForm->setWindowFlag(Qt::WindowStaysOnTopHint);
+    settingsForm->show();
     std::cout<<"SETTINGS"<<std::endl;
+}
+
+void MainWindow::on_count_of_bytes_editingFinished()
+{
+    std::cout<<"changed"<<std::endl;
+    bool* b = new bool;
+    *b = false;
+    QString text = ui->CountOfBytes->text();
+    int res = text.toInt(b);
+    if (*b && res < 1024)
+    {
+        ui->CountOfBytes->setStyleSheet("QLineEdit { background: rgb(255, 255, 255); selection-background-color: rgb(233, 99, 0); }");
+        Settings::setSendBytesPerInterval(res);
+    }
+    else {
+        ui->CountOfBytes->setStyleSheet("QLineEdit { background: rgb(255, 65, 65); selection-background-color: rgb(233, 99, 0); }");
+        //Settings::
+    }
+}
+
+void MainWindow::on_send_interval_editingFinished()
+{
+    std::cout<<"changed"<<std::endl;
+    bool* b = new bool;
+    *b = false;
+    QString text = ui->sendIntervalMS->text();
+    int res = text.toInt(b);
+    if (*b && res < 100000)
+    {
+        ui->sendIntervalMS->setStyleSheet("QLineEdit { background: rgb(255, 255, 255); selection-background-color: rgb(233, 99, 0); }");
+        Settings::setsendIntervalMS(res);
+    }
+    else {
+        ui->sendIntervalMS->setStyleSheet("QLineEdit { background: rgb(255, 65, 65); selection-background-color: rgb(233, 99, 0); }");
+        //Settings::
+    }
 }

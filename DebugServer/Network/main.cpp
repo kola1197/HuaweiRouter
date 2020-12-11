@@ -6,6 +6,7 @@
 #include <QtCore/QDir>
 #include <cstdlib>
 #include <ctime>
+#include <Utils/Settings.h>
 
 using namespace std;
 
@@ -93,6 +94,12 @@ void randomTest()
     int b = rand() % (10);
     int c = rand() % (10);
     std::cout<<a<<", "<<b<<", "<<c<<std::endl;
+}
+
+void initSettings()
+{
+    Settings::setDebugFirstPortNum(5555);
+    Settings::setConnectionsFirstPortNum(6666);
 }
 
 int main(int argc, char *argv[]) {

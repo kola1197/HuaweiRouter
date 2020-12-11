@@ -9,6 +9,7 @@
 #include <Utils/ColorMode.h>
 #include <QtCore/QThread>
 #include <zconf.h>
+#include <Utils/Settings.h>
 #include "ServerConnection.h"
 #include "Messages.h"
 #include "QObject"
@@ -19,6 +20,9 @@ ServerConnection::ServerConnection(int _port, int _from, int _to, int _id):QObje
     from = _from;
     to = _to;
     id = _id;
+    sendIntervalMS = Settings::getsendIntervalMS();
+    sendBytesPerInterval = Settings::getSendBytesPerInterval();
+
 }
 
 ServerConnection::~ServerConnection() noexcept

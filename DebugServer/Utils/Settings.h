@@ -7,17 +7,46 @@
 class Settings
 
 {
+    static int DebugFirstPortNum;
+    static int ConnectionsFirstPortNum;
+    static float SendBytesPerInterval;
+    static float sendIntervalMS;
 public:
-    static int DebugFirstPortNum()
+    static int getDebugFirstPortNum()
     {
-        return 5555;
+        return DebugFirstPortNum;
     };
-    static int ConnectionsFirstPortNum()
+    static int getConnectionsFirstPortNum()
     {
-        return 6666;
+        return ConnectionsFirstPortNum;
     };
+    static void setDebugFirstPortNum(int i)
+    {
+        DebugFirstPortNum = i;
+    }
+    static void setConnectionsFirstPortNum(int i)
+    {
+        ConnectionsFirstPortNum = i;
+    }
+    static float getSendBytesPerInterval()
+    {
+        return SendBytesPerInterval;
+    }
+    static void setSendBytesPerInterval(float i)
+    {
+        SendBytesPerInterval = i;
+    }
+    static float getsendIntervalMS()
+    {
+        return sendIntervalMS;
+    }
+    static void setsendIntervalMS(float i)
+    {
+        sendIntervalMS = i;
+    }
 
 };
+
 
 
 
