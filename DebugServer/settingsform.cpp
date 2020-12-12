@@ -7,7 +7,7 @@ SettingsForm::SettingsForm(QWidget *parent) :
         , ui(new Ui::SettingsForm)
 {
     ui->setupUi(this);
-    //std::cout<<"SettingsForm"<<std::endl;
+    //sim::sout<<"SettingsForm"<<sim::endl;
 
 }
 

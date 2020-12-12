@@ -3,6 +3,7 @@
 #include "simulation.h"
 #include <unistd.h>
 #include <iostream>
+#include <Utils/sout.h>
 
 Simulation::Simulation()
 {
@@ -17,7 +18,7 @@ Simulation::Simulation(Graph *_graph)
 Simulation::~Simulation()
 {
 /*    if (started){
-        std::cout<<"SIMULATION DESTRUCTION"<<std::endl;
+        sim::sout<<"SIMULATION DESTRUCTION"<<sim::endl;
         for (int i=0;i<serverNodes.size();i++)
         {
             serverNodes[i]->~ServerNode();
@@ -29,7 +30,7 @@ Simulation::~Simulation()
 void Simulation::stop()
 {
     if (started){
-        std::cout<<"SIMULATION STOP"<<std::endl;
+        sim::sout<<"SIMULATION STOP"<<sim::endl;
         for (int i=0;i<serverNodes.size();i++)
         {
             serverNodes[i]->Stop();
@@ -40,7 +41,7 @@ void Simulation::stop()
 
 void Simulation::Start()
 {
-    //std::cout<<"Packet count "<<graph->packets.size()<<std::endl;
+    //sim::sout<<"Packet count "<<graph->packets.size()<<sim::endl;
     started = true;
     debugServer = new DebugServer(Settings::getDebugFirstPortNum(), *graph);
     debugServer->Start();
@@ -54,7 +55,7 @@ void Simulation::Start()
         QSharedPointer<ServerNode> node = QSharedPointer<ServerNode>(new ServerNode(graph->ellipses[i].number,Settings::getDebugFirstPortNum(),*graph));
         serverNodes.push_back(node);
         node->Start();
-        std::cout<<"node "<<graph->ellipses[i].number<<" started"<<std::endl;
+        sim::sout<<"node "<<graph->ellipses[i].number<<" started"<<sim::endl;
     }
 }
 

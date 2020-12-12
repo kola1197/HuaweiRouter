@@ -13,6 +13,7 @@
 #include "QObject"
 #include <cstdlib>
 #include <ctime>
+#include <Utils/sout.h>
 #include "string"
 
 ServerNode::ServerNode(int _serverNum,int _debugSocketAdress, Graph g):QObject()
@@ -57,16 +58,16 @@ void ServerNode::Start()       //on start we connect to debug server
                 messagesStack.push_back(m);
             }
         }
-        //std::cout<<"Node "<<serverNum<<": GOT  "<<counter<<" packets"<<std::endl;
+        //sim::sout<<"Node "<<serverNum<<": GOT  "<<counter<<" packets"<<sim::endl;
 
 
         addDebugConnection();
-        //std::cout<<"Node "<<serverNum<<": awaiting for debug server "<<std::endl;
+        //sim::sout<<"Node "<<serverNum<<": awaiting for debug server "<<sim::endl;
         while (!debugConnection->connected.get())
         {
             usleep(400);
         }
-        //std::cout<<"Node "<<serverNum<<": debugServer active now "<<std::endl;
+        //sim::sout<<"Node "<<serverNum<<": debugServer active now "<<sim::endl;
         DebugMessage d;
         d.type = DebugMessage::CONNECTION_STATUS;
         d.i[0]=serverNum;
@@ -94,7 +95,7 @@ void ServerNode::Start()       //on start we connect to debug server
             }
         }
         bool allServerConnectionsReady = false;
-        //std::cout<<"Node "<<serverNum<<": waiting for our server connections "<<std::endl;
+        //sim::sout<<"Node "<<serverNum<<": waiting for our server connections "<<sim::endl;
 
         while (!allServerConnectionsReady)
         {
@@ -107,7 +108,7 @@ void ServerNode::Start()       //on start we connect to debug server
                 allServerConnectionsReady = b;
             }
         }
-        //std::cout<<"Node "<<serverNum<<": Servers are ready, waiting for clients connections "<<std::endl;
+        //sim::sout<<"Node "<<serverNum<<": Servers are ready, waiting for clients connections "<<sim::endl;
         SystemMessage mm;
         mm.type = SystemMessage::SERVERS_READY;
         mm.i[0] = serverNum;
@@ -117,7 +118,7 @@ void ServerNode::Start()       //on start we connect to debug server
         {
             usleep(1000);
         }
-        //std::cout<<"Node "<<serverNum<<": Starting client connections "<<std::endl;
+        //sim::sout<<"Node "<<serverNum<<": Starting client connections "<<sim::endl;
 
         for (int i =0; i<connections.size();i++)
         {
@@ -154,7 +155,7 @@ void ServerNode::Start()       //on start we connect to debug server
         Color::ColorMode grn(Color::FG_GREEN);
         Color::ColorMode def(Color::FG_DEFAULT);
         Color::ColorMode red(Color::FG_RED);
-        //std::cout<<"Node "<<serverNum<<":"<<grn<<" AWAITING FOR TEST START"<<def<<std::endl;
+        //sim::sout<<"Node "<<serverNum<<":"<<grn<<" AWAITING FOR TEST START"<<def<<sim::endl;
         while (!startTest.get())
         {
             usleep(50);
@@ -165,7 +166,7 @@ void ServerNode::Start()       //on start we connect to debug server
             messagesStack[i].timeOnCreation = ms;
         }
         updatePacketCountForDebugServer();
-        //std::cout<<"Node "<<serverNum<<":"<<grn<<" STARTING WORK"<<def<<std::endl;
+        //sim::sout<<"Node "<<serverNum<<":"<<grn<<" STARTING WORK"<<def<<sim::endl;
         while (!stopNode.get())
         {
             updateEdgesUsage();
@@ -175,16 +176,16 @@ void ServerNode::Start()       //on start we connect to debug server
                 PacketMessage m(messagesStack[0]);
                 messagesStack.erase(messagesStack.begin());
                 int i = selectPacketPath();
-                std::cout<<"Node "<<serverNum<<":"<<grn<<" sending packet with id "<<m.id<<" to "<<connections[i]->to<<def<<std::endl;
+                sim::sout<<"Node "<<serverNum<<":"<<grn<<" sending packet with id "<<m.id<<" to "<<connections[i]->to<<def<<sim::endl;
                 connections[i]->sendMessage(m);
                 updatePacketCountForDebugServer();
             }
             else{
-                //std::cout<<"Node "<<serverNum<<":"<<red<<" I AM EMPTY!!! "<<def<<std::endl;
+                //sim::sout<<"Node "<<serverNum<<":"<<red<<" I AM EMPTY!!! "<<def<<sim::endl;
                 usleep(10000);
             }
         }
-        std::cout<<"NODE "<<serverNum<<" STOPPED"<<std::endl;
+        sim::sout<<"NODE "<<serverNum<<" STOPPED"<<sim::endl;
     });
     thr.detach();
 }
@@ -263,7 +264,7 @@ void ServerNode::addDebugConnection()
     //debugConnection = QSharedPointer<ServerConnection>(_debugConnection);
     //ServerConnection debugConnection(debugSocketAdress + serverNum, serverNum,-1);
     debugConnection = new ServerConnection(debugSocketAdress + serverNum, serverNum,-1);
-    //std::cout<<"port to recive = "<<debugSocketAdress<<" + "<<serverNum<<std::endl;
+    //sim::sout<<"port to recive = "<<debugSocketAdress<<" + "<<serverNum<<sim::endl;
 
     //connections.push_back(debugConnection);
     debugConnection->connectTo();
@@ -290,18 +291,18 @@ void ServerNode::addConnection(int to)
     }
     if (port != -1)
     {
-        //std::cout<<"debugSocketAdress = "<<debugSocketAdress<<std::endl;
+        //sim::sout<<"debugSocketAdress = "<<debugSocketAdress<<sim::endl;
 
         ServerConnection* newConnection = new ServerConnection(port, serverNum, to, edgeID);
 
         connections.push_back(newConnection);
         if (serverNum > to)
         {
-            //std::cout<<"Node "<<serverNum<<" creating connection to "<<to<<" on port"<<port<<std::endl;
+            //sim::sout<<"Node "<<serverNum<<" creating connection to "<<to<<" on port"<<port<<sim::endl;
             //newConnection->connectTo();
          }
         else{
-            std::cout<<"Node "<<serverNum<<" trying to connect "<<to<<" on port"<<port<<std::endl;
+            sim::sout<<"Node "<<serverNum<<" trying to connect "<<to<<" on port"<<port<<sim::endl;
             newConnection->awaitConnection();
         }
         connect(newConnection, SIGNAL(transmit_to_node(PacketMessage)),this,SLOT(get_message(PacketMessage)) );
@@ -309,14 +310,14 @@ void ServerNode::addConnection(int to)
     else {
         Color::ColorMode red(Color::FG_RED);
         Color::ColorMode def(Color::FG_DEFAULT);
-        std::cout<<red<<"CONNECTION FAIL "<<serverNum<<" <---> "<<to<<def<<std::endl;
+        sim::sout<<red<<"CONNECTION FAIL "<<serverNum<<" <---> "<<to<<def<<sim::endl;
     }
 }
 
 //TODO: more templates for the god of templates
 void ServerNode::get_message(PacketMessage m)
 {
-    //std::cout<<"Node"<< serverNum<<", message with id "<<m.id<<" got CHECKSUM = "<<m.checkSum<<std::endl;
+    //sim::sout<<"Node"<< serverNum<<", message with id "<<m.id<<" got CHECKSUM = "<<m.checkSum<<sim::endl;
     if (m.checkSum!=239239239)
     {
         //qFatal("Error on Node %s !!! Packet with id %s got wrong checksum ( %s )",serverNum,m.id, m.checkSum);
@@ -351,12 +352,12 @@ void ServerNode::get_message(SystemMessage m)
     }
     if (m.type == SystemMessage::SERVERS_READY)
     {
-        std::cout<<"Node "<<serverNum<<" got SERVERS_READY status "<<m.i[0]<<std::endl;
+        sim::sout<<"Node "<<serverNum<<" got SERVERS_READY status "<<m.i[0]<<sim::endl;
         allClientsReady.set(m.i[0]==1);
     }
     if (m.type == SystemMessage::DEBUG_SERVER_READY)
     {
-        std::cout<<"Node "<<serverNum<<" got DEBUG_SERVER_READY status "<<m.i[0]<<std::endl;
+        sim::sout<<"Node "<<serverNum<<" got DEBUG_SERVER_READY status "<<m.i[0]<<sim::endl;
         debugServerReady.set(m.i[0]==1);
     }
 }

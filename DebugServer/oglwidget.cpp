@@ -4,6 +4,7 @@
 #include <QtOpenGL/QtOpenGL>
 #include <GL/glu.h>
 #include <GL/gl.h>
+#include <Utils/sout.h>
 #include "TextureImage.h"
 
 OGLWidget::OGLWidget(QWidget *parent)
@@ -262,7 +263,7 @@ void OGLWidget::mousePressEvent(QMouseEvent *event)
 {
     if (!screenLocked && event->button() == Qt::LeftButton)
     {
-        std::cout<<event->x()<<"::"<<event->y()<<std::endl;
+        sim::sout<<event->x()<<"::"<<event->y()<<sim::endl;
         float x = event->x();
         float y = event->y();
         Ellips *el = graph.getEllipseByPoint(x,y);
@@ -273,15 +274,15 @@ void OGLWidget::mousePressEvent(QMouseEvent *event)
             q+="y  : "+QString::number(el->y)+"\n";
             q+="num: "+QString::number(el->number)+"\n";
             emit transmit_info(q);
-            std::cout<<"ellips number "<<el->number<<std::endl;
+            sim::sout<<"ellips number "<<el->number<<sim::endl;
             el->colorStatus=1;
             //el->number=30;
-            //std::cout<<el->x<<"*"<<el->y<<std::endl;
-            //std::cout<<"ellips number now "<<el->number<<std::endl;
+            //sim::sout<<el->x<<"*"<<el->y<<sim::endl;
+            //sim::sout<<"ellips number now "<<el->number<<sim::endl;
             graph.active = el;
         }
         else{
-            std::cout<<"FREE AREA"<<std::endl;
+            sim::sout<<"FREE AREA"<<sim::endl;
         }
     }
     if (event->button() == Qt::RightButton)
@@ -323,7 +324,7 @@ void OGLWidget::mouseReleaseEvent(QMouseEvent *event)
     if (!screenLocked)
     {
         deactivate();
-        //std::cout<<"release"<<std::endl;
+        //sim::sout<<"release"<<sim::endl;
         //graph.addEdge(-1);
     }
 }
@@ -346,7 +347,7 @@ void OGLWidget::mouseDoubleClickEvent(QMouseEvent *event)
             el->colorStatus = 1;
             if (graph.addEdge(el->number))
             {
-                std::cout<<"TRUE"<<::std::endl;
+                sim::sout<<"TRUE"<<::sim::endl;
                 deactivateNewEdge();
             }
             //graph.active = el;

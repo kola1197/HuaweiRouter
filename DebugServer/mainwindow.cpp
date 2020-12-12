@@ -8,6 +8,7 @@
 #include <qtextedit.h>
 #include <zconf.h>
 #include <Utils/Settings.h>
+#include <Utils/sout.h>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -251,7 +252,7 @@ void MainWindow::on_loadButton_released()
 
 void MainWindow::setEllipseInfo(QString q)
 {
-    std::cout<<"info label"<<std::endl;
+    sim::sout<<"info label"<<sim::endl;
     ui->infoLabel->setText(q);
 }
 
@@ -263,7 +264,7 @@ void MainWindow::on_deleteButton_released()
 
 void MainWindow::on_startButton_released()   // lock the screen and start simulation
 {
-    std::cout<<"START PRESS"<<std::endl;
+    sim::sout<<"START PRESS"<<sim::endl;
     if (!simulationIsActive){
         simulationIsActive = true;
         blockInterface();
@@ -278,7 +279,7 @@ void MainWindow::on_startButton_released()   // lock the screen and start simula
         simulation->stop();
         usleep(100000);
         ui->openGLWidget->graph = Graph(savedGraph);
-        std::cout<<ui->openGLWidget->graph.edges.size()<<std::endl;
+        sim::sout<<ui->openGLWidget->graph.edges.size()<<sim::endl;
         updateStartButtonText();
         updateTable();
         repaintOGLWidget();
@@ -341,7 +342,7 @@ void MainWindow::updateTable()
 {
     checkSimulationStatus();
     createUI();
-    //std::cout<<"updating table"<<std::endl;
+    //sim::sout<<"updating table"<<sim::endl;
 }
 
 void MainWindow::checkSimulationStatus()
@@ -350,7 +351,7 @@ void MainWindow::checkSimulationStatus()
     float time = 0;
     for (int i=0;i< ui->openGLWidget->graph.packets.size();i++)
     {
-        //std::cout<<"Packet "<<i<<" delivering  status = "<<ui->openGLWidget->graph.packets[i].delivered<<std::endl;
+        //sim::sout<<"Packet "<<i<<" delivering  status = "<<ui->openGLWidget->graph.packets[i].delivered<<sim::endl;
         //allPacketsDelivered *= ui->openGLWidget->graph.packets[i].delivered;
         allPacketsDelivered = allPacketsDelivered ? ui->openGLWidget->graph.packets[i].delivered : false;
         time += ui->openGLWidget->graph.packets[i].timeOnCreation.count();
@@ -395,7 +396,7 @@ void MainWindow::on_algorithmBox_currentIndexChanged(int index)
 {
     ui->openGLWidget->graph.selectedAlgorithm = static_cast<Algorithms>(index);
     std::string  res = ui->openGLWidget->graph.selectedAlgorithm == Algorithms::DRILL? "Drill": "notDrill";
-    std::cout<<ui->openGLWidget->graph.selectedAlgorithm<<"   "<<res<<std::endl;
+    sim::sout<<ui->openGLWidget->graph.selectedAlgorithm<<"   "<<res<<sim::endl;
 }
 
 void MainWindow::on_settingsButton_released()
@@ -408,12 +409,12 @@ void MainWindow::on_settingsButton_released()
     settingsForm->setWindowIconText("Simulation");
     settingsForm->setWindowFlag(Qt::WindowStaysOnTopHint);
     settingsForm->show();
-    std::cout<<"SETTINGS"<<std::endl;
+    sim::sout<<"SETTINGS"<<sim::endl;
 }
 
 void MainWindow::on_count_of_bytes_editingFinished()
 {
-    std::cout<<"changed"<<std::endl;
+    sim::sout<<"changed"<<sim::endl;
     bool* b = new bool;
     *b = false;
     QString text = ui->CountOfBytes->text();
@@ -431,7 +432,7 @@ void MainWindow::on_count_of_bytes_editingFinished()
 
 void MainWindow::on_send_interval_editingFinished()
 {
-    std::cout<<"changed"<<std::endl;
+    sim::sout<<"changed"<<sim::endl;
     bool* b = new bool;
     *b = false;
     QString text = ui->sendIntervalMS->text();

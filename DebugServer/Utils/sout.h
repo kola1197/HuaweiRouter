@@ -12,6 +12,9 @@
 #include <sstream>
 #include "string.h"
 #include "AsyncVar.h"
+#include <Utils/sout.h>
+
+#define MUTEX_MODE
 
 class Sout
 {
@@ -34,7 +37,9 @@ public:
     {
         if ( threadNum != std::this_thread::get_id() )
         {
+#ifdef MUTEX_MODE
             Sout::mut.lock();
+#endif
             threadNum = std::this_thread::get_id();
         }
         bool endOfLine;
@@ -52,7 +57,9 @@ public:
         else {
             std::cout<< t ;
             threadNum = std::thread::id();
+#ifdef MUTEX_MODE
             mut.unlock();
+#endif
             return *this;
         }
     }

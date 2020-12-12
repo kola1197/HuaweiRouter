@@ -94,7 +94,7 @@ void randomTest()
     int a = rand() % (10);
     int b = rand() % (10);
     int c = rand() % (10);
-    std::cout<<a<<", "<<b<<", "<<c<<std::endl;
+    sim::sout<<a<<", "<<b<<", "<<c<<sim::endl;
 }
 
 void initSettings()
@@ -126,8 +126,8 @@ void soutTest()
 }
 
 int main(int argc, char *argv[]) {
-    soutTest();
-    /*QApplication a(argc, argv);
+    //soutTest();
+    QApplication a(argc, argv);
     a.setApplicationName("Simulation");
     MainWindow w;
     w.setWindowTitle("Simulation");
@@ -136,7 +136,7 @@ int main(int argc, char *argv[]) {
     w.setWindowIcon(icon);
     w.setWindowIconText("Simulation");
     w.show();
-    return a.exec();*/
+    return a.exec();
 
     //using namespace std;
     //TestNetworkDebug();
