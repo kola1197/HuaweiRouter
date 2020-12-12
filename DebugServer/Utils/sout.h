@@ -29,13 +29,6 @@ public:
     std::string endL;
     std::thread::id threadNum;
 
-
-    //explicit operator bool() const
-    //{
-    //    return valid_state;
-    // }
-
-
     template <typename T>
     Sout& operator<<(T&& t) // provide a generic operator<<
     {

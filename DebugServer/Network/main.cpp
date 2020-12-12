@@ -126,7 +126,7 @@ void soutTest()
 }
 
 int main(int argc, char *argv[]) {
-
+    soutTest();
     /*QApplication a(argc, argv);
     a.setApplicationName("Simulation");
     MainWindow w;

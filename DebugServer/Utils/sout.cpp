@@ -3,10 +3,7 @@
 //
 
 #include "sout.h"
-#include <iostream>
 #include <mutex>
-#include <thread>
-#include "string.h"
 
 std::mutex Sout::mut;
 std::string sim::endl = "\n";
