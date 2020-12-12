@@ -15,6 +15,7 @@
 #include <Utils/sout.h>
 
 #define MUTEX_MODE
+#define WRITE_CONSOLE_LOG
 
 class Sout
 {
@@ -39,25 +40,22 @@ public:
         {
 #ifdef MUTEX_MODE
             Sout::mut.lock();
-#endif
             threadNum = std::this_thread::get_id();
+#endif
         }
         bool endOfLine;
-        std::string name ( typeid(T).name());
-            std::stringstream ss;
-            ss<<t;
-            std::string sData = ss.str();
-            endOfLine = sData == endL;
-        if (!endOfLine)
-            //if (strcmp(hData, ttData) != 0)
+        std::stringstream ss;
+        ss<<t;
+        std::string sData = ss.str();
+        endOfLine = sData == endL;
+        std::cout<< t;
+        if (endOfLine)
         {
-            std::cout<< t;
-            return *this;
-        }
-        else {
+#ifdef WRITE_CONSOLE_LOG
             std::cout<< t ;
-            threadNum = std::thread::id();
+#endif
 #ifdef MUTEX_MODE
+            threadNum = std::thread::id();
             mut.unlock();
 #endif
             return *this;
