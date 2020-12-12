@@ -13,6 +13,7 @@
 #include "QObject"
 #include <cstdlib>
 #include <ctime>
+#include "string"
 
 ServerNode::ServerNode(int _serverNum,int _debugSocketAdress, Graph g):QObject()
 {

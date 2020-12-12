@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <Utils/Settings.h>
+#include <Utils/sout.h>
 
 using namespace std;
 
@@ -102,9 +103,31 @@ void initSettings()
     Settings::setConnectionsFirstPortNum(6666);
 }
 
+void soutTest()
+{
+    std::thread thr([]() {
+        for (int i=0;i<10;i++) {
+            sim::sout  << "test1 " <<1<<sim::endl;
+            usleep(100);
+        }
+    });
+    std::thread thr1([]() {
+        for (int i=0;i<10;i++) {
+            sim::sout  << "test2 " <<2<<sim::endl;
+            usleep(100);
+        }
+    });
+    thr.detach();
+    thr1.detach();
+    while (true)
+    {
+        usleep(10000);
+    }
+}
+
 int main(int argc, char *argv[]) {
 
-    QApplication a(argc, argv);
+    /*QApplication a(argc, argv);
     a.setApplicationName("Simulation");
     MainWindow w;
     w.setWindowTitle("Simulation");
@@ -113,7 +136,7 @@ int main(int argc, char *argv[]) {
     w.setWindowIcon(icon);
     w.setWindowIconText("Simulation");
     w.show();
-    return a.exec();
+    return a.exec();*/
 
     //using namespace std;
     //TestNetworkDebug();
