@@ -36,9 +36,9 @@ public:
     template <typename T>
     Sout& operator<<(T&& t) // provide a generic operator<<
     {
+#ifdef MUTEX_MODE
         if ( threadNum != std::this_thread::get_id() )
         {
-#ifdef MUTEX_MODE
             Sout::mut.lock();
             threadNum = std::this_thread::get_id();
 #endif
@@ -48,18 +48,17 @@ public:
         ss<<t;
         std::string sData = ss.str();
         endOfLine = sData == endL;
+#ifdef WRITE_CONSOLE_LOG
         std::cout<< t;
+#endif
         if (endOfLine)
         {
-#ifdef WRITE_CONSOLE_LOG
-            std::cout<< t ;
-#endif
 #ifdef MUTEX_MODE
             threadNum = std::thread::id();
             mut.unlock();
 #endif
-            return *this;
         }
+        return *this;
     }
 };
 
