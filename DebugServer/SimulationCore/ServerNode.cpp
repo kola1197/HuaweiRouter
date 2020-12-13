@@ -33,14 +33,29 @@ ServerNode::~ServerNode() noexcept
     debugConnection->~ServerConnection();*/
 }
 
+void ServerNode::StopToConnections()
+{
+    stopNode.set(true);
+    //usleep(15000);
+    for (int i=0; i < connections.size();i++)
+    {
+        if (connections[i]->connectionType == ConnectionType::TO){
+            connections[i]->stop();
+        }
+    }
+    usleep(15000);
+    //debugConnection->stop();
+}
+
 void ServerNode::Stop()
 {
     stopNode.set(true);
     //usleep(15000);
     for (int i=0; i < connections.size();i++)
     {
-        connections[i]->stop();
-    }
+        if (connections[i]->connectionType == ConnectionType::FROM){
+            connections[i]->stop();
+        }    }
     usleep(15000);
     debugConnection->stop();
 }

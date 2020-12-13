@@ -12,9 +12,14 @@
 #include <QtCore/QTimer>
 #include <QtCore/QThread>
 
+enum ConnectionType{
+    TO, FROM
+};
+
 class ServerConnection : public QObject{
     Q_OBJECT
 public:
+    ConnectionType connectionType;
     ServerConnection(int _port, int _from, int _to, int _id = -1);
     ~ServerConnection();
     void connectTo();

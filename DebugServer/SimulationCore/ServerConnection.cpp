@@ -35,9 +35,9 @@ ServerConnection::~ServerConnection() noexcept
 
 void ServerConnection::stop()
 {
-    sim::sout<<"GOT STOP COMMAND ( "<<from<<" ==> "<<to<<" )"<<sim::endl;
+    //sim::sout<<"GOT STOP COMMAND ( "<<from<<" ==> "<<to<<" )"<<sim::endl;
     needToStop.set(true);
-    sim::sout<<"connection ( "<<from<<" ==> "<<to<<" ) needToStop = "<<needToStop.get()<<sim::endl;
+    //sim::sout<<"connection ( "<<from<<" ==> "<<to<<" ) needToStop = "<<needToStop.get()<<sim::endl;
     connected.set(true); // for cases, when we has not connected yet
     if (isServer){
         while (!mayCloseSocket.get())
@@ -52,55 +52,68 @@ void ServerConnection::stop()
 
 void ServerConnection::connectTo()
 {
-started.set(true);
-if (!connected.get())
-{
-thr = std::thread([this]() {
-    while (!connected.get())
+    connectionType = ConnectionType::TO;
+    started.set(true);
+    if (!connected.get())
     {
-        sim::sout<<"trying to connect "<<from<<" => "<<to<<". Port: "<<port<<sim::endl;
-        struct sockaddr_in serv_addr;
-        if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-            sim::sout << "\n Socket creation error \n" << sim::endl;
-        }
-        serv_addr.sin_family = AF_INET;
-        serv_addr.sin_port = htons(port);
-        // Convert IPv4 and IPv6 addresses from text to binary form
-        if (inet_pton(AF_INET, ip.c_str(), &serv_addr.sin_addr) <= 0) {
-            sim::sout << "\nInvalid address/ Address not supported \n" << sim::endl;
-        }
-        if (::connect(sock, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
-            printf("\nConnection Failed \n");
-        } else{
-            connected.set(true);
-            //sim::sout<<"connection "<<from<<" => "<<to<<" status is now: CONNECTED"<<sim::endl;
-        }
-    }
-    //connect(timer, SIGNAL(timeout()), this, SLOT(sendMessagesFromBufferTick()));
-    //timer->start();
-    thr1 = std::thread([this]()
-    {
-        while (!needToStop.get()){
-            sendMessagesFromBufferTick();
-            usleep(sendIntervalMS);
-        }
-    });
-    if (!oldway){
-        thr1.detach();
-    }
-    while (!needToStop.get())
-    {
-        getMessage();
-        //sim::sout<<"ALIVE"<<sim::endl;
-    }
-    //sendMutex.lock();
-    //close(server_fd);
-    //shutdown(sock, 2);
-    //close(sock);
-    mayCloseSocket.set(true);
-    Color::ColorMode grn(Color::FG_GREEN);
-    Color::ColorMode def(Color::FG_DEFAULT);
-    sim::sout<<"Node "<<from<<grn<<" CONNECTION TO "<<def<<to<<grn<<" SUCCESSFULLY CLOSED (To)"<<def<<sim::endl;
+        thr = std::thread([this]() {
+            while (!connected.get())
+            {
+                sim::sout<<"trying to connect "<<from<<" => "<<to<<". Port: "<<port<<sim::endl;
+                struct sockaddr_in serv_addr;
+                if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+                    sim::sout << "\n Socket creation error \n" << sim::endl;
+                }
+                struct timeval tv;
+                tv.tv_sec = 1;
+                tv.tv_usec = 0;
+                //if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT | SO_RCVTIMEO, &opt, sizeof(opt))) {
+                if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO , (const char *)&tv, sizeof(tv))) {
+                    perror("setsockopt");
+                    exit(EXIT_FAILURE);
+                }
+                serv_addr.sin_family = AF_INET;
+                serv_addr.sin_port = htons(port);
+                // Convert IPv4 and IPv6 addresses from text to binary form
+                if (inet_pton(AF_INET, ip.c_str(), &serv_addr.sin_addr) <= 0) {
+                    sim::sout << "\nInvalid address/ Address not supported \n" << sim::endl;
+                }
+                if (::connect(sock, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
+                    printf("\nConnection Failed \n");
+                } else{
+                    connected.set(true);
+                    //sim::sout<<"connection "<<from<<" => "<<to<<" status is now: CONNECTED"<<sim::endl;
+                }
+            }
+            //connect(timer, SIGNAL(timeout()), this, SLOT(sendMessagesFromBufferTick()));
+            //timer->start();
+            thr1 = std::thread([this]()
+                               {
+                                   while (!needToStop.get()){
+                                       sendMessagesFromBufferTick();
+                                       usleep(sendIntervalMS);
+                                   }
+                                   Color::ColorMode grn(Color::FG_GREEN);
+                                   Color::ColorMode def(Color::FG_DEFAULT);
+                                   //sim::sout<<"Node "<<from<<grn<<" STATISTICS THREAD "<<def<<to<<grn<<" SUCCESSFULLY CLOSED (To)"<<def<<sim::endl;
+
+                               });
+            if (!oldway){
+                thr1.detach();
+            }
+            while (!needToStop.get())
+            {
+                getMessage();
+                //sim::sout<<"ALIVE"<<sim::endl;
+            }
+            //sendMutex.lock();
+            //close(server_fd);
+            //shutdown(sock, 2);
+            //close(sock);
+            mayCloseSocket.set(true);
+            Color::ColorMode grn(Color::FG_GREEN);
+            Color::ColorMode def(Color::FG_DEFAULT);
+            sim::sout<<"Node "<<from<<grn<<" CONNECTION TO "<<def<<to<<grn<<" SUCCESSFULLY CLOSED (To)"<<def<<sim::endl;
         });
         thr.detach();
     }
@@ -224,6 +237,7 @@ void ServerConnection::getTestMessage()
 
 void ServerConnection::awaitConnection()
 {
+    connectionType = ConnectionType::FROM;
     isServer = true;
     started.set(true);
     if (!connected.get())

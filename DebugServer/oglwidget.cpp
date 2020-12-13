@@ -269,12 +269,12 @@ void OGLWidget::mousePressEvent(QMouseEvent *event)
         Ellips *el = graph.getEllipseByPoint(x,y);
         if (el!=NULL)
         {
-            QString q="";
-            q+="x  : "+QString::number(el->x)+"\n";
-            q+="y  : "+QString::number(el->y)+"\n";
-            q+="num: "+QString::number(el->number)+"\n";
-            emit transmit_info(q);
-            sim::sout<<"ellips number "<<el->number<<sim::endl;
+            //QString q="";
+            //q+="x  : "+QString::number(el->x)+"\n";
+            //q+="y  : "+QString::number(el->y)+"\n";
+            //q+="num: "+QString::number(el->number)+"\n";
+            //emit transmit_info(q);
+            //sim::sout<<"ellips number "<<el->number<<sim::endl;
             el->colorStatus=1;
             //el->number=30;
             //sim::sout<<el->x<<"*"<<el->y<<sim::endl;

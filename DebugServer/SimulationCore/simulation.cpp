@@ -33,6 +33,11 @@ void Simulation::stop()
         sim::sout<<"SIMULATION STOP"<<sim::endl;
         for (int i=0;i<serverNodes.size();i++)
         {
+            serverNodes[i]->StopToConnections();
+        }
+        usleep(10000);
+        for (int i=0;i<serverNodes.size();i++)
+        {
             serverNodes[i]->Stop();
         }
         debugServer->Stop();

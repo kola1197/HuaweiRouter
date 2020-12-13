@@ -274,6 +274,7 @@ void MainWindow::on_startButton_released()   // lock the screen and start simula
         connectSlots();
     }
     else {
+        ui->startButton->setText("Please wait");
         disconnectSlots();
         simulationIsActive = false;
         simulation->stop();
@@ -401,7 +402,7 @@ void MainWindow::on_algorithmBox_currentIndexChanged(int index)
 
 void MainWindow::on_settingsButton_released()
 {
-    settingsForm = new SettingsForm;
+    /*settingsForm = new SettingsForm;
     settingsForm->setWindowTitle("Simulation settings");
     QIcon icon;
     icon.addFile(QStringLiteral("../icon1.ico"), QSize(), QIcon::Normal, QIcon::Off);
@@ -409,12 +410,12 @@ void MainWindow::on_settingsButton_released()
     settingsForm->setWindowIconText("Simulation");
     settingsForm->setWindowFlag(Qt::WindowStaysOnTopHint);
     settingsForm->show();
-    sim::sout<<"SETTINGS"<<sim::endl;
+    sim::sout<<"SETTINGS"<<sim::endl;*/
 }
 
 void MainWindow::on_count_of_bytes_editingFinished()
 {
-    sim::sout<<"changed"<<sim::endl;
+    //sim::sout<<"changed"<<sim::endl;
     bool* b = new bool;
     *b = false;
     QString text = ui->CountOfBytes->text();
@@ -432,7 +433,7 @@ void MainWindow::on_count_of_bytes_editingFinished()
 
 void MainWindow::on_send_interval_editingFinished()
 {
-    sim::sout<<"changed"<<sim::endl;
+    //sim::sout<<"changed"<<sim::endl;
     bool* b = new bool;
     *b = false;
     QString text = ui->sendIntervalMS->text();

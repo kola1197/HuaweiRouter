@@ -25,6 +25,7 @@ public:
     MutexBool stopNode{false};
     MutexBool allClientsReady{false};
     void Stop();
+    void StopToConnections();
 public slots:
     void get_message(PacketMessage m);
     void get_message(SystemMessage m);
