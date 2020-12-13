@@ -16,6 +16,7 @@
 #include <Utils/sout.h>
 
 
+AsyncVar<int> ServerConnection::connectionsCount{0};
 ServerConnection::ServerConnection(int _port, int _from, int _to, int _id):QObject()
 {
     port = _port;
@@ -50,10 +51,18 @@ void ServerConnection::stop()
     }
 }
 
+void ServerConnection::updateCount(int i)
+{
+    int c = connectionsCount.get();
+    c += i;
+    connectionsCount.set(c);
+}
+
 void ServerConnection::connectTo()
 {
     connectionType = ConnectionType::TO;
     started.set(true);
+    updateCount(1);
     if (!connected.get())
     {
         thr = std::thread([this]() {
@@ -113,6 +122,7 @@ void ServerConnection::connectTo()
             mayCloseSocket.set(true);
             Color::ColorMode grn(Color::FG_GREEN);
             Color::ColorMode def(Color::FG_DEFAULT);
+            updateCount(-1);
             sim::sout<<"Node "<<from<<grn<<" CONNECTION TO "<<def<<to<<grn<<" SUCCESSFULLY CLOSED (To)"<<def<<sim::endl;
         });
         thr.detach();
@@ -238,6 +248,7 @@ void ServerConnection::getTestMessage()
 void ServerConnection::awaitConnection()
 {
     connectionType = ConnectionType::FROM;
+    updateCount(1);
     isServer = true;
     started.set(true);
     if (!connected.get())
@@ -315,6 +326,7 @@ void ServerConnection::awaitConnection()
             //shutdown(sock, 2);
             //close(sock);
             mayCloseSocket.set(true);
+            updateCount(-1);
             sim::sout<<"Node "<<from<<grn<<" CONNECTION TO "<<def<<to<<grn<<" SUCCESSFULLY CLOSED (FROm)"<<def<<sim::endl;
         });
         thr.detach();

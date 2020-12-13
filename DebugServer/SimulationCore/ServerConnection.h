@@ -30,8 +30,7 @@ public:
     void sendMessage(TestMessage m);
     void sendMessage(DebugMessage m);
     void sendMessage(PacketMessage m);
-
-
+    static AsyncVar<int> connectionsCount;
     void getMessage();
     void getPingMessage();
     void getTestMessage();
@@ -78,7 +77,7 @@ private:
     bool isServer = false;
     std::thread thr1;
     std::thread thr;
-
+    void updateCount(int i);
 };
 
 

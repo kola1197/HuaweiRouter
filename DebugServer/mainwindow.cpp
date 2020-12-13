@@ -264,7 +264,7 @@ void MainWindow::on_deleteButton_released()
 
 void MainWindow::on_startButton_released()   // lock the screen and start simulation
 {
-    sim::sout<<"START PRESS"<<sim::endl;
+    //sim::sout<<"START PRESS"<<sim::endl;
     if (!simulationIsActive){
         simulationIsActive = true;
         blockInterface();
