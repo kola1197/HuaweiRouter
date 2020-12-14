@@ -17,6 +17,7 @@
 
 
 AsyncVar<int> ServerConnection::connectionsCount{0};
+AsyncVar<int> ServerConnection::connectionsCountTo{0};
 ServerConnection::ServerConnection(int _port, int _from, int _to, int _id):QObject()
 {
     port = _port;
@@ -58,11 +59,22 @@ void ServerConnection::updateCount(int i)
     connectionsCount.set(c);
 }
 
+void ServerConnection::updateCountTo(int i)
+{
+    int c = connectionsCountTo.get();
+    c += i;
+    connectionsCountTo.set(c);
+}
+
 void ServerConnection::connectTo()
 {
     connectionType = ConnectionType::TO;
     started.set(true);
     updateCount(1);
+    if (to!=-1 && from != -1)
+    {
+        updateCountTo(1);
+    }
     if (!connected.get())
     {
         thr = std::thread([this]() {
@@ -123,7 +135,10 @@ void ServerConnection::connectTo()
             Color::ColorMode grn(Color::FG_GREEN);
             Color::ColorMode def(Color::FG_DEFAULT);
             updateCount(-1);
-            sim::sout<<"Node "<<from<<grn<<" CONNECTION TO "<<def<<to<<grn<<" SUCCESSFULLY CLOSED (To)"<<def<<sim::endl;
+            if (to !=-1 && from != -1)
+            {
+                updateCountTo(-1);
+            }            sim::sout<<"Node "<<from<<grn<<" CONNECTION TO "<<def<<to<<grn<<" SUCCESSFULLY CLOSED (To)"<<def<<sim::endl;
         });
         thr.detach();
     }

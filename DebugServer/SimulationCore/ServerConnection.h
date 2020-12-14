@@ -31,6 +31,7 @@ public:
     void sendMessage(DebugMessage m);
     void sendMessage(PacketMessage m);
     static AsyncVar<int> connectionsCount;
+    static AsyncVar<int> connectionsCountTo;
     void getMessage();
     void getPingMessage();
     void getTestMessage();
@@ -78,6 +79,7 @@ private:
     std::thread thr1;
     std::thread thr;
     void updateCount(int i);
+    void updateCountTo(int i);
 };
 
 

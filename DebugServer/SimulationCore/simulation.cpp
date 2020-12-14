@@ -5,6 +5,7 @@
 #include <iostream>
 #include <Utils/sout.h>
 #include <QMessageBox>
+#include <Utils/ColorMode.h>
 
 Simulation::Simulation()
 {
@@ -36,7 +37,20 @@ void Simulation::stop()
         {
             serverNodes[i]->StopToConnections();
         }
-        usleep(100000);
+        int counter = 0;
+        while (counter <1000 && ServerConnection::connectionsCountTo.get() != 0)
+        {
+            counter++;
+            sim::sout<<"turning off "<<counter<<"%"<<sim::endl;
+            usleep(20000);
+        }
+        Color::ColorMode red(Color::FG_RED);
+        Color::ColorMode def(Color::FG_DEFAULT);
+        if (ServerConnection::connectionsCountTo.get()!=0)
+        {
+            sim::sout<<red<<"ERROR!!! "<<def<<ServerConnection::connectionsCountTo.get()<<red<<" threads alive"<<def<<sim::endl;
+        }
+        //usleep(100000);
         for (int i=0;i<serverNodes.size();i++)
         {
             serverNodes[i]->Stop();
