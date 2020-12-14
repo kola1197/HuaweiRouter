@@ -3,6 +3,12 @@
 #include <Network/node.h>
 #include <Network/network.h>
 #include <QApplication>
+#include <QtCore/QDir>
+#include <cstdlib>
+#include <ctime>
+#include <Utils/Settings.h>
+#include <Utils/sout.h>
+
 using namespace std;
 
 static void setLeftToSendRight(Channel& left, Channel& right) {
@@ -82,10 +88,53 @@ void testMultiThreading(int sendingThreadsAmount) {
 //vector<pair<int,int>> adjList = { {0, 1}, {0, 2} }; //last clock was like 7 000 000
 //vector<pair<int,int>> adjList = { {0, 1} }; //last clock was like 3 500 000 //oriented was 2 000 000, btw difs are 2 900 000 1 500 000
 
+void randomTest()
+{
+    srand(time(NULL));
+    int a = rand() % (10);
+    int b = rand() % (10);
+    int c = rand() % (10);
+    sim::sout<<a<<", "<<b<<", "<<c<<sim::endl;
+}
+
+void initSettings()
+{
+    Settings::setDebugFirstPortNum(5555);
+    Settings::setConnectionsFirstPortNum(6666);
+}
+
+void soutTest()
+{
+    std::thread thr([]() {
+        for (int i=0;i<10;i++) {
+            sim::sout  << "test1 " <<1<<sim::endl;
+            usleep(100);
+        }
+    });
+    std::thread thr1([]() {
+        for (int i=0;i<10;i++) {
+            sim::sout  << "test2 " <<2<<sim::endl;
+            usleep(100);
+        }
+    });
+    thr.detach();
+    thr1.detach();
+    while (true)
+    {
+        usleep(10000);
+    }
+}
 
 int main(int argc, char *argv[]) {
+    //soutTest();
     QApplication a(argc, argv);
+    a.setApplicationName("Simulation");
     MainWindow w;
+    w.setWindowTitle("Simulation");
+    QIcon icon;
+    icon.addFile(QStringLiteral("../icon1.ico"), QSize(), QIcon::Normal, QIcon::Off);
+    w.setWindowIcon(icon);
+    w.setWindowIconText("Simulation");
     w.show();
     return a.exec();
 
@@ -93,3 +142,4 @@ int main(int argc, char *argv[]) {
     //TestNetworkDebug();
     //testMultiThreading(4);
 }
+

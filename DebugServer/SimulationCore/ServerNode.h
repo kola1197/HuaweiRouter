@@ -14,15 +14,18 @@ class ServerNode :public QObject{
 Q_OBJECT
 public:
     ServerNode(int serverNum,int debugSocketAdress, Graph g);
+    ~ServerNode();
     void Start();
     //std::vector<std::shared_ptr<ServerConnection>> connections;
     std::vector<ServerConnection*> connections;
     ServerConnection* debugConnection;
     std::vector<PacketMessage> messagesStack;
+    MutexBool debugServerReady {false};
     MutexBool startTest{false};
     MutexBool stopNode{false};
     MutexBool allClientsReady{false};
-
+    void Stop();
+    void StopToConnections();
 public slots:
     void get_message(PacketMessage m);
     void get_message(SystemMessage m);
@@ -35,7 +38,12 @@ private:
     void addDebugConnection();
     std::chrono::milliseconds timeNow();
     void updatePacketCountForDebugServer();
+    int maxPacketsCount = 0;
+    void updateEdgesUsage();
 
+    int randomSelectionAlgorithm();
+    int drillSelectionAlgorithm();
+    int selectPacketPath();
 };
 
 

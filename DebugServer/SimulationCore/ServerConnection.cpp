@@ -7,47 +7,144 @@
 #include <arpa/inet.h>
 #include <thread>
 #include <Utils/ColorMode.h>
+#include <QtCore/QThread>
+#include <zconf.h>
+#include <Utils/Settings.h>
 #include "ServerConnection.h"
 #include "Messages.h"
 #include "QObject"
+#include <Utils/sout.h>
 
-ServerConnection::ServerConnection(int _port, int _from, int _to):QObject()
+
+AsyncVar<int> ServerConnection::connectionsCount{0};
+AsyncVar<int> ServerConnection::connectionsCountTo{0};
+ServerConnection::ServerConnection(int _port, int _from, int _to, int _id):QObject()
 {
     port = _port;
     from = _from;
     to = _to;
+    id = _id;
+    sendIntervalMS = Settings::getsendIntervalMS();
+    sendBytesPerInterval = Settings::getSendBytesPerInterval();
+
+}
+
+ServerConnection::~ServerConnection() noexcept
+{
+    //needToStop.set(true);
+    //connected.set(true); // for cases, when we has not connected yet
+}
+
+void ServerConnection::stop()
+{
+    //sim::sout<<"GOT STOP COMMAND ( "<<from<<" ==> "<<to<<" )"<<sim::endl;
+    needToStop.set(true);
+    //sim::sout<<"connection ( "<<from<<" ==> "<<to<<" ) needToStop = "<<needToStop.get()<<sim::endl;
+    connected.set(true); // for cases, when we has not connected yet
+    if (isServer){
+        while (!mayCloseSocket.get())
+        {
+            usleep(100);
+        }
+        //shutdown(sock, 2);
+        close(sock);
+        close(server_fd);
+    }
+}
+
+void ServerConnection::updateCount(int i)
+{
+    int c = connectionsCount.get();
+    c += i;
+    connectionsCount.set(c);
+}
+
+void ServerConnection::updateCountTo(int i)
+{
+    int c = connectionsCountTo.get();
+    c += i;
+    connectionsCountTo.set(c);
 }
 
 void ServerConnection::connectTo()
 {
+    connectionType = ConnectionType::TO;
     started.set(true);
+    connectionsCount.increase(1);
+    connectionsCountTo.increase(1);
+    //updateCount(1);
+    //if (to!=-1 && from != -1)
+    //{
+    //updateCountTo(1);
+    //}
     if (!connected.get())
     {
-        std::thread thr([this]() {
+        thr = std::thread([this]() {
             while (!connected.get())
             {
-                std::cout<<"trying to connect "<<from<<" => "<<to<<". Port: "<<port<<std::endl;
+                sim::sout<<"trying to connect "<<from<<" => "<<to<<". Port: "<<port<<sim::endl;
                 struct sockaddr_in serv_addr;
                 if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-                    std::cout << "\n Socket creation error \n" << std::endl;
+                    sim::sout << "\n Socket creation error \n" << sim::endl;
+                }
+                struct timeval tv;
+                tv.tv_sec = 1;
+                tv.tv_usec = 0;
+                //if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT | SO_RCVTIMEO, &opt, sizeof(opt))) {
+                if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO , (const char *)&tv, sizeof(tv))) {
+                    perror("setsockopt");
+                    exit(EXIT_FAILURE);
                 }
                 serv_addr.sin_family = AF_INET;
                 serv_addr.sin_port = htons(port);
                 // Convert IPv4 and IPv6 addresses from text to binary form
                 if (inet_pton(AF_INET, ip.c_str(), &serv_addr.sin_addr) <= 0) {
-                    std::cout << "\nInvalid address/ Address not supported \n" << std::endl;
+                    sim::sout << "\nInvalid address/ Address not supported \n" << sim::endl;
                 }
                 if (::connect(sock, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
                     printf("\nConnection Failed \n");
                 } else{
                     connected.set(true);
-                    //std::cout<<"connection "<<from<<" => "<<to<<" status is now: CONNECTED"<<std::endl;
+                    //sim::sout<<"connection "<<from<<" => "<<to<<" status is now: CONNECTED"<<sim::endl;
                 }
+            }
+            //connect(timer, SIGNAL(timeout()), this, SLOT(sendMessagesFromBufferTick()));
+            //timer->start();
+            thr1 = std::thread([this]()
+                               {
+                                   while (!needToStop.get()){
+                                       sendMessagesFromBufferTick();
+                                       usleep(sendIntervalMS);
+                                   }
+                                   Color::ColorMode grn(Color::FG_GREEN);
+                                   Color::ColorMode def(Color::FG_DEFAULT);
+                                   //sim::sout<<"Node "<<from<<grn<<" STATISTICS THREAD "<<def<<to<<grn<<" SUCCESSFULLY CLOSED (To)"<<def<<sim::endl;
+
+                               });
+            if (!oldway){
+                thr1.detach();
             }
             while (!needToStop.get())
             {
                 getMessage();
+                //sim::sout<<"ALIVE"<<sim::endl;
             }
+            //sendMutex.lock();
+            //close(server_fd);
+            //shutdown(sock, 2);
+            //close(sock);
+            mayCloseSocket.set(true);
+            Color::ColorMode grn(Color::FG_GREEN);
+            Color::ColorMode def(Color::FG_DEFAULT);
+            //updateCount(-1);
+            //if (to !=-1 && from != -1)
+            //{
+            //    updateCountTo(-1);
+            //}
+            connectionsCount.increase(-1);
+            connectionsCountTo.increase(-1);
+            stopped.set(true);
+            sim::sout<<"Node "<<from<<grn<<" CONNECTION TO "<<def<<to<<grn<<" SUCCESSFULLY CLOSED (To)"<<def<<sim::endl;
         });
         thr.detach();
     }
@@ -60,30 +157,32 @@ void ServerConnection::getMessage()
     int hbytes;
     for (int i = 0; i < sizeof(h); i += hbytes) {
         if ((hbytes = recv(sock, hmsg +i, sizeof(h)  - i, 0)) == -1){
-            std::cout<<"error on receive HarbingerMessage"<<std::endl;
-            //errorServerStop();
+            //sim::sout<<"error on receive HarbingerMessage"<<sim::endl;
+            return;
         }
     }
-    memcpy(&h,hmsg , sizeof(h));
-    if (h.type == HarbingerMessage::PING_MESSAGE)
-    {
-        getPingMessage();
-    }
-    if (h.type == HarbingerMessage::TEST_MESSAGE)
-    {
-        getTestMessage();
-    }
-    if (h.type == HarbingerMessage::SYSTEM_MESSAGE)
-    {
-        getSystemMessage();
-    }
-    if (h.type == HarbingerMessage::DEBUG_MESSAGE)
-    {
-        getDebugMessage();
-    }
-    if (h.type == HarbingerMessage::PACKET_MESSAGE)
-    {
-        getPacketMessage();
+    if (!needToStop.get()){
+        memcpy(&h,hmsg , sizeof(h));
+        if (h.type == HarbingerMessage::PING_MESSAGE)
+        {
+            getPingMessage();
+        }
+        if (h.type == HarbingerMessage::TEST_MESSAGE)
+        {
+            getTestMessage();
+        }
+        if (h.type == HarbingerMessage::SYSTEM_MESSAGE)
+        {
+            getSystemMessage();
+        }
+        if (h.type == HarbingerMessage::DEBUG_MESSAGE)
+        {
+            getDebugMessage();
+        }
+        if (h.type == HarbingerMessage::PACKET_MESSAGE)
+        {
+            getPacketMessage();
+        }
     }
 }
 
@@ -94,10 +193,12 @@ void ServerConnection::getPacketMessage()
     int bytes;
     for (int i = 0; i < sizeof(m); i += bytes) {
         if ((bytes = recv(sock, msg + i, sizeof(m)  - i, 0)) == -1){
-            std::cout<<"error on receive PacketMessage "<<std::endl;
+            sim::sout<<"error on receive PacketMessage "<<sim::endl;
+            return;
         }
     }
     memcpy(&m, msg, sizeof(m));
+    //sim::sout<<"From "<<from<<" to "<<to<<" got message with id "<<m.id<<" checksum: "<<m.checkSum <<sim::endl;
     emit transmit_to_node(m);
 }
 
@@ -108,7 +209,8 @@ void ServerConnection::getDebugMessage()
     int bytes;
     for (int i = 0; i < sizeof(m); i += bytes) {
         if ((bytes = recv(sock, msg + i, sizeof(m)  - i, 0)) == -1){
-            std::cout<<"error on receive DebugMessage"<<std::endl;
+            sim::sout<<"error on receive DebugMessage"<<sim::endl;
+            return;
         }
     }
     memcpy(&m, msg, sizeof(m));
@@ -122,7 +224,8 @@ void ServerConnection::getSystemMessage()
     int bytes;
     for (int i = 0; i < sizeof(m); i += bytes) {
         if ((bytes = recv(sock, msg +i, sizeof(m)  - i, 0)) == -1){
-            std::cout<<"error on receive SystemMessage"<<std::endl;
+            sim::sout<<"error on receive SystemMessage"<<sim::endl;
+            return;
         }
     }
     memcpy(&m, msg, sizeof(m));
@@ -137,7 +240,8 @@ void ServerConnection::getPingMessage()
     int bytes;
     for (int i = 0; i < sizeof(m); i += bytes) {
         if ((bytes = recv(sock, msg +i, sizeof(m)  - i, 0)) == -1){
-            std::cout<<"error on receive PingMessage"<<std::endl;
+            sim::sout<<"error on receive PingMessage"<<sim::endl;
+            return;
         }
     }
     memcpy(&m, msg, sizeof(m));
@@ -153,43 +257,55 @@ void ServerConnection::getTestMessage()
     int bytes;
     for (int i = 0; i < sizeof(m); i += bytes) {
         if ((bytes = recv(sock, msg +i, sizeof(m)  - i, 0)) == -1){
-            std::cout<<"error"<<std::endl;
+            sim::sout<<"error"<<sim::endl;
+            return;
         }
     }
     memcpy(&m, msg, sizeof(m));
 
-    std::cout<<"Got test Message from "<<from<<" => "<<to<<" message '"<<m.text<<"'"<<std::endl;
+    sim::sout<<"Got test Message from "<<from<<" => "<<to<<" message '"<<m.text<<"'"<<sim::endl;
 }
 
 void ServerConnection::awaitConnection()
 {
+    connectionType = ConnectionType::FROM;
+    //updateCount(1);
+    connectionsCount.increase(1);
+    isServer = true;
     started.set(true);
     if (!connected.get())
     {
         Color::ColorMode yel(Color::FG_YELLOW);
         Color::ColorMode def(Color::FG_DEFAULT);
-        std::cout <<yel<< "Awaiting for Connection "<<def<< "from "<<from<<" to "<< to << std::endl;
+        //sim::sout <<yel<< "Awaiting for Connection "<<def<< "from "<<from<<" to "<< to << sim::endl;
         std::thread thr([this]() {
             struct sockaddr_in address;
             int opt = 1;
+
             int addrlen = sizeof(address);
             char buffer[1024] = {0};
             if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
                 perror("socket failed");
                 exit(EXIT_FAILURE);
             }
-            //std::cout<<"here2"<<std::endl;
+            //sim::sout<<"here2"<<sim::endl;
 
-            // Forcefully attaching socket to the port 8080
-            if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT,
-                           &opt, sizeof(opt))) {
+            struct timeval tv;
+            tv.tv_sec = 1;
+            tv.tv_usec = 0;
+            //if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT | SO_RCVTIMEO, &opt, sizeof(opt))) {
+            if (setsockopt(server_fd, SOL_SOCKET, SO_RCVTIMEO , (const char *)&tv, sizeof(tv))) {
+                perror("setsockopt");
+                exit(EXIT_FAILURE);
+            }
+            if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR , (const char *)&tv, sizeof(tv))) {
                 perror("setsockopt");
                 exit(EXIT_FAILURE);
             }
             address.sin_family = AF_INET;
             address.sin_addr.s_addr = INADDR_ANY;
             address.sin_port = htons(port);
-            //std::cout<<"here3"<<std::endl;
+            //sim::sout<<"here3"<<sim::endl;
 
             // Forcefully attaching socket to the port 8080
             if (bind(server_fd, (struct sockaddr *) &address,
@@ -212,11 +328,30 @@ void ServerConnection::awaitConnection()
             connected.set(true);
             Color::ColorMode grn(Color::FG_GREEN);
             Color::ColorMode def(Color::FG_DEFAULT);
-            std::cout <<grn<< "CONNECTED "<<def<< " "<<from<<" <---> "<< to << std::endl;
+            //sim::sout <<grn<< "CONNECTED "<<def<< " "<<from<<" <---> "<< to << sim::endl;
+            std::thread thr1([this]()
+            {
+                while (!needToStop.get()){
+                    sendMessagesFromBufferTick();
+                    usleep(sendIntervalMS);
+                }
+            });
+            if (!oldway){
+                thr1.detach();
+            }
             while (!needToStop.get())
             {
                 getMessage();
             }
+            //sendMutex.lock();
+            //close(server_fd);
+            //shutdown(sock, 2);
+            //close(sock);
+            mayCloseSocket.set(true);
+            //updateCount(-1);
+            connectionsCount.increase(-1);
+            stopped.set(true);
+            sim::sout<<"Node "<<from<<grn<<" CONNECTION TO "<<def<<to<<grn<<" SUCCESSFULLY CLOSED (FROm)"<<def<<sim::endl;
         });
         thr.detach();
     }
@@ -262,9 +397,35 @@ void ServerConnection::sendMessage(SystemMessage m)
     h.code = 239;
     sendMutex.lock();
     send(sock, &h, sizeof(h), 0);
-    //std::cout<<"sizeof m"<< sizeof(m)<<std::endl;
+    //sim::sout<<"sizeof m"<< sizeof(m)<<sim::endl;
     send(sock, &m, sizeof(m), 0);
     sendMutex.unlock();
+}
+
+void ServerConnection::sendMessagesFromBufferTick()
+{
+    messageBuffer.lock();
+    if (!messagesDataQueue.empty()) {
+        //sim::sout<<"tick from "<<from<<" to"<<to<<" messagesDataQueue size: "<<messagesDataQueue.size()<<sim::endl;
+        int size = messagesDataQueue.size()>sendBytesPerInterval ? sendBytesPerInterval : messagesDataQueue.size();
+        char data[size];
+        int counter = 0;
+        while (counter < sendBytesPerInterval && messagesDataQueue.size() > 0)
+        {
+            char c = messagesDataQueue[0];
+            messagesDataQueue.erase(messagesDataQueue.begin());
+            data[counter] = c;
+            counter++;
+        }
+        //sim::sout<<"Second tick from "<<from<<" to"<<to<<" messagesDataQueue size: "<<messagesDataQueue.size()<<" data: "<< data <<sim::endl;
+        sendMutex.lock();
+        send(sock, &data, sizeof(data), 0);
+        //sim::sout<<"sizeof m"<< sizeof(m)<<sim::endl;
+        //send(sock, &data, sizeof(data), 0);
+        sendMutex.unlock();
+        bufferLoad.set(messagesDataQueue.size() * 100 / (1000000 * sendBytesPerInterval / sendIntervalMS));
+    }
+    messageBuffer.unlock();
 }
 
 void ServerConnection::sendMessage(PacketMessage m)
@@ -272,10 +433,34 @@ void ServerConnection::sendMessage(PacketMessage m)
     HarbingerMessage h;
     h.type = HarbingerMessage::PACKET_MESSAGE;
     h.code = 239;
-    sendMutex.lock();
-    send(sock, &h, sizeof(h), 0);
-    //std::cout<<"sizeof m"<< sizeof(m)<<std::endl;
-    send(sock, &m, sizeof(m), 0);
-    sendMutex.unlock();
+
+    if (!oldway)
+    {
+        messageBuffer.lock();
+        char hData[sizeof(h)];
+        memcpy(hData, &h, sizeof(h));
+        for (int i=0; i<sizeof(hData); i++)
+        {
+            messagesDataQueue.push_back(hData[i]);
+        }
+        char mData[sizeof(m)];
+        memcpy(mData, &m, sizeof(m));
+        for (int i=0; i<sizeof(mData); i++)
+        {
+            messagesDataQueue.push_back(mData[i]);
+        }
+        messageBuffer.unlock();
+    }
+    else{
+        sendMutex.lock();
+        char hData[sizeof(h)];
+        memcpy(hData, &h, sizeof(h));
+        send(sock, &hData, sizeof(h), 0);
+        //sim::sout<<"sizeof m"<< sizeof(m)<<sim::endl;
+        char mData[sizeof(m)];
+        memcpy(mData, &m, sizeof(m));
+        send(sock, &mData, sizeof(m), 0);
+        sendMutex.unlock();
+    }
 }
 

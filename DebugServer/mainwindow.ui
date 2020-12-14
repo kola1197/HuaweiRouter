@@ -59,7 +59,7 @@
        <x>0</x>
        <y>0</y>
        <width>1824</width>
-       <height>970</height>
+       <height>955</height>
       </rect>
      </property>
      <widget class="QPushButton" name="saveButton">
@@ -72,7 +72,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>Сохранить</string>
+       <string>Save</string>
       </property>
      </widget>
      <widget class="QLabel" name="infoLabel">
@@ -81,11 +81,14 @@
         <x>1650</x>
         <y>110</y>
         <width>111</width>
-        <height>181</height>
+        <height>71</height>
        </rect>
       </property>
       <property name="text">
-       <string>TextLabel</string>
+       <string/>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
      <widget class="QPushButton" name="startButton">
@@ -104,10 +107,10 @@
      <widget class="QPushButton" name="AddButton">
       <property name="geometry">
        <rect>
-        <x>1670</x>
-        <y>820</y>
-        <width>89</width>
-        <height>25</height>
+        <x>1660</x>
+        <y>810</y>
+        <width>101</width>
+        <height>31</height>
        </rect>
       </property>
       <property name="text">
@@ -117,14 +120,14 @@
      <widget class="QPushButton" name="deleteButton">
       <property name="geometry">
        <rect>
-        <x>1660</x>
-        <y>510</y>
+        <x>1650</x>
+        <y>590</y>
         <width>111</width>
-        <height>25</height>
+        <height>31</height>
        </rect>
       </property>
       <property name="text">
-       <string>Удалить узел</string>
+       <string>Delete node</string>
       </property>
      </widget>
      <widget class="QPushButton" name="loadButton">
@@ -137,7 +140,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>Загрузить</string>
+       <string>Load</string>
       </property>
      </widget>
      <widget class="QTableWidget" name="tableWidget">
@@ -160,6 +163,97 @@
        </rect>
       </property>
      </widget>
+     <widget class="QComboBox" name="algorithmBox">
+      <property name="geometry">
+       <rect>
+        <x>1650</x>
+        <y>520</y>
+        <width>111</width>
+        <height>25</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="infoLabel_2">
+      <property name="geometry">
+       <rect>
+        <x>1650</x>
+        <y>490</y>
+        <width>111</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Algorithm</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="saveReportCheckBox">
+      <property name="geometry">
+       <rect>
+        <x>1650</x>
+        <y>640</y>
+        <width>111</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Save report</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_2">
+      <property name="geometry">
+       <rect>
+        <x>1640</x>
+        <y>210</y>
+        <width>131</width>
+        <height>71</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Timeout between sending iteration (microSec) :</string>
+      </property>
+      <property name="wordWrap">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label">
+      <property name="geometry">
+       <rect>
+        <x>1640</x>
+        <y>110</y>
+        <width>131</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Count of bytes we send during one iteration :</string>
+      </property>
+      <property name="wordWrap">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="sendIntervalMS">
+      <property name="geometry">
+       <rect>
+        <x>1640</x>
+        <y>290</y>
+        <width>131</width>
+        <height>25</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="CountOfBytes">
+      <property name="geometry">
+       <rect>
+        <x>1640</x>
+        <y>180</y>
+        <width>131</width>
+        <height>25</height>
+       </rect>
+      </property>
+     </widget>
     </widget>
    </widget>
   </widget>
@@ -172,8 +266,48 @@
      <height>22</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionLoad"/>
+    <addaction name="actionSave"/>
+    <addaction name="separator"/>
+    <addaction name="actionExit"/>
+   </widget>
+   <widget class="QMenu" name="menuSettings">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <addaction name="actionSettings"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuSettings"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionLoad">
+   <property name="text">
+    <string>Load</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="text">
+    <string>Save</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionSettings">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Settings</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -200,9 +334,110 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionSave</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>on_saveButton_released()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>894</x>
+     <y>499</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionLoad</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>on_loadButton_released()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>894</x>
+     <y>499</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionExit</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>894</x>
+     <y>499</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSettings</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>on_settingsButton_released()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>894</x>
+     <y>499</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>CountOfBytes</sender>
+   <signal>editingFinished()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>on_count_of_bytes_editingFinished()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1706</x>
+     <y>215</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>894</x>
+     <y>499</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sendIntervalMS</sender>
+   <signal>editingFinished()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>on_send_interval_editingFinished()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1706</x>
+     <y>325</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>894</x>
+     <y>499</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>AddButtonClick()</slot>
   <slot>SavePacketClick()</slot>
+  <slot>on_saveButton_released()</slot>
+  <slot>on_loadButton_released()</slot>
+  <slot>on_settingsButton_released()</slot>
+  <slot>on_count_of_bytes_editingFinished()</slot>
+  <slot>on_send_interval_editingFinished()</slot>
  </slots>
 </ui>

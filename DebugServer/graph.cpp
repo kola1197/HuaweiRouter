@@ -5,6 +5,7 @@
 
 #include <QFileDialog>
 #include <QString>
+#include <Utils/sout.h>
 
 
 Graph::Graph(QObject *parent) : QObject(parent)
@@ -126,7 +127,7 @@ void Graph::load(QString path)
         int loadPart = 0;       //0 - ellipses, 1 - edges, 2 - PacketMessages
         while( getline(in, line))
         {
-            std::cout<< line<<'\n';
+            sim::sout<< line<<'\n';
             QString q = QString::fromStdString(line);
             float arr[3];
             int counter = 0;
@@ -152,7 +153,7 @@ void Graph::load(QString path)
                 }
                 if (loadPart == 1)
                 {
-                    //std::cout<<" "<<arr[0]<<" "<<arr[1]<<std::endl;
+                    //sim::sout<<" "<<arr[0]<<" "<<arr[1]<<sim::endl;
                     addEdge((int)arr[0]);
                     addEdge((int)arr[1]);
                 }
@@ -169,7 +170,7 @@ void Graph::load(QString path)
     }
     else
     {
-        std::cout<<"unable load file";
+        sim::sout<<"unable load file";
     }
 }
 
@@ -232,7 +233,7 @@ Ellips * Graph::getEllipseByNumber(int num)
     {
         if ( ellipses[i].number == num )
         {
-            //std::cout<<ellipses[i].x<<"*"<<ellipses[i].y<<std::endl;
+            //sim::sout<<ellipses[i].x<<"*"<<ellipses[i].y<<sim::endl;
             result = &ellipses[i];
         }
     }
@@ -250,7 +251,7 @@ Ellips * Graph::getEllipseByPoint(int x,int y)
     {
         if ( dist(x,y,ellipses[i].x,ellipses[i].y) + dist(x,y,ellipses[i].x,ellipses[i].y) < 100 )
         {
-            std::cout<<ellipses[i].x<<"*"<<ellipses[i].y<<std::endl;
+            sim::sout<<ellipses[i].x<<"*"<<ellipses[i].y<<sim::endl;
             result = &ellipses[i];
         }
     }
@@ -315,7 +316,7 @@ void Graph::deleteEllips(int number)
 
 void Graph::get_system_message(SystemMessage m)
 {
-    std::cout<<m.authorNum<<" send system message "<<std::endl;
+    sim::sout<<m.authorNum<<" send system message "<<sim::endl;
 }
 
 void Graph::get_system_message(DebugMessage m)
@@ -325,12 +326,12 @@ void Graph::get_system_message(DebugMessage m)
         Ellips *e = getEllipseByNumber(m.i[0]);
         e->connected = m.i[1]==1;
         e->colorStatus = m.i[1];
-        //std::cout<<m.i[0]<<" send system message, colorStatus now is "<<e->colorStatus<<std::endl;
+        //sim::sout<<m.i[0]<<" send system message, colorStatus now is "<<e->colorStatus<<sim::endl;
         emit repaint();
     }
     if (m.type == DebugMessage::PACKET_STATUS)
     {
-        //std::cout<<"GOT PACKET STATUS "<<m.i[0]<<"   "<<m.i[1]<<std::endl;
+        //sim::sout<<"GOT PACKET STATUS "<<m.i[0]<<"   "<<m.i[1]<<sim::endl;
         for (int i = 0;i < packets.size();i++)
         {
             if (packets[i].id == m.i[0])
@@ -352,15 +353,38 @@ void Graph::get_system_message(DebugMessage m)
                 packets[i].timeOnCreation = m.deliveringTime;
             }
         }
-        emit updateTable();
+            emit updateTable();
     }
     if (m.type == DebugMessage::PACKET_COUNT_STATUS)
     {
         Ellips *e = getEllipseByNumber(m.i[0]);
         e->packetCount = m.i[1];
+        e->maxPacketCount = m.i[2];
         emit repaint();
     }
-    //std::cout<<m.i[0]<<" send connection status "<<m.i[1]<<std::endl;
+    if (m.type == DebugMessage::EDGES_USAGE_STATUS)
+    {
+        int count = m.i[0];
+        for (int j = 0;j<count;j++)
+        {
+            for (int i=0;i<edges.size();i++)
+            {
+                if (edges[i].id == m.i[j*3 + 1])
+                {
+                    if (edges[i].from == m.i[j*3 +2])
+                    {
+                        edges[i].loadFromTo = m.i[j*3 + 3];
+                    }
+                    if (edges[i].to == m.i[j*3 +2])
+                    {
+                        edges[i].loadToFrom = m.i[j*3 + 3];
+                    }
+                }
+            }
+        }
+        emit repaint();
+    }
+    //sim::sout<<m.i[0]<<" send connection status "<<m.i[1]<<sim::endl;
 }
 
 void Graph::addPacket()

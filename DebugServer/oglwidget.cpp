@@ -4,6 +4,7 @@
 #include <QtOpenGL/QtOpenGL>
 #include <GL/glu.h>
 #include <GL/gl.h>
+#include <Utils/sout.h>
 #include "TextureImage.h"
 
 OGLWidget::OGLWidget(QWidget *parent)
@@ -52,15 +53,48 @@ void OGLWidget::paintGL()
         Ellips *el2 = graph.getEllipseByNumber(e.to);
         if (el1!=NULL && el2!=NULL)
         {
-            //std::cout<<"Edge output "<<e.from<<" "<<e.to<<std::endl;
-            //std::cout<<"Ellips "<<el1->x<<" "<<el1->y<<" -*- "<<el2->x<<" "<<el2->y<<std::endl;
             std::tuple<float,float,float,float> newCoords = countCoords(el1,el2);
             float x1,x2,y1,y2;
             std::tie(x1,y1,x2,y2) = newCoords;
             drawEdge(x1,y1,x2,y2);
-            //drawEdge(el1->x,el1->y,el2->x,el2->y);
         }
     }
+    for (Edge e:graph.edges)
+    {
+        Ellips *el1 = graph.getEllipseByNumber(e.from);
+        Ellips *el2 = graph.getEllipseByNumber(e.to);
+        if (el1!=NULL && el2!=NULL)
+        {
+            std::tuple<float,float,float,float> newCoords = countCoords(el1,el2);
+            float x1,x2,y1,y2;
+            std::tie(x1,y1,x2,y2) = newCoords;
+            drawLableCircle(x1,y1,x2,y2, QString::number(e.loadFromTo));
+            drawLableCircle(x2,y2,x1,y1, QString::number(e.loadToFrom));
+        }
+    }
+}
+
+void OGLWidget::drawLableCircle(float x1, float y1, float x2,float y2, QString edgeUsage)
+{
+    float x = (x1*9+x2)/10;
+    float y = (y1*9+y2)/10;
+    int radius = 15;
+    glColor3f(1.0, 1.0, 1.0);
+    glBegin(GL_TRIANGLE_FAN);
+    glVertex2f(x, y); // center of circle
+    for (int i = 0; i <= 20; i++)   {
+        glVertex2f ((x + (radius * cos(i * float(2 * M_PI) / 20))), (y + (radius * sin(i * float(2 * M_PI) / 20))));
+    }
+    glEnd();
+    radius++;
+    glColor3f(0.0, 0.0, 1.0);
+    glBegin(GL_LINE_LOOP);
+    for (int i = 0; i <= 20; i++)   {
+        glVertex2f ((x + (radius * cos(i * float(2 * M_PI) / 20))), (y + (radius * sin(i * float(2 * M_PI) / 20))) );
+    }
+    glEnd();
+    //QString edgeUsage("100%");
+    renderText(x - 14,y + 5 ,edgeUsage, true, Qt::red);
 }
 
 void OGLWidget::drawEdge(float x1, float y1, float x2,float y2)
@@ -110,11 +144,12 @@ void OGLWidget::drawEllipse(Ellips *e)      //color 0 - default, 1 - active elli
         glVertex2f(dx + e->x, dy + e->y);
     }
     glEnd();
-    const QFont f;
     QString ellipseNum = QString::number(e->number);
-    renderText(e->x-1,e->y,0,ellipseNum,f);
+    renderText(e->x-1,e->y-10,ellipseNum);
     QString ellipseCount = "Packets: " + QString::number(e->packetCount);
-    renderText(e->x-20,e->y+10,0,ellipseCount,f);
+    renderText(e->x-24,e->y+0,ellipseCount);
+    QString ellipseMaxCount = "MaxPackets: " + QString::number(e->maxPacketCount);
+    renderText(e->x-34,e->y+10,ellipseMaxCount);
 }
 
 #pragma clang diagnostic push
@@ -162,7 +197,7 @@ int OGLWidget::sign(float i)
     return i>0 ? 1 : -1;
 }
 
-void OGLWidget::renderText(double x, double y, double z, const QString &str, const QFont & font = QFont())
+void OGLWidget::renderText(double x, double y, const QString &str, bool bold, QColor color)
 {
     // Identify x and y locations to render text within widget
     int height = this->height();
@@ -171,14 +206,14 @@ void OGLWidget::renderText(double x, double y, double z, const QString &str, con
     textPosY = height - textPosY; // y is inverted
 
     // Retrieve last OpenGL color to use as a font color
-    GLdouble glColor[4];
-    glGetDoublev(GL_CURRENT_COLOR, glColor);
-    QColor fontColor = QColor(glColor[0], glColor[1], glColor[2], glColor[3]);
 
     // Render text
     QPainter painter(this);
-    painter.setPen(Qt::black);
-    painter.setFont(QFont("Helvetica", 8));
+    //painter.setPen(color);
+    painter.setPen(color);
+    QFont font("Helvetica", 8);
+    font.setBold(bold);
+    painter.setFont(font);
     painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
     painter.drawText(x, y, str);
     painter.end();
@@ -228,26 +263,26 @@ void OGLWidget::mousePressEvent(QMouseEvent *event)
 {
     if (!screenLocked && event->button() == Qt::LeftButton)
     {
-        std::cout<<event->x()<<"::"<<event->y()<<std::endl;
+        sim::sout<<event->x()<<"::"<<event->y()<<sim::endl;
         float x = event->x();
         float y = event->y();
         Ellips *el = graph.getEllipseByPoint(x,y);
         if (el!=NULL)
         {
-            QString q="";
-            q+="x  : "+QString::number(el->x)+"\n";
-            q+="y  : "+QString::number(el->y)+"\n";
-            q+="num: "+QString::number(el->number)+"\n";
-            emit transmit_info(q);
-            std::cout<<"ellips number "<<el->number<<std::endl;
+            //QString q="";
+            //q+="x  : "+QString::number(el->x)+"\n";
+            //q+="y  : "+QString::number(el->y)+"\n";
+            //q+="num: "+QString::number(el->number)+"\n";
+            //emit transmit_info(q);
+            //sim::sout<<"ellips number "<<el->number<<sim::endl;
             el->colorStatus=1;
             //el->number=30;
-            //std::cout<<el->x<<"*"<<el->y<<std::endl;
-            //std::cout<<"ellips number now "<<el->number<<std::endl;
+            //sim::sout<<el->x<<"*"<<el->y<<sim::endl;
+            //sim::sout<<"ellips number now "<<el->number<<sim::endl;
             graph.active = el;
         }
         else{
-            std::cout<<"FREE AREA"<<std::endl;
+            sim::sout<<"FREE AREA"<<sim::endl;
         }
     }
     if (event->button() == Qt::RightButton)
@@ -289,7 +324,7 @@ void OGLWidget::mouseReleaseEvent(QMouseEvent *event)
     if (!screenLocked)
     {
         deactivate();
-        //std::cout<<"release"<<std::endl;
+        //sim::sout<<"release"<<sim::endl;
         //graph.addEdge(-1);
     }
 }
@@ -312,7 +347,7 @@ void OGLWidget::mouseDoubleClickEvent(QMouseEvent *event)
             el->colorStatus = 1;
             if (graph.addEdge(el->number))
             {
-                std::cout<<"TRUE"<<::std::endl;
+                sim::sout<<"TRUE"<<::sim::endl;
                 deactivateNewEdge();
             }
             //graph.active = el;

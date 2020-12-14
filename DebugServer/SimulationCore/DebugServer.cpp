@@ -5,23 +5,40 @@
 #include <thread>
 #include <iostream>
 #include <Utils/ColorMode.h>
+#include <Utils/sout.h>
 #include "DebugServer.h"
 
 DebugServer::DebugServer(int debugSocketAdress, Graph g) : ServerNode(-1,debugSocketAdress,g)
 {
-    //std::cout<<"Debug server: we have got "<<g.ellipses.size()<<" nodes"<<std::endl;
+    //sim::sout<<"Debug server: we have got "<<g.ellipses.size()<<" nodes"<<sim::endl;
     //graph = g;
-    //std::cout<<"Debug server: now we have got "<<graph.ellipses.size()<<" nodes"<<std::endl;
+    //sim::sout<<"Debug server: now we have got "<<graph.ellipses.size()<<" nodes"<<sim::endl;
+}
+
+DebugServer::~DebugServer() noexcept
+{
+    /*for (int i=0;i<connections.size();i++)
+    {
+        connections[i]->~ServerConnection();
+    };*/
+}
+
+void DebugServer::Stop()
+{
+    for (int i=0;i<connections.size();i++)
+    {
+        connections[i]->stop();
+    };
 }
 
 void DebugServer::Start()
 {
-    std::cout<<"Debug server started his work "<<std::endl;
+    sim::sout<<"Debug server started his work "<<sim::endl;
     std::thread thr([this]() {
         for (int i = 0; i < graph.ellipses.size(); i++) {
             addConnection(graph.ellipses[i].number);
         }
-        std::cout<<"Debug server finished his work"<<std::endl;
+        sim::sout<<"Debug server finished his work"<<sim::endl;
 
         bool allNodesConnected = false;
         while (!allNodesConnected)
@@ -35,7 +52,15 @@ void DebugServer::Start()
         }
         Color::ColorMode grn(Color::FG_GREEN);
         Color::ColorMode def(Color::FG_DEFAULT);
-        std::cout<<"Debug server:"<<grn<<" ALL "<<connections.size() <<" NODES CONNECTED"<<def<<std::endl;
+        sim::sout<<"Debug server:"<<grn<<" ALL "<<connections.size() <<" NODES CONNECTED"<<def<<sim::endl;
+
+        for (int i=0;i<connections.size();i++)
+        {
+            SystemMessage m;
+            m.type = SystemMessage::DEBUG_SERVER_READY;
+            m.i[0]=1;
+            connections[i]->sendMessage(m);
+        }
 
         bool allServersReady =false;
         while (!allServersReady)
@@ -47,7 +72,7 @@ void DebugServer::Start()
             }
             allServersReady = b;
         }
-        std::cout<<"Debug server:"<<grn<<" ALL SERVERS ARE READY NOW, STARTING CONNECTIONS"<<def<<std::endl;
+        sim::sout<<"Debug server:"<<grn<<" ALL SERVERS ARE READY NOW, STARTING CONNECTIONS"<<def<<sim::endl;
 
         for (int i=0;i<connections.size();i++)
         {
@@ -67,7 +92,7 @@ void DebugServer::Start()
             }
             allNodesReady = b;
         }
-        std::cout<<"Debug server:"<<grn<<" ALL NODES ARE READY NOW!!!"<<def<<std::endl;
+        sim::sout<<"Debug server:"<<grn<<" ALL NODES ARE READY NOW!!!"<<def<<sim::endl;
         for (int i=0;i<connections.size();i++)
         {
             SystemMessage m;
@@ -86,7 +111,7 @@ void DebugServer::get_message_for_debug(SystemMessage m)
     Color::ColorMode def(Color::FG_DEFAULT);
     if (m.type == SystemMessage::START_SIMULATION_FLAG)
     {
-        std::cout<<"Debug server:"<<" GOT SYSTEM MESSAGE FROM "<<m.i[0]<<" status START_SIMULATION_FLAG is "<<m.i[1]<<std::endl;
+        sim::sout<<"Debug server:"<<" GOT SYSTEM MESSAGE FROM "<<m.i[0]<<" status START_SIMULATION_FLAG is "<<m.i[1]<<sim::endl;
         for (int i=0;i<graph.ellipses.size();i++)
         {
             if (graph.ellipses[i].number == m.i[0])
@@ -97,7 +122,7 @@ void DebugServer::get_message_for_debug(SystemMessage m)
     }
     if (m.type == SystemMessage::SERVERS_READY)
     {
-        std::cout<<"Debug server:"<<grn<<" GOT SYSTEM MESSAGE FROM "<<m.i[0]<<" status SERVERS_READY is "<<m.i[1]<<def<<std::endl;
+        sim::sout<<"Debug server:"<<grn<<" GOT SYSTEM MESSAGE FROM "<<m.i[0]<<" status SERVERS_READY is "<<m.i[1]<<def<<sim::endl;
         for (int i=0;i<graph.ellipses.size();i++)
         {
             if (graph.ellipses[i].number == m.i[0])

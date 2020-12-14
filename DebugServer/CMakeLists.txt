@@ -10,7 +10,7 @@ set(CMAKE_AUTORCC ON)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++2a -pthread")
 
 # QtCreator supports the following variables for Android, which are identical to qmake Android variables.
 # Check http://doc.qt.io/qt-5/deployment-android.html for more information.
@@ -46,7 +46,7 @@ if(ANDROID)
     network.h
     network.cpp
     dir/channel.cpp
-          SimulationCore/ServerNode.cpp SimulationCore/ServerNode.h SimulationCore/ServerConnection.cpp SimulationCore/ServerConnection.h SimulationCore/DebugServer.cpp SimulationCore/DebugServer.h TextureImage.cpp TextureImage.h)
+          SimulationCore/ServerNode.cpp SimulationCore/ServerNode.h SimulationCore/ServerConnection.cpp SimulationCore/ServerConnection.h SimulationCore/DebugServer.cpp SimulationCore/DebugServer.h TextureImage.cpp TextureImage.h Utils/MutexInt.cpp Utils/MutexInt.h Utils/AsyncVar.cpp Utils/AsyncVar.h)
 else()
   add_executable(HuaweiRouter
           Network/main.cpp
@@ -74,7 +74,20 @@ else()
           SimulationCore/ServerConnection.h
           Utils/MutexBool.cpp
           Utils/MutexBool.h
-          SimulationCore/DebugServer.cpp SimulationCore/DebugServer.h Utils/Settings.h Utils/ColorMode.cpp Utils/ColorMode.h TextureImage.cpp TextureImage.h)
+          SimulationCore/DebugServer.cpp
+          SimulationCore/DebugServer.h
+          Utils/Settings.h Utils/ColorMode.cpp
+          Utils/ColorMode.h
+          TextureImage.cpp
+          TextureImage.h
+          Utils/MutexInt.cpp
+          Utils/MutexInt.h
+          Utils/AsyncVar.cpp
+          Utils/AsyncVar.h
+          settingsform.cpp
+          settingsform.h
+          settingsform.ui
+          Utils/Settings.cpp Utils/sout.cpp Utils/sout.h)
 endif()
 
 target_link_libraries(HuaweiRouter PRIVATE Qt5::Widgets  ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES})

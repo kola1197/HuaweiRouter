@@ -13,9 +13,10 @@ class DebugServer: public ServerNode {
     Q_OBJECT
 public:
     DebugServer(int debugSocketAdress, Graph g);
+    ~DebugServer();
     void Start();
     MutexBool isReady {false};   //true when all connections for nodes are ready
-
+    void Stop();
 public slots:
     void get_message_for_debug(SystemMessage);
 

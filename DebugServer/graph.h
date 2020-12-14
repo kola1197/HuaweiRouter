@@ -14,6 +14,7 @@ struct Ellips
     bool ready = false;  // all packets are loaded to Node
     bool serversReady = false;
     int number = -1;
+    int maxPacketCount = 0;
     int packetCount = 0;
     int colorStatus = 0; // 0 - orange - default but not connected, 1 - blue - active for movement, 2 - yellow - conected, packets not loaded, 3 - green packets loaded, started //
 };
@@ -23,7 +24,14 @@ struct Edge
     int id;
     int  from;
     int  to;
+    float loadFromTo = 0;
+    float loadToFrom = 0;
 };
+
+enum Algorithms
+        {
+            RANDOM, DRILL, DE_TAILS, LOCAL_FLOW
+        };
 
 class Graph: public QObject
 {
@@ -58,6 +66,7 @@ public:
     void addPacket(PacketMessage m);
     void addPacketmessage(int _type, int _from, int _to);
     int packetIdCounter = 0;
+    Algorithms selectedAlgorithm = Algorithms::RANDOM;
 public slots:
     void get_system_message(SystemMessage m);
     void get_system_message(DebugMessage m);

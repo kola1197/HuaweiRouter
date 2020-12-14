@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <SimulationCore/simulation.h>
+#include "settingsform.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -21,7 +22,6 @@ private slots:
     void on_saveButton_released();
     void setEllipseInfo(QString info);
     void on_loadButton_released();
-
     void on_deleteButton_released();
     void AddButtonClick();
     void SavePacketClick();
@@ -32,14 +32,34 @@ private slots:
     void cellToTextChanged();
     void cellIndexChanged(int i);
     void updateTable();
+    void on_algorithmBox_currentIndexChanged(int index);
+
+    void on_count_of_bytes_editingFinished();
+    void on_send_interval_editingFinished();
+
 public slots:
+    void on_settingsButton_released();
     void repaintOGLWidget();
     void onBtnClicked();
+    void unBlockInterface();
     //void get_system_message(SystemMessage m);
 private:
-    Simulation simulation;
+    Simulation* simulation;
     Ui::MainWindow *ui;
     void connectSlots();
     void createUI();
+    Graph savedGraph;
+
+    void checkSimulationStatus();
+    bool tableResized = false;
+
+    void createAlgprithmComboBox();
+    void blockInterface();
+    bool simulationIsActive = false;
+    void updateStartButtonText();
+    void disconnectSlots();
+    SettingsForm* settingsForm;
+
+    void setDefaultSettings();
 };
 #endif // MAINWINDOW_H
