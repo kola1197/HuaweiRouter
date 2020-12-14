@@ -55,8 +55,9 @@ void ServerNode::Stop()
     {
         if (connections[i]->connectionType == ConnectionType::FROM){
             connections[i]->stop();
-        }    }
-    usleep(15000);
+        }
+    }
+    usleep(10000);
     //debugConnection->stop();
 }
 

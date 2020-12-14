@@ -30,6 +30,12 @@ public:
         targetVar = i;
         mutex.unlock();
     };
+    void increase(T i)
+    {
+        mutex.lock();
+        targetVar += i;
+        mutex.unlock();
+    }
 private:
     std::mutex mutex;
     T targetVar;

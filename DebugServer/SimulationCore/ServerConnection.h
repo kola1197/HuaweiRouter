@@ -53,6 +53,7 @@ public:
     int updateUsageDataPerTicks = 5;
     int updateUsageDataCounter = 0;
     AsyncVar<float> bufferLoad{0};
+    AsyncVar<bool> stopped{false};
 signals:
     void transmit_to_gui(SystemMessage m);
     void transmit_to_gui(DebugMessage m);

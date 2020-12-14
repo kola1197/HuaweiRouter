@@ -41,8 +41,8 @@ public:
         {
             Sout::mut.lock();
             threadNum = std::this_thread::get_id();
-#endif
         }
+#endif
         bool endOfLine;
         std::stringstream ss;
         ss<<t;

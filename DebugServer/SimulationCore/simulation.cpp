@@ -64,6 +64,18 @@ void Simulation::stop()
         QMessageBox msgBox;
         msgBox.setText("Error. Some socket threads has not closed, please restart app.");
         msgBox.exec();
+        for (int i=0;i<serverNodes.size();i++)
+        {
+            for (int j=0;j<serverNodes[i]->connections.size();j++)
+            {
+                if (!serverNodes[i]->connections[j]->stopped.get())
+                {
+                    Color::ColorMode red(Color::FG_RED);
+                    Color::ColorMode def(Color::FG_DEFAULT);
+                    sim::sout<<red<<"CONNECTION "<<def<<serverNodes[i]->connections[j]->from<<red<<" ==> "<<def<<serverNodes[i]->connections[j]->to<<red<<" STIL ACTIVE"<<sim::endl;
+                }
+            }
+        }
     }
 }
 

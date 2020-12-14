@@ -70,11 +70,13 @@ void ServerConnection::connectTo()
 {
     connectionType = ConnectionType::TO;
     started.set(true);
-    updateCount(1);
-    if (to!=-1 && from != -1)
-    {
-        updateCountTo(1);
-    }
+    connectionsCount.increase(1);
+    connectionsCountTo.increase(1);
+    //updateCount(1);
+    //if (to!=-1 && from != -1)
+    //{
+    //updateCountTo(1);
+    //}
     if (!connected.get())
     {
         thr = std::thread([this]() {
@@ -134,11 +136,15 @@ void ServerConnection::connectTo()
             mayCloseSocket.set(true);
             Color::ColorMode grn(Color::FG_GREEN);
             Color::ColorMode def(Color::FG_DEFAULT);
-            updateCount(-1);
-            if (to !=-1 && from != -1)
-            {
-                updateCountTo(-1);
-            }            sim::sout<<"Node "<<from<<grn<<" CONNECTION TO "<<def<<to<<grn<<" SUCCESSFULLY CLOSED (To)"<<def<<sim::endl;
+            //updateCount(-1);
+            //if (to !=-1 && from != -1)
+            //{
+            //    updateCountTo(-1);
+            //}
+            connectionsCount.increase(-1);
+            connectionsCountTo.increase(-1);
+            stopped.set(true);
+            sim::sout<<"Node "<<from<<grn<<" CONNECTION TO "<<def<<to<<grn<<" SUCCESSFULLY CLOSED (To)"<<def<<sim::endl;
         });
         thr.detach();
     }
@@ -263,7 +269,8 @@ void ServerConnection::getTestMessage()
 void ServerConnection::awaitConnection()
 {
     connectionType = ConnectionType::FROM;
-    updateCount(1);
+    //updateCount(1);
+    connectionsCount.increase(1);
     isServer = true;
     started.set(true);
     if (!connected.get())
@@ -341,7 +348,9 @@ void ServerConnection::awaitConnection()
             //shutdown(sock, 2);
             //close(sock);
             mayCloseSocket.set(true);
-            updateCount(-1);
+            //updateCount(-1);
+            connectionsCount.increase(-1);
+            stopped.set(true);
             sim::sout<<"Node "<<from<<grn<<" CONNECTION TO "<<def<<to<<grn<<" SUCCESSFULLY CLOSED (FROm)"<<def<<sim::endl;
         });
         thr.detach();
