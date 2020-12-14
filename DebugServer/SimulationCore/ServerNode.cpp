@@ -44,7 +44,7 @@ void ServerNode::StopToConnections()
         }
     }
     usleep(15000);
-    //debugConnection->stop();
+    debugConnection->stop();
 }
 
 void ServerNode::Stop()
@@ -57,7 +57,7 @@ void ServerNode::Stop()
             connections[i]->stop();
         }    }
     usleep(15000);
-    debugConnection->stop();
+    //debugConnection->stop();
 }
 
 void ServerNode::Start()       //on start we connect to debug server

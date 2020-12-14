@@ -57,6 +57,7 @@ void Simulation::stop()
         }
         debugServer->Stop();
     }
+    usleep(100000);
     sim::sout<<"SIMULATION STOPED. Count of active connections: "<<ServerConnection::connectionsCount.get()<<sim::endl;
     if (ServerConnection::connectionsCount.get()!=0)
     {
