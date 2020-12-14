@@ -42,7 +42,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::createAlgprithmComboBox()
 {
-    ui->algorithmBox->addItems(QStringList() <<trUtf8("RANDOM") << trUtf8("DRILL") << trUtf8("DeTails") << trUtf8("LocalFlow"));
+    ui->algorithmBox->addItems(QStringList() <<trUtf8("RANDOM") << trUtf8("DRILL") /*<< trUtf8("DeTails") << trUtf8("LocalFlow")*/);
+    //ui->algorithmBox.
 }
 
 
