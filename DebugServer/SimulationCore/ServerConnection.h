@@ -11,6 +11,7 @@
 #include <Utils/AsyncVar.h>
 #include <QtCore/QTimer>
 #include <QtCore/QThread>
+#include <arpa/inet.h>
 
 enum ConnectionType{
     TO, FROM
@@ -25,11 +26,12 @@ public:
     void connectTo();
     void awaitConnection();
     MutexBool connected {false};
-    void sendMessage(PingMessage m);
+    /*void sendMessage(PingMessage m);
     void sendMessage(SystemMessage m);
     void sendMessage(TestMessage m);
     void sendMessage(DebugMessage m);
     void sendMessage(PacketMessage m);
+*/
     static AsyncVar<int> connectionsCount;
     static AsyncVar<int> connectionsCountTo;
     void getMessage();
@@ -54,6 +56,44 @@ public:
     int updateUsageDataCounter = 0;
     AsyncVar<float> bufferLoad{0};
     AsyncVar<bool> stopped{false};
+
+    template <typename T>
+    void sendMessage(T t){                       //in header because of stupid gcc compilation
+        HarbingerMessage h{};
+        std::string type = typeid(t).name();
+        if (Messages::getMessageTypeByName(type, &h.type)) //HarbingerMessage::PING_MESSAGE;
+        {
+            h.code = 239;
+            if (!oldway)
+            {
+                messageBuffer.lock();
+                char hData[sizeof(h)];
+                memcpy(hData, &h, sizeof(h));
+                for (int i=0; i<sizeof(hData); i++)
+                {
+                    messagesDataQueue.push_back(hData[i]);
+                }
+                char mData[sizeof(t)];
+                memcpy(mData, &t, sizeof(t));
+                for (int i=0; i<sizeof(mData); i++)
+                {
+                    messagesDataQueue.push_back(mData[i]);
+                }
+                messageBuffer.unlock();
+            }
+            else{
+                sendMutex.lock();
+                char hData[sizeof(h)];
+                memcpy(hData, &h, sizeof(h));
+                send(sock, &hData, sizeof(h), 0);
+                //sim::sout<<"sizeof m"<< sizeof(m)<<sim::endl;
+                char mData[sizeof(t)];
+                memcpy(mData, &t, sizeof(t));
+                send(sock, &mData, sizeof(t), 0);
+                sendMutex.unlock();
+            }
+        }
+    }
 signals:
     void transmit_to_gui(SystemMessage m);
     void transmit_to_gui(DebugMessage m);
@@ -81,6 +121,7 @@ private:
     std::thread thr;
     void updateCount(int i);
     void updateCountTo(int i);
+
 };
 
 

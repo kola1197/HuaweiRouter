@@ -3,11 +3,9 @@
 //
 
 #include <netinet/in.h>
-#include <iostream>
 #include <arpa/inet.h>
 #include <thread>
 #include <Utils/ColorMode.h>
-#include <QtCore/QThread>
 #include <zconf.h>
 #include <Utils/Settings.h>
 #include "ServerConnection.h"
@@ -72,11 +70,6 @@ void ServerConnection::connectTo()
     started.set(true);
     connectionsCount.increase(1);
     connectionsCountTo.increase(1);
-    //updateCount(1);
-    //if (to!=-1 && from != -1)
-    //{
-    //updateCountTo(1);
-    //}
     if (!connected.get())
     {
         thr = std::thread([this]() {
@@ -105,21 +98,15 @@ void ServerConnection::connectTo()
                     printf("\nConnection Failed \n");
                 } else{
                     connected.set(true);
-                    //sim::sout<<"connection "<<from<<" => "<<to<<" status is now: CONNECTED"<<sim::endl;
                 }
             }
-            //connect(timer, SIGNAL(timeout()), this, SLOT(sendMessagesFromBufferTick()));
-            //timer->start();
+
             thr1 = std::thread([this]()
                                {
                                    while (!needToStop.get()){
                                        sendMessagesFromBufferTick();
                                        usleep(sendIntervalMS);
                                    }
-                                   Color::ColorMode grn(Color::FG_GREEN);
-                                   Color::ColorMode def(Color::FG_DEFAULT);
-                                   //sim::sout<<"Node "<<from<<grn<<" STATISTICS THREAD "<<def<<to<<grn<<" SUCCESSFULLY CLOSED (To)"<<def<<sim::endl;
-
                                });
             if (!oldway){
                 thr1.detach();
@@ -127,20 +114,10 @@ void ServerConnection::connectTo()
             while (!needToStop.get())
             {
                 getMessage();
-                //sim::sout<<"ALIVE"<<sim::endl;
             }
-            //sendMutex.lock();
-            //close(server_fd);
-            //shutdown(sock, 2);
-            //close(sock);
             mayCloseSocket.set(true);
             Color::ColorMode grn(Color::FG_GREEN);
             Color::ColorMode def(Color::FG_DEFAULT);
-            //updateCount(-1);
-            //if (to !=-1 && from != -1)
-            //{
-            //    updateCountTo(-1);
-            //}
             connectionsCount.increase(-1);
             connectionsCountTo.increase(-1);
             stopped.set(true);
@@ -357,6 +334,44 @@ void ServerConnection::awaitConnection()
     }
 }
 
+/*template <typename T> void ServerConnection::sendMessage(T t)
+{
+    HarbingerMessage h;
+    std::string type = typeid(t).name();
+    if (Messages::getMessageTypeByName(type, &h.type)) //HarbingerMessage::PING_MESSAGE;
+    {
+        h.code = 239;
+        if (!oldway)
+        {
+            messageBuffer.lock();
+            char hData[sizeof(h)];
+            memcpy(hData, &h, sizeof(h));
+            for (int i=0; i<sizeof(hData); i++)
+            {
+                messagesDataQueue.push_back(hData[i]);
+            }
+            char mData[sizeof(t)];
+            memcpy(mData, &t, sizeof(t));
+            for (int i=0; i<sizeof(mData); i++)
+            {
+                messagesDataQueue.push_back(mData[i]);
+            }
+            messageBuffer.unlock();
+        }
+        else{
+            sendMutex.lock();
+            char hData[sizeof(h)];
+            memcpy(hData, &h, sizeof(h));
+            send(sock, &hData, sizeof(h), 0);
+            //sim::sout<<"sizeof m"<< sizeof(m)<<sim::endl;
+            char mData[sizeof(t)];
+            memcpy(mData, &t, sizeof(t));
+            send(sock, &mData, sizeof(t), 0);
+            sendMutex.unlock();
+        }
+    }
+}*/
+/*
 void ServerConnection::sendMessage(PingMessage m)
 {
     HarbingerMessage h;
@@ -400,7 +415,7 @@ void ServerConnection::sendMessage(SystemMessage m)
     //sim::sout<<"sizeof m"<< sizeof(m)<<sim::endl;
     send(sock, &m, sizeof(m), 0);
     sendMutex.unlock();
-}
+}*/
 
 void ServerConnection::sendMessagesFromBufferTick()
 {
@@ -428,7 +443,7 @@ void ServerConnection::sendMessagesFromBufferTick()
     messageBuffer.unlock();
 }
 
-void ServerConnection::sendMessage(PacketMessage m)
+/*void ServerConnection::sendMessage(PacketMessage m)
 {
     HarbingerMessage h;
     h.type = HarbingerMessage::PACKET_MESSAGE;
@@ -463,4 +478,4 @@ void ServerConnection::sendMessage(PacketMessage m)
         sendMutex.unlock();
     }
 }
-
+*/

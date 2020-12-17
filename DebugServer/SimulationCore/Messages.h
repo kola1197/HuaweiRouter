@@ -65,19 +65,74 @@ struct TestMessage{
     //std::string testTexst;
 };
 
+
+
+//new generation
+enum Priority {
+    LOW, MEDIUM, HIGH
+};
+
 struct PacketMessage{
     enum Type {DEFAULT_PACKET=0};
+    Priority priority = Priority::MEDIUM;
     int from;
     int to;
     int id;
     int currentPosition;
     bool delivered;
     char uselessData [239000];
-    int checkSum = 239239239;
+    int checkSum = 0;
     std::chrono::milliseconds timeOnCreation;
     Type type;
 };
 
+/*struct Message
+{
+    Priority priority = Priority::MEDIUM;
+    int id;
+    int to;
+    int from;
+    std::chrono::milliseconds timeOnCreation;
+    std::chrono::milliseconds deliveredToThisNode;
+};
+
+struct PMessage:Message
+{
+
+};*/
+//enum Type {PING_MESSAGE, TEST_MESSAGE, SYSTEM_MESSAGE, DEBUG_MESSAGE, PACKET_MESSAGE};
+
+class Messages {
+public:
+    static bool getMessageTypeByName(std::string name,HarbingerMessage::Type * type) {
+        if (name == typeid(SystemMessage).name())
+        {
+            *type = HarbingerMessage::Type::SYSTEM_MESSAGE;
+            return true;
+        }
+        if (name == typeid(DebugMessage).name())
+        {
+            *type = HarbingerMessage::Type::DEBUG_MESSAGE;
+            return true;
+        }
+        if (name == typeid(PingMessage).name())
+        {
+            *type = HarbingerMessage::Type::PING_MESSAGE;
+            return true;
+        }
+        if (name == typeid(TestMessage).name())
+        {
+            *type = HarbingerMessage::Type::TEST_MESSAGE;
+            return true;
+        }
+        if (name == typeid(PacketMessage).name())
+        {
+            *type = HarbingerMessage::Type::PACKET_MESSAGE;
+            return true;
+        }
+        return false;
+    }
+};
 //class Messages {
 
 //};

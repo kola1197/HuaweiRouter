@@ -143,7 +143,6 @@ void ServerNode::Start()       //on start we connect to debug server
                 connections[i]->connectTo();
             }
         }
-
         bool allNodesConnected = false;
         while (!allNodesConnected)
         {
