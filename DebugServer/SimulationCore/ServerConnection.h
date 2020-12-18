@@ -7,6 +7,7 @@
 
 #include "QObject"
 #include "Messages.h"
+#include "SendingQueue.h"
 #include <Utils/MutexBool.h>
 #include <Utils/AsyncVar.h>
 #include <QtCore/QTimer>
@@ -66,7 +67,8 @@ public:
             h.code = 239;
             if (!oldway)
             {
-                messageBuffer.lock();
+                sendingQueue.addMessage(t);
+                /*messageBuffer.lock();
                 char hData[sizeof(h)];
                 memcpy(hData, &h, sizeof(h));
                 for (int i=0; i<sizeof(hData); i++)
@@ -79,7 +81,7 @@ public:
                 {
                     messagesDataQueue.push_back(mData[i]);
                 }
-                messageBuffer.unlock();
+                messageBuffer.unlock();*/
             }
             else{
                 sendMutex.lock();
@@ -113,7 +115,7 @@ private:
     std::string ip = "127.0.0.2";
     std::mutex sendMutex;
     //std::vector<PacketMessage> messagesQueue;
-    std::vector<char> messagesDataQueue;
+    //std::vector<char> messagesDataQueue;
     QTimer* timer = new QTimer();
     bool oldway = false;
     bool isServer = false;
@@ -121,7 +123,7 @@ private:
     std::thread thr;
     void updateCount(int i);
     void updateCountTo(int i);
-
+    SendingQueue sendingQueue;
 };
 
 

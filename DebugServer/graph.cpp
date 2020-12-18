@@ -181,7 +181,7 @@ void Graph::addPacketmessage(int _type, int _from, int _to)
     packetIdCounter++;
     if (_type == 0)
     {
-        m.type = PacketMessage::DEFAULT_PACKET;
+        //m.type = DEFAULT_PACKET;
     }
     m.from = _from;
     m.to = _to;
@@ -321,7 +321,7 @@ void Graph::get_system_message(SystemMessage m)
 
 void Graph::get_system_message(DebugMessage m)
 {
-    if (m.type == DebugMessage::CONNECTION_STATUS)
+    if (m.function == DebugMessage::CONNECTION_STATUS)
     {
         Ellips *e = getEllipseByNumber(m.i[0]);
         e->connected = m.i[1]==1;
@@ -329,7 +329,7 @@ void Graph::get_system_message(DebugMessage m)
         //sim::sout<<m.i[0]<<" send system message, colorStatus now is "<<e->colorStatus<<sim::endl;
         emit repaint();
     }
-    if (m.type == DebugMessage::PACKET_STATUS)
+    if (m.function == DebugMessage::PACKET_STATUS)
     {
         //sim::sout<<"GOT PACKET STATUS "<<m.i[0]<<"   "<<m.i[1]<<sim::endl;
         for (int i = 0;i < packets.size();i++)
@@ -342,7 +342,7 @@ void Graph::get_system_message(DebugMessage m)
         //emit repaint();
         emit updateTable();
     }
-    if (m.type == DebugMessage::PACKET_STATUS_DELIVERED)
+    if (m.function == DebugMessage::PACKET_STATUS_DELIVERED)
     {
         for (int i = 0;i < packets.size();i++)
         {
@@ -355,14 +355,14 @@ void Graph::get_system_message(DebugMessage m)
         }
             emit updateTable();
     }
-    if (m.type == DebugMessage::PACKET_COUNT_STATUS)
+    if (m.function == DebugMessage::PACKET_COUNT_STATUS)
     {
         Ellips *e = getEllipseByNumber(m.i[0]);
         e->packetCount = m.i[1];
         e->maxPacketCount = m.i[2];
         emit repaint();
     }
-    if (m.type == DebugMessage::EDGES_USAGE_STATUS)
+    if (m.function == DebugMessage::EDGES_USAGE_STATUS)
     {
         int count = m.i[0];
         for (int j = 0;j<count;j++)
@@ -392,7 +392,7 @@ void Graph::addPacket()
     PacketMessage m;
     m.id = packetIdCounter;
     packetIdCounter++;
-    m.type = PacketMessage::DEFAULT_PACKET;
+    //m.type = PacketMessage::DEFAULT_PACKET;
     m.from = -1;
     m.to = -1;
     m.currentPosition = -1;

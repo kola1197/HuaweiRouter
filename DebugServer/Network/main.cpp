@@ -8,6 +8,7 @@
 #include <ctime>
 #include <Utils/Settings.h>
 #include <Utils/sout.h>
+#include <SimulationCore/SendingQueue.h>
 
 using namespace std;
 
@@ -125,8 +126,51 @@ void soutTest()
     }
 }
 
+void newMessagesQueueTest()
+{
+    ServerConnection* s1 = new ServerConnection(5239, 0, 1, 0);
+    ServerConnection* s2 = new ServerConnection(5239, 1, 0, 0);
+    s1->awaitConnection();
+    usleep(1000);
+    s2->connectTo();
+    TestMessage t;
+    t.checkCode = 1001001;
+    char test[] = "SUCKSESS!!!";
+    for (int i=0;i<sizeof (test);i++)
+    {
+        t.text[i] = test[i];
+    }
+    TestMessage tt;
+    tt.priority = HIGH;
+    tt.checkCode = 239239;
+    char test1[] = "IMPORTANT SUCKSESS!!! kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk";
+    for (int i=0;i<sizeof (test1);i++)
+    {
+        tt.text[i] = test1[i];
+    }
+    PacketMessage packetMessage{};
+    packetMessage.checkSum=2391197;
+    packetMessage.priority = HIGH;
+    packetMessage.to = 1;
+    s1->sendMessage(t);
+    s1->sendMessage(packetMessage);
+    s1->sendMessage(t);
+    //usleep(100000);
+    s1->sendMessage(tt);
+    s1->sendMessage(t);
+    s1->sendMessage(t);
+    s1->sendMessage(t);
+    s1->sendMessage(tt);
+    while (true)
+    {
+        usleep(100000);
+    }
+}
+
 int main(int argc, char *argv[]) {
-    //soutTest();
+
+
+    //newMessagesQueueTest();
     QApplication a(argc, argv);
     a.setApplicationName("Simulation");
     MainWindow w;

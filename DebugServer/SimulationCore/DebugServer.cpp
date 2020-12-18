@@ -57,7 +57,7 @@ void DebugServer::Start()
         for (int i=0;i<connections.size();i++)
         {
             SystemMessage m;
-            m.type = SystemMessage::DEBUG_SERVER_READY;
+            m.function = SystemMessage::DEBUG_SERVER_READY;
             m.i[0]=1;
             connections[i]->sendMessage(m);
         }
@@ -77,7 +77,7 @@ void DebugServer::Start()
         for (int i=0;i<connections.size();i++)
         {
             SystemMessage m;
-            m.type = SystemMessage::SERVERS_READY;
+            m.function = SystemMessage::SERVERS_READY;
             m.i[0]=1;
             connections[i]->sendMessage(m);
         }
@@ -96,7 +96,7 @@ void DebugServer::Start()
         for (int i=0;i<connections.size();i++)
         {
             SystemMessage m;
-            m.type = SystemMessage::START_SIMULATION_FLAG;
+            m.function = SystemMessage::START_SIMULATION_FLAG;
             m.i[0]=1;
             connections[i]->sendMessage(m);
         }
@@ -109,7 +109,7 @@ void DebugServer::get_message_for_debug(SystemMessage m)
 {
     Color::ColorMode grn(Color::FG_GREEN);
     Color::ColorMode def(Color::FG_DEFAULT);
-    if (m.type == SystemMessage::START_SIMULATION_FLAG)
+    if (m.function == SystemMessage::START_SIMULATION_FLAG)
     {
         sim::sout<<"Debug server:"<<" GOT SYSTEM MESSAGE FROM "<<m.i[0]<<" status START_SIMULATION_FLAG is "<<m.i[1]<<sim::endl;
         for (int i=0;i<graph.ellipses.size();i++)
@@ -120,7 +120,7 @@ void DebugServer::get_message_for_debug(SystemMessage m)
             }
         }
     }
-    if (m.type == SystemMessage::SERVERS_READY)
+    if (m.function == SystemMessage::SERVERS_READY)
     {
         sim::sout<<"Debug server:"<<grn<<" GOT SYSTEM MESSAGE FROM "<<m.i[0]<<" status SERVERS_READY is "<<m.i[1]<<def<<sim::endl;
         for (int i=0;i<graph.ellipses.size();i++)

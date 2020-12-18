@@ -140,23 +140,23 @@ void ServerConnection::getMessage()
     }
     if (!needToStop.get()){
         memcpy(&h,hmsg , sizeof(h));
-        if (h.type == HarbingerMessage::PING_MESSAGE)
+        if (h.type == PING_MESSAGE)
         {
             getPingMessage();
         }
-        if (h.type == HarbingerMessage::TEST_MESSAGE)
+        if (h.type == TEST_MESSAGE)
         {
             getTestMessage();
         }
-        if (h.type == HarbingerMessage::SYSTEM_MESSAGE)
+        if (h.type == SYSTEM_MESSAGE)
         {
             getSystemMessage();
         }
-        if (h.type == HarbingerMessage::DEBUG_MESSAGE)
+        if (h.type == DEBUG_MESSAGE)
         {
             getDebugMessage();
         }
-        if (h.type == HarbingerMessage::PACKET_MESSAGE)
+        if (h.type == PACKET_MESSAGE)
         {
             getPacketMessage();
         }
@@ -175,7 +175,7 @@ void ServerConnection::getPacketMessage()
         }
     }
     memcpy(&m, msg, sizeof(m));
-    //sim::sout<<"From "<<from<<" to "<<to<<" got message with id "<<m.id<<" checksum: "<<m.checkSum <<sim::endl;
+    sim::sout<<"From "<<from<<" to "<<to<<" got message with id "<<m.id<<" checksum: "<<m.checkSum <<sim::endl;
     emit transmit_to_node(m);
 }
 
@@ -228,6 +228,7 @@ void ServerConnection::getPingMessage()
 
 void ServerConnection::getTestMessage()
 {
+    //sim::sout<<"awaiting test message"<<sim::endl;
     TestMessage m;
     //m.testTexst = "";
     char msg[sizeof (m)];
@@ -239,8 +240,7 @@ void ServerConnection::getTestMessage()
         }
     }
     memcpy(&m, msg, sizeof(m));
-
-    sim::sout<<"Got test Message from "<<from<<" => "<<to<<" message '"<<m.text<<"'"<<sim::endl;
+    sim::sout<<"Got test Message from "<<from<<" => "<<to<<" message '"<<m.text<<"'  checkCode = "<<m.checkCode<<sim::endl;
 }
 
 void ServerConnection::awaitConnection()
@@ -419,7 +419,7 @@ void ServerConnection::sendMessage(SystemMessage m)
 
 void ServerConnection::sendMessagesFromBufferTick()
 {
-    messageBuffer.lock();
+    /*messageBuffer.lock();
     if (!messagesDataQueue.empty()) {
         //sim::sout<<"tick from "<<from<<" to"<<to<<" messagesDataQueue size: "<<messagesDataQueue.size()<<sim::endl;
         int size = messagesDataQueue.size()>sendBytesPerInterval ? sendBytesPerInterval : messagesDataQueue.size();
@@ -440,7 +440,22 @@ void ServerConnection::sendMessagesFromBufferTick()
         sendMutex.unlock();
         bufferLoad.set(messagesDataQueue.size() * 100 / (1000000 * sendBytesPerInterval / sendIntervalMS));
     }
-    messageBuffer.unlock();
+    messageBuffer.unlock();*/
+
+    //if (from == 0){
+    std::vector<char> dataToSend = sendingQueue.getData(sendBytesPerInterval);
+    char data[dataToSend.size()];
+    for (int i=0;i<dataToSend.size();i++)
+    {
+        data[i] = dataToSend[i];
+        //sim::sout<<data[i]<<sim::endl;
+    }
+    sendMutex.lock();
+    send(sock, &data, sizeof(data), 0);
+    sendMutex.unlock();
+    //}
+    bufferLoad.set( sendingQueue.loadingSize.get() * 100 / (1000000 * sendBytesPerInterval / sendIntervalMS));
+    //bufferLoad.set(messagesDataQueue.size() * 100 / (1000000 * sendBytesPerInterval / sendIntervalMS));
 }
 
 /*void ServerConnection::sendMessage(PacketMessage m)

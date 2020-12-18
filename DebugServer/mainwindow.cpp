@@ -65,7 +65,7 @@ void MainWindow::createUI()
     ui->tableWidget->setShowGrid(true);
     ui->tableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
     //QStringList headers =
-    ui->tableWidget->setHorizontalHeaderLabels(QStringList() <<trUtf8("№") <<trUtf8("    id    ") <<trUtf8("    Type    ") <<trUtf8("    From    ") <<trUtf8("    To    ")<< trUtf8("    Current Position    ")<<trUtf8("    Delivering time (ms)    ")<<trUtf8("Delete"));
+    ui->tableWidget->setHorizontalHeaderLabels(QStringList() <<trUtf8("№") <<trUtf8("    id    ") <<trUtf8("    Function    ") <<trUtf8("    From    ") <<trUtf8("    To    ")<< trUtf8("    Current Position    ")<<trUtf8("    Delivering time (ms)    ")<<trUtf8("Delete"));
     ui->tableWidget->horizontalHeader()->setStretchLastSection(true);
     ui->tableWidget->hideColumn(0);
 
@@ -159,7 +159,7 @@ void MainWindow::cellIndexChanged(int i)
         int index = box->toolTip().toInt();
         if (i == 0)
         {
-            ui->openGLWidget->graph.packets[index].type = PacketMessage::DEFAULT_PACKET;
+            //ui->openGLWidget->graph.packets[index].type = PacketMessage::DEFAULT_PACKET;
         }
     }
 }

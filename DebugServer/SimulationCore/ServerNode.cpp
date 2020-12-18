@@ -85,7 +85,7 @@ void ServerNode::Start()       //on start we connect to debug server
         }
         //sim::sout<<"Node "<<serverNum<<": debugServer active now "<<sim::endl;
         DebugMessage d;
-        d.type = DebugMessage::CONNECTION_STATUS;
+        d.function = DebugMessage::CONNECTION_STATUS;
         d.i[0]=serverNum;
         d.i[1]=2;
         debugConnection->sendMessage(d);
@@ -126,7 +126,7 @@ void ServerNode::Start()       //on start we connect to debug server
         }
         //sim::sout<<"Node "<<serverNum<<": Servers are ready, waiting for clients connections "<<sim::endl;
         SystemMessage mm;
-        mm.type = SystemMessage::SERVERS_READY;
+        mm.function = SystemMessage::SERVERS_READY;
         mm.i[0] = serverNum;
         mm.i[1] = 1;
         debugConnection->sendMessage(mm);
@@ -157,13 +157,13 @@ void ServerNode::Start()       //on start we connect to debug server
             }
         }
         SystemMessage m;
-        m.type = SystemMessage::START_SIMULATION_FLAG;
+        m.function = SystemMessage::START_SIMULATION_FLAG;
         m.i[0] = serverNum;
         m.i[1] = 1;
         debugConnection->sendMessage(m);
 
         DebugMessage dd;
-        dd.type = DebugMessage::CONNECTION_STATUS;
+        dd.function = DebugMessage::CONNECTION_STATUS;
         dd.i[0] = serverNum;
         dd.i[1] = 3;
         debugConnection->sendMessage(dd);
@@ -246,7 +246,7 @@ int ServerNode::drillSelectionAlgorithm()
 void ServerNode::updateEdgesUsage()      // it will be broken with more than 99 edges in one node
 {
     DebugMessage d;
-    d.type = DebugMessage::EDGES_USAGE_STATUS;
+    d.function = DebugMessage::EDGES_USAGE_STATUS;
     d.i[0] = connections.size();
     for (int j=0;j<d.i[0];j++)
     {
@@ -266,7 +266,7 @@ void ServerNode::updatePacketCountForDebugServer()
 {
     maxPacketsCount = maxPacketsCount>messagesStack.size() ? maxPacketsCount : messagesStack.size();
     DebugMessage dmsg;
-    dmsg.type = DebugMessage::PACKET_COUNT_STATUS;
+    dmsg.function = DebugMessage::PACKET_COUNT_STATUS;
     dmsg.i[0] = serverNum;
     dmsg.i[1] = messagesStack.size();
     dmsg.i[2] = maxPacketsCount;
@@ -338,7 +338,7 @@ void ServerNode::get_message(PacketMessage m)
         //qFatal("Error on Node %s !!! Packet with id %s got wrong checksum ( %s )",serverNum,m.id, m.checkSum);
     }
     DebugMessage d;
-    d.type = DebugMessage::PACKET_STATUS;
+    d.function = DebugMessage::PACKET_STATUS;
     d.i[0] = m.id;
     d.i[1] = serverNum;
     debugConnection->sendMessage(d);
@@ -351,7 +351,7 @@ void ServerNode::get_message(PacketMessage m)
         m.delivered =true;
         std::chrono::milliseconds ms = timeNow();
         DebugMessage msg;
-        msg.type = DebugMessage::PACKET_STATUS_DELIVERED;
+        msg.function = DebugMessage::PACKET_STATUS_DELIVERED;
         msg.deliveringTime = ms - m.timeOnCreation;
         msg.i[0] = m.id;
         msg.i[1] = serverNum;
@@ -361,16 +361,16 @@ void ServerNode::get_message(PacketMessage m)
 
 void ServerNode::get_message(SystemMessage m)
 {
-    if (m.type == SystemMessage::START_SIMULATION_FLAG)
+    if (m.function == SystemMessage::START_SIMULATION_FLAG)
     {
         startTest.set(m.i[0]==1);
     }
-    if (m.type == SystemMessage::SERVERS_READY)
+    if (m.function == SystemMessage::SERVERS_READY)
     {
         sim::sout<<"Node "<<serverNum<<" got SERVERS_READY status "<<m.i[0]<<sim::endl;
         allClientsReady.set(m.i[0]==1);
     }
-    if (m.type == SystemMessage::DEBUG_SERVER_READY)
+    if (m.function == SystemMessage::DEBUG_SERVER_READY)
     {
         sim::sout<<"Node "<<serverNum<<" got DEBUG_SERVER_READY status "<<m.i[0]<<sim::endl;
         debugServerReady.set(m.i[0]==1);
