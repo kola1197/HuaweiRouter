@@ -9,6 +9,7 @@
 #include <Utils/Settings.h>
 #include <Utils/sout.h>
 #include <SimulationCore/SendingQueue.h>
+#include <Utils/CpuInfo.h>
 
 using namespace std;
 
@@ -169,7 +170,7 @@ void newMessagesQueueTest()
 
 int main(int argc, char *argv[]) {
 
-
+    //CpuInfo::getCPULoad();
     //newMessagesQueueTest();
     QApplication a(argc, argv);
     a.setApplicationName("Simulation");

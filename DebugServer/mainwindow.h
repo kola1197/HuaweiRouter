@@ -36,12 +36,12 @@ private slots:
 
     void on_count_of_bytes_editingFinished();
     void on_send_interval_editingFinished();
-
 public slots:
     void on_settingsButton_released();
     void repaintOGLWidget();
     void onBtnClicked();
     void unBlockInterface();
+    void updateCpuLabel();
     //void get_system_message(SystemMessage m);
 private:
     Simulation* simulation;
@@ -49,6 +49,8 @@ private:
     void connectSlots();
     void createUI();
     Graph savedGraph;
+
+    QTimer* tmr;
 
     void checkSimulationStatus();
     bool tableResized = false;

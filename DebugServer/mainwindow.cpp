@@ -9,6 +9,7 @@
 #include <zconf.h>
 #include <Utils/Settings.h>
 #include <Utils/sout.h>
+#include <Utils/CpuInfo.h>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -25,6 +26,39 @@ MainWindow::MainWindow(QWidget *parent)
     setDefaultSettings();
     connect(ui->openGLWidget,SIGNAL(transmit_info(QString)),this,SLOT(setEllipseInfo(QString)));
     draw();
+    tmr = new QTimer();
+    tmr->setInterval(1000);
+    connect(tmr, SIGNAL(timeout()), this, SLOT(updateCpuLabel()));
+    tmr->start();
+}
+
+void MainWindow::updateCpuLabel()
+{
+    float limValue = 95.00f;
+    std::vector<float> cpuUsage = CpuInfo::getCPULoad();
+    bool limit = false;
+    limit = cpuUsage[0] > limValue || limit;;
+    QString result = "AVG] " + QString::number(cpuUsage[0], 'f',2)+"% ";
+    int length = result.size();
+    for (int i=1; i < cpuUsage.size();i=i+2)
+    {
+        limit = cpuUsage[i] > limValue || limit;
+        result += QString::number(i-1)+"] " ;
+        result += QString::number(cpuUsage[i], 'f',2)+"% ";
+    }
+    result += "\n             ";
+    for (int i=0;i<length;i++)
+    {
+        result+=" ";
+    }
+    for (int i=2; i < cpuUsage.size();i=i+2)
+    {
+        limit = cpuUsage[i] > limValue || limit;
+        result += QString::number(i-1)+"] " ;
+        result += QString::number(cpuUsage[i], 'f',2)+"% ";
+    }
+    ui->CpuInfoLabel->setStyleSheet(limit ? "color: rgb(200, 0, 0)" : "color: rgb(0, 0, 0)");
+    ui->CpuInfoLabel->setText(result);
 }
 
 void MainWindow::setDefaultSettings()
