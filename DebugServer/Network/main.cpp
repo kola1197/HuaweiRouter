@@ -170,7 +170,6 @@ void newMessagesQueueTest()
 
 int main(int argc, char *argv[]) {
 
-    //CpuInfo::getCPULoad();
     //newMessagesQueueTest();
     QApplication a(argc, argv);
     a.setApplicationName("Simulation");

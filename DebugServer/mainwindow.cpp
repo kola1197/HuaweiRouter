@@ -59,6 +59,10 @@ void MainWindow::updateCpuLabel()
     }
     ui->CpuInfoLabel->setStyleSheet(limit ? "color: rgb(200, 0, 0)" : "color: rgb(0, 0, 0)");
     ui->CpuInfoLabel->setText(result);
+    float ftemp = CpuInfo::getCPUTemp();
+    ui->CpuTempLabel->setStyleSheet(ftemp > 75.0f ? "color: rgb(200, 0, 0)" : "color: rgb(0, 0, 0)");
+    QString temp = "CPU temp = "+QString::number(ftemp,'f',2)+"°C";
+    ui->CpuTempLabel->setText(temp);
 }
 
 void MainWindow::setDefaultSettings()

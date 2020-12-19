@@ -32,6 +32,7 @@ typedef struct CPUData
 class CpuInfo {
 public:
     static std::vector<float> getCPULoad();
+    static float getCPUTemp();
 private:
     static void ReadStatsCPU(std::vector<CPUData> & entries);
     static size_t GetIdleTime(const CPUData & e);

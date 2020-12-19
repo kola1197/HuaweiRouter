@@ -128,3 +128,22 @@ void CpuInfo::PrintStats(const std::vector<CPUData> & entries1, const std::vecto
         std::cout << (100.f * IDLE_TIME / TOTAL_TIME) << "%" << std::endl;
     }
 }
+
+float CpuInfo::getCPUTemp()
+{
+    std::ifstream fileStat("/sys/class/hwmon/hwmon0/temp1_input");
+    //std::ifstream fileStat("cat sensors");
+    std::string line;
+    float result = -1;
+    while(std::getline(fileStat, line))
+    {
+        std::istringstream ss(line);
+        //std::cout<<ss.str()<<std::endl;
+        if (result==-1)
+        {
+            result = std::stof(ss.str());
+        }
+    }
+    result = result/1000;
+    return result;
+}
