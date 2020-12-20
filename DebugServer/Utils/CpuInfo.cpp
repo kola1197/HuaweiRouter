@@ -7,6 +7,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <QProcess>
 #include "CpuInfo.h"
 
 std::vector<float> CpuInfo::getCPULoad()
@@ -146,4 +147,18 @@ float CpuInfo::getCPUTemp()
     }
     result = result/1000;
     return result;
+}
+
+std::string CpuInfo::getCPUName()
+{
+    QProcess linuxcpuinfo;
+    //QString linuxcpu = "cat /proc/cpuinfo | grep \'model name\' | uniq";
+    //linuxcpuinfo.start("bash", QStringList() << "-c" << "cat /proc/cpuinfo | grep \'model name\' | uniq");
+    linuxcpuinfo.start("bash", QStringList() << "-c" << "lscpu | grep \"Model name:\" | sed -r 's/Model name:\\s{1,}//g'");
+    //linuxcpuinfo.start(linuxcpu);
+    linuxcpuinfo.waitForFinished();
+    //std::cout<<linuxcpu.toStdString()<<std::endl;
+    QString linuxOutput = linuxcpuinfo.readAllStandardOutput();
+    linuxOutput = linuxOutput.replace("\n","");
+    return linuxOutput.toStdString();
 }

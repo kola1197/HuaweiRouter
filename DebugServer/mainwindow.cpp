@@ -10,6 +10,7 @@
 #include <Utils/Settings.h>
 #include <Utils/sout.h>
 #include <Utils/CpuInfo.h>
+#include <SimulationCore/SimulationReport.h>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -63,6 +64,9 @@ void MainWindow::updateCpuLabel()
     ui->CpuTempLabel->setStyleSheet(ftemp > 75.0f ? "color: rgb(200, 0, 0)" : "color: rgb(0, 0, 0)");
     QString temp = "CPU temp = "+QString::number(ftemp,'f',2)+"°C";
     ui->CpuTempLabel->setText(temp);
+    if (simulationIsActive){
+        ui->openGLWidget->graph.cpuCorrect = !limit && ftemp <= 75.0f && ui->openGLWidget->graph.cpuCorrect;
+    }
 }
 
 void MainWindow::setDefaultSettings()
@@ -211,13 +215,16 @@ void MainWindow::cellFromTextChanged()
 
         bool b;
         int data = s.toInt(&b,10);
-        if (!b)                                  //check data
+        if (!b )                                  //check data
         {
-            data = -1;
-            QMessageBox::information( this, "The button was clicked", edit->toPlainText());
-            //QColor c ()
-            edit->setTextColor(QColor(255,0,0));
-            edit->setText("-1");
+            if (s.toStdString() != "" && s.toStdString() != " " ) {
+                data = -1;
+                QMessageBox::information(this, "The button was pressed", edit->toPlainText());
+                //QColor c ()
+                edit->setTextColor(QColor(255, 0, 0));
+                edit->setText("-1");
+            }
+            else{}
         }
         else
         {
@@ -241,11 +248,13 @@ void MainWindow::cellToTextChanged()
         int data = s.toInt(&b,10);
         if (!b)                                  //check data
         {
-            data = -1;
-            QMessageBox::information( this, "The button was clicked", edit->toPlainText());
-            //QColor c ()
-            edit->setTextColor(QColor(255,0,0));
-            edit->setText("-1");
+            if (s.toStdString() != "" && s.toStdString() != " " ) {
+                data = -1;
+                QMessageBox::information(this, "The button was pressed", edit->toPlainText());
+                //QColor c ()
+                edit->setTextColor(QColor(255, 0, 0));
+                edit->setText("-1");
+            }else {}
         }
         else
         {
@@ -396,6 +405,7 @@ void MainWindow::checkSimulationStatus()
         allPacketsDelivered = allPacketsDelivered ? ui->openGLWidget->graph.packets[i].delivered : false;
         time += ui->openGLWidget->graph.packets[i].timeOnCreation.count();
     }
+    ui->openGLWidget->graph.averageTime = time;
     if (allPacketsDelivered)
     {
         time /= ui->openGLWidget->graph.packets.size();
@@ -403,6 +413,11 @@ void MainWindow::checkSimulationStatus()
         msgBox.setText("All packets delivered. \nAverage time: " + QString::number(time));
         msgBox.exec();
         unBlockInterface();
+        if (ui->saveReportCheckBox->isChecked())
+        {
+            SimulationReport::generateReport(&ui->openGLWidget->graph, ui->algorithmBox->currentText().toStdString());
+        }
+        ui->openGLWidget->graph.cpuCorrect = true;
     }
 }
 

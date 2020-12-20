@@ -33,6 +33,7 @@ class CpuInfo {
 public:
     static std::vector<float> getCPULoad();
     static float getCPUTemp();
+    static std::string getCPUName();
 private:
     static void ReadStatsCPU(std::vector<CPUData> & entries);
     static size_t GetIdleTime(const CPUData & e);

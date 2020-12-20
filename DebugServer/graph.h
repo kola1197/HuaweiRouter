@@ -66,6 +66,8 @@ public:
     void addPacket(PacketMessage m);
     void addPacketmessage(int _type, int _from, int _to);
     int packetIdCounter = 0;
+    float averageTime = 0;
+    bool cpuCorrect = true;
     Algorithms selectedAlgorithm = Algorithms::RANDOM;
 public slots:
     void get_system_message(SystemMessage m);
