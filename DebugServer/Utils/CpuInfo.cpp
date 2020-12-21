@@ -9,6 +9,7 @@
 #include <iostream>
 #include <QProcess>
 #include "CpuInfo.h"
+#include "sout.h"
 
 std::vector<float> CpuInfo::getCPULoad()
 {
@@ -132,21 +133,52 @@ void CpuInfo::PrintStats(const std::vector<CPUData> & entries1, const std::vecto
 
 float CpuInfo::getCPUTemp()
 {
-    std::ifstream fileStat("/sys/class/hwmon/hwmon0/temp1_input");
-    //std::ifstream fileStat("cat sensors");
-    std::string line;
-    float result = -1;
-    while(std::getline(fileStat, line))
-    {
-        std::istringstream ss(line);
-        //std::cout<<ss.str()<<std::endl;
-        if (result==-1)
-        {
-            result = std::stof(ss.str());
+    QString cpuName = QString::fromUtf8(getCPUName().c_str());
+    sim::sout<<cpuName.toStdString().c_str()<<sim::endl;
+    if (cpuName.contains("AMD")) {
+        sim::sout<<"AMD"<<sim::endl;
+        std::ifstream fileStat("/sys/class/hwmon/hwmon0/temp1_input");
+        //std::ifstream fileStat("cat sensors");
+        std::string line;
+        float result = -1;
+        while (std::getline(fileStat, line)) {
+            std::istringstream ss(line);
+            //std::cout<<ss.str()<<std::endl;
+            if (result == -1) {
+                result = std::stof(ss.str());
+            }
         }
+        result = result / 1000;
+        return result;
     }
-    result = result/1000;
-    return result;
+    else{
+        sim::sout<<"intel"<<sim::endl;
+        //std::ifstream fileStat("cat /sys/class/thermal/thermal_zone*/temp");
+        QProcess linuxcpuinfo;
+        //linuxcpuinfo.start("bash", QStringList() << "-c" << "cat /sys/class/thermal/thermal_zone*/temp");
+        linuxcpuinfo.start("bash", QStringList() << "-c" << "paste <(cat /sys/class/thermal/thermal_zone*/type) <(cat /sys/class/thermal/thermal_zone*/temp) | column -s $'\\t' -t | sed 's/\\(.\\)..$/.\\1°C/'");
+        linuxcpuinfo.waitForFinished();
+        QString linuxOutput = linuxcpuinfo.readAllStandardOutput();
+        //sim::sout<<linuxOutput.toStdString().c_str()<<sim::endl;
+        QStringList res = linuxOutput.split("\n");
+        QString s = res[res.size() - 2];
+        QStringList ss = s.split(" ");
+        s = ss[ss.size()-1];
+        s = s.split("°")[0];
+        float result = s.toFloat();
+        //linuxOutput = linuxOutput.replace("\n","");
+        /*std::string line;
+        float prevRes = -1;
+        float result = -1;
+        while (std::getline(fileStat, line)) {
+            std::istringstream ss(line);
+            std::cout<<ss.str()<<std::endl;
+            prevRes = result;
+            result = std::stof(ss.str());
+        }*/
+        //result = result / 1000;
+        return result;
+    }
 }
 
 std::string CpuInfo::getCPUName()
