@@ -25,9 +25,9 @@ void SimulationReport::generateReport(Graph* g, std::string alg)
     fout<<"             "<<g->packets.size()<<" Packets                  \n";
     fout<<" Algorithm:        "<<alg<<"   \n";
     fout<<" CPU:              "<<CpuInfo::getCPUName()<<"                  \n";
-    std::string cpuLoadStatus = g->cpuLoadCriticalFrames > 1 ? "OK" : "OVERLOAD ( we've got " + QString::number(g->cpuLoadCriticalFrames).toStdString() + " overload frames: "+QString::number(g->cpuLoadCriticalFrames*100/g->cpuFrames).toStdString()+"% of time)";
+    std::string cpuLoadStatus = g->cpuLoadCriticalFrames < 1 ? "OK" : "OVERLOAD ( we've got " + QString::number(g->cpuLoadCriticalFrames).toStdString() + " overload frames: "+QString::number(g->cpuLoadCriticalFrames*100/g->cpuFrames).toStdString()+"% of time )";
     fout<<" CPU load status:       "<<cpuLoadStatus<<"                  \n";
-    std::string cpuTempStatus = g->cpuTermCriticalFrames > 1 ? "OK" : "OVEHEAT ( we've got " + QString::number(g->cpuTermCriticalFrames).toStdString() +" overheat frames: "+QString::number(g->cpuTermCriticalFrames*100/g->cpuFrames).toStdString()+"% of time)";
+    std::string cpuTempStatus = g->cpuTermCriticalFrames < 1 ? "OK" : "OVEHEAT ( we've got " + QString::number(g->cpuTermCriticalFrames).toStdString() +" overheat frames: "+QString::number(g->cpuTermCriticalFrames*100/g->cpuFrames).toStdString()+"% of time )";
     fout<<" CPU temp status:       "<<cpuTempStatus<<"                  \n";
     fout<<" Average time:     "<<g->averageTime<<"          \n\n";
     for (int j=0;j<g->packets.size();j++)
