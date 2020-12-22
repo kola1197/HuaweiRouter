@@ -68,6 +68,9 @@ public:
     int packetIdCounter = 0;
     float averageTime = 0;
     bool cpuCorrect = true;
+    int cpuTermCriticalFrames = 0;
+    int cpuLoadCriticalFrames = 0;
+    int cpuFrames = 0;
     Algorithms selectedAlgorithm = Algorithms::RANDOM;
 public slots:
     void get_system_message(SystemMessage m);

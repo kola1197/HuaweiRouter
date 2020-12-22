@@ -36,6 +36,7 @@ MainWindow::MainWindow(QWidget *parent)
 void MainWindow::updateCpuLabel()
 {
     float limValue = 95.00f;
+    float criticalTemp = 75.0f;
     std::vector<float> cpuUsage = CpuInfo::getCPULoad();
     bool limit = false;
     limit = cpuUsage[0] > limValue || limit;;
@@ -61,8 +62,17 @@ void MainWindow::updateCpuLabel()
     ui->CpuInfoLabel->setStyleSheet(limit ? "color: rgb(200, 0, 0)" : "color: rgb(0, 0, 0)");
     ui->CpuInfoLabel->setText(result);
     float ftemp = CpuInfo::getCPUTemp();
-    ui->CpuTempLabel->setStyleSheet(ftemp > 75.0f ? "color: rgb(200, 0, 0)" : "color: rgb(0, 0, 0)");
+    ui->CpuTempLabel->setStyleSheet(ftemp > criticalTemp ? "color: rgb(200, 0, 0)" : "color: rgb(0, 0, 0)");
     QString temp = "CPU temp = "+QString::number(ftemp,'f',2)+"°C";
+    ui->openGLWidget->graph.cpuFrames++;
+    if (limit)
+    {
+        ui->openGLWidget->graph.cpuLoadCriticalFrames++;
+    }
+    if (ftemp > criticalTemp)
+    {
+        ui->openGLWidget->graph.cpuTermCriticalFrames++;
+    }
     ui->CpuTempLabel->setText(temp);
     if (simulationIsActive){
         ui->openGLWidget->graph.cpuCorrect = !limit && ftemp <= 75.0f && ui->openGLWidget->graph.cpuCorrect;
@@ -405,10 +415,10 @@ void MainWindow::checkSimulationStatus()
         allPacketsDelivered = allPacketsDelivered ? ui->openGLWidget->graph.packets[i].delivered : false;
         time += ui->openGLWidget->graph.packets[i].timeOnCreation.count();
     }
-    ui->openGLWidget->graph.averageTime = time;
     if (allPacketsDelivered)
     {
         time /= ui->openGLWidget->graph.packets.size();
+        ui->openGLWidget->graph.averageTime = time;
         QMessageBox msgBox;
         msgBox.setText("All packets delivered. \nAverage time: " + QString::number(time));
         msgBox.exec();
