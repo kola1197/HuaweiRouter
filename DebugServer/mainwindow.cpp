@@ -325,6 +325,10 @@ void MainWindow::on_startButton_released()   // lock the screen and start simula
     //sim::sout<<"START PRESS"<<sim::endl;
     if (!simulationIsActive){
         simulationIsActive = true;
+        ui->openGLWidget->graph.cpuCorrect = true;
+        ui->openGLWidget->graph.cpuTermCriticalFrames = 0;
+        ui->openGLWidget->graph.cpuLoadCriticalFrames = 0;
+        ui->openGLWidget->graph.cpuFrames = 0;
         blockInterface();
         savedGraph = Graph(ui->openGLWidget->graph);
         simulation = new Simulation(&ui->openGLWidget->graph);
