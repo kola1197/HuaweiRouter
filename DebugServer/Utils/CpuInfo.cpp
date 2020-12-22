@@ -117,13 +117,11 @@ void CpuInfo::PrintStats(const std::vector<CPUData> & entries1, const std::vecto
         const float IDLE_TIME	= static_cast<float>(GetIdleTime(e2) - GetIdleTime(e1));
         const float TOTAL_TIME	= ACTIVE_TIME + IDLE_TIME;
 
-        //std::cout << "active: ";
         std::cout.setf(std::ios::fixed, std::ios::floatfield);
         std::cout.width(6);
         std::cout.precision(2);
         std::cout << (100.f * ACTIVE_TIME / TOTAL_TIME) << "%";
 
-        //std::cout << " - idle: ";
         std::cout.setf(std::ios::fixed, std::ios::floatfield);
         std::cout.width(6);
         std::cout.precision(2);
