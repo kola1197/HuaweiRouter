@@ -36,6 +36,9 @@ private slots:
 
     void on_count_of_bytes_editingFinished();
     void on_send_interval_editingFinished();
+    void repaint_on_simulation_finish_done();
+signals:
+    void simulation_finish_done();
 public slots:
     void on_settingsButton_released();
     void repaintOGLWidget();

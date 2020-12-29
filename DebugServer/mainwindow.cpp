@@ -26,6 +26,7 @@ MainWindow::MainWindow(QWidget *parent)
     createAlgprithmComboBox();
     setDefaultSettings();
     connect(ui->openGLWidget,SIGNAL(transmit_info(QString)),this,SLOT(setEllipseInfo(QString)));
+    connect(this,SIGNAL(simulation_finish_done()), this, SLOT(repaint_on_simulation_finish_done()));
     draw();
     tmr = new QTimer();
     tmr->setInterval(1000);
@@ -337,18 +338,28 @@ void MainWindow::on_startButton_released()   // lock the screen and start simula
     }
     else {
         ui->startButton->setText("Please wait");
-        disconnectSlots();
-        simulationIsActive = false;
-        simulation->stop();
-        usleep(100000);
-        ui->openGLWidget->graph = Graph(savedGraph);
-        sim::sout<<ui->openGLWidget->graph.edges.size()<<sim::endl;
-        updateStartButtonText();
-        updateTable();
-        repaintOGLWidget();
+        blockInterface();
+        std::thread thr1 = std::thread([this](){
+                disconnectSlots();
+                simulationIsActive = false;
+                simulation->stop();
+                //usleep(100000);
+                ui->openGLWidget->graph = Graph(savedGraph);
+                sim::sout<<ui->openGLWidget->graph.edges.size()<<sim::endl;
+                emit simulation_finish_done();
+        });
+        thr1.detach();
         //simulation = Simulation(&ui->openGLWidget->graph);
         //simulation.~Simulation();
     }
+}
+
+void MainWindow::repaint_on_simulation_finish_done()
+{
+    updateStartButtonText();
+    updateTable();
+    repaintOGLWidget();
+    unBlockInterface();
 }
 
 void MainWindow::disconnectSlots()
