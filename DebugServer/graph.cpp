@@ -176,18 +176,15 @@ void Graph::load(QString path)
 
 void Graph::addPacketmessage(int _type, int _from, int _to)
 {
-    PacketMessage m;
+    Packet m;
     m.id = packetIdCounter;
     packetIdCounter++;
-    if (_type == 0)
-    {
-        //m.type = DEFAULT_PACKET;
-    }
     m.from = _from;
     m.to = _to;
     m.currentPosition = -1;
     m.delivered = false;
     packets.push_back(m);
+    tableIndexesToUpdate.push_back(packets.size()-1);
 }
 
 void Graph::addEllips(float x,float y)
@@ -213,16 +210,17 @@ void Graph::addEllips(float x,float y, int num)
     ellipses.push_back(d);
 }
 
-void Graph::addPacket(PacketMessage m)
+void Graph::addPacket(Packet m)
 {
-    PacketMessage p;
+    Packet p;
     p.id = m.id;
-    p.type = m.type;
+    //p.type = m.type;
     p.from = m.from;
     p.to = m.to;
     p.delivered = m.delivered;
     p.timeOnCreation = m.timeOnCreation;
     packets.push_back(p);
+    tableIndexesToUpdate.push_back(packets.size()-1);
 }
 
 Ellips * Graph::getEllipseByNumber(int num)
@@ -337,6 +335,7 @@ void Graph::get_system_message(DebugMessage m)
             if (packets[i].id == m.i[0])
             {
                 packets[i].currentPosition = m.i[1];
+                tableIndexesToUpdate.push_back(i);
             }
         }
         //emit repaint();
@@ -389,7 +388,7 @@ void Graph::get_system_message(DebugMessage m)
 
 void Graph::addPacket()
 {
-    PacketMessage m;
+    Packet m;
     m.id = packetIdCounter;
     packetIdCounter++;
     //m.type = PacketMessage::DEFAULT_PACKET;
@@ -399,5 +398,6 @@ void Graph::addPacket()
     m.timeOnCreation;
     m.delivered = false;
     packets.push_back(m);
+    tableIndexesToUpdate.push_back(packets.size()-1);
     emit repaint();
 }

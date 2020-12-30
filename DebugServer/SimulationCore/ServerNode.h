@@ -16,6 +16,7 @@ public:
     ServerNode(int serverNum,int debugSocketAdress, Graph g);
     ~ServerNode();
     void Start();
+    void loadPackets();
     //std::vector<std::shared_ptr<ServerConnection>> connections;
     std::vector<ServerConnection*> connections;
     ServerConnection* debugConnection;

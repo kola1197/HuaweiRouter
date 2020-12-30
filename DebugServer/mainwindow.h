@@ -40,6 +40,7 @@ private slots:
 signals:
     void simulation_finish_done();
 public slots:
+    void updateAllScreen();
     void onnn_settingsButton_released();                              // QT thinks that "on_" is system slot ?!
     void repaintOGLWidget();
     void onBtnClicked();
@@ -47,6 +48,8 @@ public slots:
     void updateCpuLabel();
     //void get_system_message(SystemMessage m);
 private:
+    int screenUpdateFrameCounter;
+    void updatePacketsLabel();
     Simulation* simulation;
     Ui::MainWindow *ui;
     void connectSlots();

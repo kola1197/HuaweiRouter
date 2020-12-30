@@ -28,6 +28,17 @@ struct Edge
     float loadToFrom = 0;
 };
 
+struct Packet
+{
+    int id;
+    int from;
+    int to;
+    int currentPosition = -1;
+    bool delivered = false;
+    std::chrono::milliseconds timeOnCreation;
+    MessageType type = MessageType::PACKET_MESSAGE;
+};
+
 enum Algorithms
         {
             RANDOM, DRILL, DE_TAILS, LOCAL_FLOW
@@ -51,6 +62,9 @@ public:
     void load(QString path);
     Ellips *getEllipseByNumber(int num);
     int activeNumberForEdge = -1;
+    bool needReaintTable = false;
+
+    std::vector<int> tableIndexesToUpdate;
 
     bool addEdge(int number);
     void addEdge(Edge e);
@@ -61,10 +75,11 @@ public:
 
     void deleteActiveEllips();
 
-    std::vector<PacketMessage> packets;
+    std::vector<Packet> packets;
     void addPacket();
-    void addPacket(PacketMessage m);
+    void addPacket(Packet m);
     void addPacketmessage(int _type, int _from, int _to);
+
     int packetIdCounter = 0;
     float averageTime = 0;
     bool cpuCorrect = true;

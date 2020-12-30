@@ -13,13 +13,14 @@
 #include <SimulationCore/SimulationReport.h>
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+        : QMainWindow(parent)
+        , ui(new Ui::MainWindow)
 {
     qRegisterMetaType<DebugMessage>("DebugMessage");             //now we can use this messages in signal/slot system as QObjects
     qRegisterMetaType<SystemMessage>("SystemMessage");
     qRegisterMetaType<PacketMessage>("PacketMessage");
-
+    //lastTableUpdate = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+    //lastOGLWUpdate = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
     ui->setupUi(this);
     setCentralWidget(ui->scrollArea);
     createUI();
@@ -29,9 +30,49 @@ MainWindow::MainWindow(QWidget *parent)
     connect(this,SIGNAL(simulation_finish_done()), this, SLOT(repaint_on_simulation_finish_done()));
     draw();
     tmr = new QTimer();
-    tmr->setInterval(1000);
-    connect(tmr, SIGNAL(timeout()), this, SLOT(updateCpuLabel()));
+    tmr->setInterval(84);
+    //connect(tmr, SIGNAL(timeout()), this, SLOT(updateCpuLabel()));
+    connect(tmr, SIGNAL(timeout()), this, SLOT(updateAllScreen()));
     tmr->start();
+    //ui->openGLWidget->graph = new Graph();
+}
+
+
+void MainWindow::updateAllScreen()
+{
+    std::chrono::microseconds render1 = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch());
+    if (screenUpdateFrameCounter%7==0)
+    {
+        //updateTable();
+    }
+    if (screenUpdateFrameCounter%21==0)
+    {
+        //checkSimulationStatus();
+    }
+    createUI();
+    std::chrono::microseconds render2 = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch());
+    ui->openGLWidget->update();
+    std::chrono::microseconds render3 = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch());
+    if (screenUpdateFrameCounter%21==0)
+    {
+        updateCpuLabel();
+        updatePacketsLabel();
+        screenUpdateFrameCounter = 0;
+    }
+    screenUpdateFrameCounter++;
+    std::chrono::microseconds end = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch());
+    sim::sout<<"updateAllScreen: 1) "<<(render2 - render1).count()<<"2) "<<(render3 - render2).count()<<"3) "<<(end - render3).count()<<" microseconds"<<sim::endl;
+}
+
+void MainWindow::updatePacketsLabel()
+{
+    int counter = 0;
+    for (int i=0;i<ui->openGLWidget->graph.packets.size();i++)
+    {
+        counter += ui->openGLWidget->graph.packets[i].delivered? 1:0;
+    }
+    QString text = QString::number(counter)+"/"+QString::number(ui->openGLWidget->graph.packets.size());
+    ui->PacketsCounterLabel->setText(text);
 }
 
 void MainWindow::updateCpuLabel()
@@ -108,84 +149,112 @@ void MainWindow::draw()
 
 void MainWindow::createUI()
 {
-    ui->tableWidget->clear();
-    //int s = ui->tableWidget->rowCount();
-    while (ui->tableWidget->rowCount()>0) {
-        ui->tableWidget->removeRow(0);
-    }
-    //connect(ui->tableWidget, SIGNAL(cellChanged(int,int)),this,SLOT(cellChangedCheck(int,int)));
-    ui->tableWidget->setColumnCount(8);
-    ui->tableWidget->setShowGrid(true);
-    ui->tableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
-    //QStringList headers =
-    ui->tableWidget->setHorizontalHeaderLabels(QStringList() <<trUtf8("№") <<trUtf8("    id    ") <<trUtf8("    Function    ") <<trUtf8("    From    ") <<trUtf8("    To    ")<< trUtf8("    Current Position    ")<<trUtf8("    Delivering time (ms)    ")<<trUtf8("Delete"));
-    ui->tableWidget->horizontalHeader()->setStretchLastSection(true);
-    ui->tableWidget->hideColumn(0);
+    if (ui->openGLWidget->graph.needReaintTable || true) {
+        if (ui->openGLWidget->graph.packets.size() != ui->tableWidget->rowCount()) {
+            ui->tableWidget->clear();
+            //int s = ui->tableWidget->rowCount();
+            while (ui->tableWidget->rowCount() > 0) {
+                ui->tableWidget->removeRow(0);
+            }
+            //connect(ui->tableWidget, SIGNAL(cellChanged(int,int)),this,SLOT(cellChangedCheck(int,int)));
+            ui->tableWidget->setColumnCount(8);
+            ui->tableWidget->setShowGrid(true);
+            ui->tableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
+            //QStringList headers =
+            ui->tableWidget->setHorizontalHeaderLabels(
+                    QStringList() << trUtf8("№") << trUtf8("    id    ") << trUtf8("    Function    ")
+                                  << trUtf8("    From    ") << trUtf8("    To    ")
+                                  << trUtf8("    Current Position    ")
+                                  << trUtf8("    Delivering time (ms)    ") << trUtf8("Delete"));
+            ui->tableWidget->horizontalHeader()->setStretchLastSection(true);
+            ui->tableWidget->hideColumn(0);
+            QTableWidgetItem *protoitem = new QTableWidgetItem();
+            protoitem->setTextAlignment(Qt::AlignmentFlag::AlignCenter);
 
-    QTableWidgetItem * protoitem = new QTableWidgetItem();
-    protoitem->setTextAlignment(Qt::AlignmentFlag::AlignCenter);
+            for (int j = 0; j < ui->openGLWidget->graph.packets.size(); j++) {
+                ui->tableWidget->insertRow(j);
 
-    for (int j=0;j<ui->openGLWidget->graph.packets.size();j++){
-        ui->tableWidget->insertRow(j);
+                QTableWidgetItem *newitem = protoitem->clone();
+                newitem->setText(QString::number(j));
+                ui->tableWidget->setItem(j, 0, newitem);
 
-        QTableWidgetItem * newitem = protoitem->clone();
-        newitem->setText(QString::number(j));
-        ui->tableWidget->setItem(j,0, newitem);
+                QTableWidgetItem *newitem1 = protoitem->clone();
+                newitem1->setText(QString::number(ui->openGLWidget->graph.packets[j].id));
+                ui->tableWidget->setItem(j, 1, newitem1);
 
-        QTableWidgetItem * newitem1 = protoitem->clone();
-        newitem1->setText(QString::number(ui->openGLWidget->graph.packets[j].id));
-        ui->tableWidget->setItem(j,1, newitem1);
+                QComboBox *box = new QComboBox();
+                box->addItems(QStringList() << trUtf8("DEFAULT"));      //enums from PacketMessage in right order!!!!
+                box->setCurrentIndex(ui->openGLWidget->graph.packets[j].type);
+                ui->tableWidget->setCellWidget(j, 2, box);
+                connect(box, SIGNAL(currentIndexChanged(int)), this, SLOT(cellIndexChanged(int)));
+
+                QTextEdit *editFrom = new QTextEdit();
+                editFrom->setToolTip(QString::number(j));
+                editFrom->setToolTipDuration(0);
+                editFrom->setAlignment(Qt::AlignmentFlag::AlignCenter);
+                editFrom->setText(QString::number(ui->openGLWidget->graph.packets[j].from));
+                ui->tableWidget->setCellWidget(j, 3, editFrom);
+                connect(editFrom, SIGNAL(textChanged()), this, SLOT(cellFromTextChanged()));
+
+                QTextEdit *editTo = new QTextEdit();
+                editTo->setToolTip(QString::number(j));
+                editTo->setToolTipDuration(0);
+                editTo->setAlignment(Qt::AlignmentFlag::AlignCenter);
+                editTo->setText(QString::number(ui->openGLWidget->graph.packets[j].to));
+                ui->tableWidget->setCellWidget(j, 4, editTo);
+                connect(editTo, SIGNAL(textChanged()), this, SLOT(cellToTextChanged()));
+
+                QTableWidgetItem *newitem2 = protoitem->clone();
+                newitem2->setText(QString::number(ui->openGLWidget->graph.packets[j].currentPosition));
+                ui->tableWidget->setItem(j, 5, newitem2);
+                //ui->tableWidget->setItem(j,5, new QTableWidgetItem(QString::number(ui->openGLWidget->graph.packets[j].currentPosition)));
+
+                QString deliveringTime = ui->openGLWidget->graph.packets[j].delivered ? QString::number(
+                        ui->openGLWidget->graph.packets[j].timeOnCreation.count()) : "Not delivered";
+                QTableWidgetItem *newitem3 = protoitem->clone();
+                newitem3->setText(deliveringTime);
+                ui->tableWidget->setItem(j, 6, newitem3);
+                //ui->tableWidget->setItem(j,6, new QTableWidgetItem(deliveringTime));
+
+                QPushButton *btn = new QPushButton();
+                btn->setText("Delete");
+                btn->setToolTip(QString::number(j));
+                btn->setToolTipDuration(0);
+                ui->tableWidget->setCellWidget(j, 7, btn);
+
+                connect(btn, SIGNAL(clicked(bool)), SLOT(onBtnClicked()));
+            }
+            if (!tableResized) {
+                ui->tableWidget->resizeColumnsToContents();
+                //ui->tableWidget->setColumnWidth(7, 10);
+                if (ui->openGLWidget->graph.packets.size() > 0) {
+                    tableResized = true;
+                }
+            }
+        }
+        else{
+            QTableWidgetItem *protoitem = new QTableWidgetItem();
+            protoitem->setTextAlignment(Qt::AlignmentFlag::AlignCenter);
+            for (int j = 0; j < ui->openGLWidget->graph.packets.size(); j++) {
+                for (int i = 0; i< ui->openGLWidget->graph.tableIndexesToUpdate.size(); i++)
+                {
+                    if (j == ui->openGLWidget->graph.tableIndexesToUpdate[i])
+                    {
 
 
-        //ui->tableWidget->setItem(j,0, new QTableWidgetItem(QString::number(j)));
-        //ui->tableWidget->setItem(j,1, new QTableWidgetItem(QString::number(ui->openGLWidget->graph.packets[j].id)));
+                        QTableWidgetItem *newitem2 = protoitem->clone();
+                        newitem2->setText(QString::number(ui->openGLWidget->graph.packets[j].currentPosition));
+                        ui->tableWidget->setItem(j, 5, newitem2);
+                        //ui->tableWidget->setItem(j,5, new QTableWidgetItem(QString::number(ui->openGLWidget->graph.packets[j].currentPosition)));
 
-        QComboBox *box = new QComboBox();
-        box->addItems(QStringList() <<trUtf8("DEFAULT"));      //enums from PacketMessage in right order!!!!
-        box->setCurrentIndex(ui->openGLWidget->graph.packets[j].type);
-        ui->tableWidget->setCellWidget(j,2,box);
-        connect(box, SIGNAL(currentIndexChanged(int)),this, SLOT(cellIndexChanged(int)));
-
-        QTextEdit *editFrom = new QTextEdit();
-        editFrom->setToolTip(QString::number(j));
-        editFrom->setToolTipDuration(0);
-        editFrom->setAlignment(Qt::AlignmentFlag::AlignCenter);
-        editFrom->setText(QString::number(ui->openGLWidget->graph.packets[j].from));
-        ui->tableWidget->setCellWidget(j,3,editFrom);
-        connect(editFrom, SIGNAL(textChanged()),this,SLOT(cellFromTextChanged()));
-
-        QTextEdit *editTo = new QTextEdit();
-        editTo->setToolTip(QString::number(j));
-        editTo->setToolTipDuration(0);
-        editTo->setAlignment(Qt::AlignmentFlag::AlignCenter);
-        editTo->setText(QString::number(ui->openGLWidget->graph.packets[j].to));
-        ui->tableWidget->setCellWidget(j,4,editTo);
-        connect(editTo, SIGNAL(textChanged()),this,SLOT(cellToTextChanged()));
-
-        QTableWidgetItem * newitem2 = protoitem->clone();
-        newitem2->setText(QString::number(ui->openGLWidget->graph.packets[j].currentPosition));
-        ui->tableWidget->setItem(j,5, newitem2);
-        //ui->tableWidget->setItem(j,5, new QTableWidgetItem(QString::number(ui->openGLWidget->graph.packets[j].currentPosition)));
-
-        QString deliveringTime = ui->openGLWidget->graph.packets[j].delivered ? QString::number(ui->openGLWidget->graph.packets[j].timeOnCreation.count()) : "Not delivered";
-        QTableWidgetItem * newitem3 = protoitem->clone();
-        newitem3->setText(deliveringTime);
-        ui->tableWidget->setItem(j,6, newitem3);
-        //ui->tableWidget->setItem(j,6, new QTableWidgetItem(deliveringTime));
-
-        QPushButton *btn = new QPushButton();
-        btn->setText("Delete");
-        btn->setToolTip(QString::number(j));
-        btn->setToolTipDuration(0);
-        ui->tableWidget->setCellWidget(j,7,btn);
-
-        connect( btn, SIGNAL( clicked( bool ) ), SLOT( onBtnClicked() ) );
-    }
-    if (!tableResized) {
-        ui->tableWidget->resizeColumnsToContents();
-        //ui->tableWidget->setColumnWidth(7, 10);
-        if (ui->openGLWidget->graph.packets.size() > 0){
-            tableResized = true;
+                        QString deliveringTime = ui->openGLWidget->graph.packets[j].delivered ? QString::number(
+                                ui->openGLWidget->graph.packets[j].timeOnCreation.count()) : "Not delivered";
+                        QTableWidgetItem *newitem3 = protoitem->clone();
+                        newitem3->setText(deliveringTime);
+                        ui->tableWidget->setItem(j, 6, newitem3);
+                    }
+                }
+            }
         }
     }
 }
@@ -240,8 +309,8 @@ void MainWindow::cellFromTextChanged()
         else
         {
             if (edit->textColor() != QColor(0,0,0) && data != -1 ){
-            edit->setTextColor(QColor(0,0,0));
-            edit->setText(QString::number(data));
+                edit->setTextColor(QColor(0,0,0));
+                edit->setText(QString::number(data));
             }
         }
         ui->openGLWidget->graph.packets[index].from = data;
@@ -270,8 +339,8 @@ void MainWindow::cellToTextChanged()
         else
         {
             if (edit->textColor() != QColor(0,0,0) && data != -1 ){
-            edit->setTextColor(QColor(0,0,0));
-            edit->setText(QString::number(data));
+                edit->setTextColor(QColor(0,0,0));
+                edit->setText(QString::number(data));
             }
         }
         ui->openGLWidget->graph.packets[index].to = data;
@@ -340,13 +409,13 @@ void MainWindow::on_startButton_released()   // lock the screen and start simula
         ui->startButton->setText("Please wait");
         blockInterface();
         std::thread thr1 = std::thread([this](){
-                disconnectSlots();
-                simulationIsActive = false;
-                simulation->stop();
-                //usleep(100000);
-                ui->openGLWidget->graph = Graph(savedGraph);
-                sim::sout<<ui->openGLWidget->graph.edges.size()<<sim::endl;
-                emit simulation_finish_done();
+            disconnectSlots();
+            simulationIsActive = false;
+            simulation->stop();
+            //usleep(100000);
+            ui->openGLWidget->graph = Graph(savedGraph);
+            sim::sout<<ui->openGLWidget->graph.edges.size()<<sim::endl;
+            emit simulation_finish_done();
         });
         thr1.detach();
         //simulation = Simulation(&ui->openGLWidget->graph);
@@ -414,14 +483,20 @@ void MainWindow::updateStartButtonText()
 
 void MainWindow::updateTable()
 {
-    checkSimulationStatus();
-    createUI();
-    //sim::sout<<"updating table"<<sim::endl;
+    /*std::chrono::milliseconds timeNow = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+    if ((timeNow - lastTableUpdate).count()>42)
+    {
+        checkSimulationStatus();
+        createUI();
+        lastTableUpdate = timeNow;
+    }
+    //sim::sout<<"updating table"<<sim::endl;*/
 }
 
 void MainWindow::checkSimulationStatus()
 {
-    bool allPacketsDelivered = true;
+
+    bool allPacketsDelivered = simulationIsActive;
     float time = 0;
     for (int i=0;i< ui->openGLWidget->graph.packets.size();i++)
     {
@@ -463,7 +538,12 @@ void MainWindow::connectSlots()
 
 void MainWindow::repaintOGLWidget()
 {
-    ui->openGLWidget->update();
+    /*std::chrono::milliseconds timeNow = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+    if ((timeNow - lastOGLWUpdate).count()>42)
+    {
+        ui->openGLWidget->update();
+        lastOGLWUpdate = timeNow;
+    }*/
 }
 
 void MainWindow::AddButtonClick()

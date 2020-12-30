@@ -32,7 +32,7 @@ void SimulationReport::generateReport(Graph* g, std::string alg)
     fout<<" Average time:     "<<g->averageTime<<"          \n\n";
     for (int j=0;j<g->packets.size();j++)
     {
-        PacketMessage* p = &g->packets[j];
+        Packet* p = &g->packets[j];
         fout<<" Packet "<<g->packets[j].id<<"  from "<<p->from<<" to "<<p->to<<" delivered for "<<p->timeOnCreation.count()<<" ms"<<"\n";
     }
     fout.close();

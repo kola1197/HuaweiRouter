@@ -61,10 +61,27 @@ void ServerNode::Stop()
     //debugConnection->stop();
 }
 
+void ServerNode::loadPackets()
+{
+    for (int i=0;i<graph.packets.size();i++)
+    {
+        if (graph.packets[i].from == serverNum)
+        {
+            PacketMessage m;//(graph.packets[i]);
+            m.from = graph.packets[i].from;
+            m.to = graph.packets[i].to;
+            m.id = graph.packets[i].id;
+            m.currentPosition = graph.packets[i].currentPosition;
+            m.type = graph.packets[i].type;
+            messagesStack.push_back(m);
+        }
+    }
+}
+
 void ServerNode::Start()       //on start we connect to debug server
 {
     std::thread thr([this]() {
-        int counter = 0;
+        /*int counter = 0;
         for (int i=0;i<graph.packets.size();i++)
         {
             if (graph.packets[i].from == serverNum)
@@ -73,7 +90,7 @@ void ServerNode::Start()       //on start we connect to debug server
                 PacketMessage m(graph.packets[i]);
                 messagesStack.push_back(m);
             }
-        }
+        }*/
         //sim::sout<<"Node "<<serverNum<<": GOT  "<<counter<<" packets"<<sim::endl;
 
 
@@ -329,7 +346,6 @@ void ServerNode::addConnection(int to)
     }
 }
 
-//TODO: more templates for the god of templates
 void ServerNode::get_message(PacketMessage m)
 {
     //sim::sout<<"Node"<< serverNum<<", message with id "<<m.id<<" got CHECKSUM = "<<m.checkSum<<sim::endl;
