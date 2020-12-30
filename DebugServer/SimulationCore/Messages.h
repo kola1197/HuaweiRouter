@@ -39,7 +39,7 @@ struct PacketMessage:Message{
     Priority priority = Priority::MEDIUM;
     int currentPosition;
     bool delivered;
-    char uselessData [239000];
+    char uselessData [2390];
     int checkSum = 0;
     std::chrono::milliseconds timeOnCreation;
     MessageType type = MessageType::PACKET_MESSAGE;

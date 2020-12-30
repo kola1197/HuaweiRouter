@@ -41,13 +41,9 @@ MainWindow::MainWindow(QWidget *parent)
 void MainWindow::updateAllScreen()
 {
     std::chrono::microseconds render1 = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch());
-    if (screenUpdateFrameCounter%7==0)
-    {
-        //updateTable();
-    }
     if (screenUpdateFrameCounter%21==0)
     {
-        //checkSimulationStatus();
+        checkSimulationStatus();
     }
     createUI();
     std::chrono::microseconds render2 = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch());
