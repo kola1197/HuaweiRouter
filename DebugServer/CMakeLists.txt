@@ -88,7 +88,16 @@ else()
           settingsform.cpp
           settingsform.h
           settingsform.ui
-          Utils/Settings.cpp Utils/sout.cpp Utils/sout.h SimulationCore/SendingQueue.cpp SimulationCore/SendingQueue.h Utils/CpuInfo.cpp Utils/CpuInfo.h SimulationCore/SimulationReport.cpp SimulationCore/SimulationReport.h)
+          Utils/Settings.cpp
+          Utils/sout.cpp
+          Utils/sout.h
+          SimulationCore/SendingQueue.cpp
+          SimulationCore/SendingQueue.h
+          Utils/CpuInfo.cpp
+          Utils/CpuInfo.h
+          SimulationCore/SimulationReport.cpp
+          SimulationCore/SimulationReport.h
+          icon.qrc)
 endif()
 
 target_link_libraries(HuaweiRouter PRIVATE Qt5::Widgets  ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES})
