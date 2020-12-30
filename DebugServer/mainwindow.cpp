@@ -479,7 +479,7 @@ void MainWindow::on_algorithmBox_currentIndexChanged(int index)
     sim::sout<<ui->openGLWidget->graph.selectedAlgorithm<<"   "<<res<<sim::endl;
 }
 
-void MainWindow::on_settingsButton_released()
+void MainWindow::onnn_settingsButton_released()
 {
     /*settingsForm = new SettingsForm;
     settingsForm->setWindowTitle("Simulation settings");
@@ -492,7 +492,7 @@ void MainWindow::on_settingsButton_released()
     sim::sout<<"SETTINGS"<<sim::endl;*/
 }
 
-void MainWindow::on_count_of_bytes_editingFinished()
+void MainWindow::onnn_count_of_bytes_editingFinished()
 {
     //sim::sout<<"changed"<<sim::endl;
     bool* b = new bool;
@@ -510,7 +510,7 @@ void MainWindow::on_count_of_bytes_editingFinished()
     }
 }
 
-void MainWindow::on_send_interval_editingFinished()
+void MainWindow::onnn_send_interval_editingFinished()
 {
     //sim::sout<<"changed"<<sim::endl;
     bool* b = new bool;
