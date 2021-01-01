@@ -57,7 +57,7 @@ void MainWindow::updateAllScreen()
     }
     screenUpdateFrameCounter++;
     std::chrono::microseconds end = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch());
-    sim::sout<<"updateAllScreen: 1) "<<(render2 - render1).count()<<"2) "<<(render3 - render2).count()<<"3) "<<(end - render3).count()<<" microseconds"<<sim::endl;
+    //sim::sout<<"updateAllScreen: 1) "<<(render2 - render1).count()<<"2) "<<(render3 - render2).count()<<"3) "<<(end - render3).count()<<" microseconds"<<sim::endl;
 }
 
 void MainWindow::updatePacketsLabel()
@@ -132,7 +132,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::createAlgprithmComboBox()
 {
-    ui->algorithmBox->addItems(QStringList() <<trUtf8("RANDOM") << trUtf8("DRILL") /*<< trUtf8("DeTails") << trUtf8("LocalFlow")*/);
+    ui->algorithmBox->addItems(QStringList() <<trUtf8("RANDOM") << trUtf8("DRILL") << trUtf8("LOCAL VOTING") /*<< trUtf8("DeTails") << trUtf8("LocalFlow")*/);
     //ui->algorithmBox.
 }
 
@@ -400,6 +400,7 @@ void MainWindow::on_startButton_released()   // lock the screen and start simula
         simulation = new Simulation(&ui->openGLWidget->graph);
         simulation->Start();
         connectSlots();
+        averageTimeShoved = false;
     }
     else {
         ui->startButton->setText("Please wait");
@@ -501,19 +502,21 @@ void MainWindow::checkSimulationStatus()
         allPacketsDelivered = allPacketsDelivered ? ui->openGLWidget->graph.packets[i].delivered : false;
         time += ui->openGLWidget->graph.packets[i].timeOnCreation.count();
     }
-    if (allPacketsDelivered)
-    {
-        time /= ui->openGLWidget->graph.packets.size();
-        ui->openGLWidget->graph.averageTime = time;
-        QMessageBox msgBox;
-        msgBox.setText("All packets delivered. \nAverage time: " + QString::number(time));
-        msgBox.exec();
-        unBlockInterface();
-        if (ui->saveReportCheckBox->isChecked())
-        {
-            SimulationReport::generateReport(&ui->openGLWidget->graph, ui->algorithmBox->currentText().toStdString());
+    if (allPacketsDelivered) {
+        if (!averageTimeShoved) {
+            time /= ui->openGLWidget->graph.packets.size();
+            ui->openGLWidget->graph.averageTime = time;
+            QMessageBox msgBox;
+            msgBox.setText("All packets delivered. \nAverage time: " + QString::number(time));
+            msgBox.exec();
+            averageTimeShoved = true;
+            unBlockInterface();
+            if (ui->saveReportCheckBox->isChecked()) {
+                SimulationReport::generateReport(&ui->openGLWidget->graph,
+                                                 ui->algorithmBox->currentText().toStdString());
+            }
+            ui->openGLWidget->graph.cpuCorrect = true;
         }
-        ui->openGLWidget->graph.cpuCorrect = true;
     }
 }
 
@@ -551,7 +554,7 @@ void MainWindow::AddButtonClick()
 void MainWindow::on_algorithmBox_currentIndexChanged(int index)
 {
     ui->openGLWidget->graph.selectedAlgorithm = static_cast<Algorithms>(index);
-    std::string  res = ui->openGLWidget->graph.selectedAlgorithm == Algorithms::DRILL? "Drill": "notDrill";
+    std::string  res = ui->openGLWidget->graph.selectedAlgorithm == Algorithms::LOCAL_VOTING? "LOCAL_VOTING": "NOT LOCAL_VOTING";
     sim::sout<<ui->openGLWidget->graph.selectedAlgorithm<<"   "<<res<<sim::endl;
 }
 

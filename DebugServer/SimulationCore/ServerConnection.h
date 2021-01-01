@@ -41,7 +41,8 @@ public:
     void getSystemMessage();
     void getDebugMessage();
     void getPacketMessage();
-
+    void getNodeLoadMessage();
+    AsyncVar<float> nodeLoad{0};
     void stop();
 
     int from = -1;

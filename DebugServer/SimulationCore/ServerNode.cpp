@@ -71,7 +71,10 @@ void ServerNode::loadPackets()
             m.from = graph.packets[i].from;
             m.to = graph.packets[i].to;
             m.id = graph.packets[i].id;
-            m.currentPosition = graph.packets[i].currentPosition;
+            //m.currentPosition = graph.packets[i].currentPosition;
+            //m.prevposition = m.currentPosition;
+            m.currentPosition = serverNum;
+            m.prevposition = m.currentPosition;
             m.type = graph.packets[i].type;
             messagesStack.push_back(m);
         }
@@ -192,6 +195,7 @@ void ServerNode::Start()       //on start we connect to debug server
         {
             usleep(50);
         }
+        usleep(100);
         std::chrono::milliseconds ms = timeNow();
         for (int i=0;i<messagesStack.size();i++)
         {
@@ -204,13 +208,14 @@ void ServerNode::Start()       //on start we connect to debug server
             updateEdgesUsage();
             if (!messagesStack.empty())
             {
-                //here our algorithm. now random.
                 PacketMessage m(messagesStack[0]);
                 messagesStack.erase(messagesStack.begin());
-                int i = selectPacketPath();
+                int prevNodeNum = m.prevposition;
+                int i = selectPacketPath(prevNodeNum);
                 sim::sout<<"Node "<<serverNum<<":"<<grn<<" sending packet with id "<<m.id<<" to "<<connections[i]->to<<def<<sim::endl;
                 connections[i]->sendMessage(m);
                 updatePacketCountForDebugServer();
+                updateNodeLoadForLocalVoting();
             }
             else{
                 //sim::sout<<"Node "<<serverNum<<":"<<red<<" I AM EMPTY!!! "<<def<<sim::endl;
@@ -222,11 +227,34 @@ void ServerNode::Start()       //on start we connect to debug server
     thr.detach();
 }
 
-int ServerNode::selectPacketPath()
+void ServerNode::updateNodeLoadForLocalVoting()
+{
+    float connectionsLoad = 0;
+    for (int i=0;i<connections.size();i++)
+    {
+        connectionsLoad += connections[i]->bufferLoad.get();
+    }
+    float stackload = 1;
+    for (int i=0;i<messagesStack.size();i++)
+    {
+        stackload += sizeof(messagesStack[i]);
+    }
+    for (int i=0;i<connections.size();i++)
+    {
+        if (connections[i]->to != -1)
+        {
+            NodeLoadMessage m;
+            m.load = stackload * connectionsLoad;
+            connections[i]->sendMessage(m);
+        }
+    }
+}
+
+int ServerNode::selectPacketPath(int prevNodeNum)
 {
     switch (graph.selectedAlgorithm) {
         case Algorithms::RANDOM:
-            return randomSelectionAlgorithm();
+            return randomSelectionAlgorithm(prevNodeNum);
             break;
         case Algorithms::DRILL:
             return drillSelectionAlgorithm();
@@ -237,14 +265,21 @@ int ServerNode::selectPacketPath()
         case Algorithms::LOCAL_FLOW:
             return drillSelectionAlgorithm();
             break;
-
+        case Algorithms::LOCAL_VOTING:
+            return localVotingSelectionAlgorithm();
+            break;
     }
 }
 
-int ServerNode::randomSelectionAlgorithm()
+int ServerNode::randomSelectionAlgorithm(int prevNodeNum)
 {
     srand(time(0));
-    int a = rand() % (connections.size());
+    sim::sout<<"prev node num "<<prevNodeNum<<sim::endl;
+    int a = prevNodeNum;
+    a = rand() % (connections.size());
+    while (prevNodeNum == connections[a]->to){
+        a = rand() % (connections.size());
+    }
     return a;
 }
 
@@ -258,6 +293,35 @@ int ServerNode::drillSelectionAlgorithm()
         b = rand() % (connections.size());
     }
     return connections[a]->bufferLoad.get() > connections[b]->bufferLoad.get() ? b : a;
+}
+
+int ServerNode::localVotingSelectionAlgorithm()
+{
+    sim::sout<<"localVotingSelectionAlgorithm"<<sim::endl;
+    std::vector<float> nodesLoad;
+    float sum=0;
+    for (int i=0;i<connections.size();i++)
+    {
+        nodesLoad.push_back(connections[i]->nodeLoad.get() * connections[i]->bufferLoad.get() + 1);
+        sum += nodesLoad[nodesLoad.size()-1];
+    }
+    int isum = 0;
+    for (int i=0;i<nodesLoad.size();i++)
+    {
+        nodesLoad[i] = sum/nodesLoad[i];
+        nodesLoad[i] = qRound(nodesLoad[i]);
+        isum += nodesLoad[i];
+    }
+    srand(time(0));
+    int a = rand() % isum;
+    for (int i=0;i<nodesLoad.size();i++)
+    {
+        a -= nodesLoad[i];
+        if (a<0)
+        {
+            return i;
+        }
+    }
 }
 
 void ServerNode::updateEdgesUsage()      // it will be broken with more than 99 edges in one node

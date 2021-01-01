@@ -175,7 +175,9 @@ void ServerConnection::getPacketMessage()
         }
     }
     memcpy(&m, msg, sizeof(m));
-    sim::sout<<"From "<<from<<" to "<<to<<" got message with id "<<m.id<<" checksum: "<<m.checkSum <<sim::endl;
+    sim::sout<<"Connection from "<<from<<" to "<<to<<" got message with id "<<m.id<<" checksum: "<<m.checkSum <<sim::endl;
+    m.prevposition = m.currentPosition;
+    m.currentPosition = from;
     emit transmit_to_node(m);
 }
 
@@ -241,6 +243,21 @@ void ServerConnection::getTestMessage()
     }
     memcpy(&m, msg, sizeof(m));
     sim::sout<<"Got test Message from "<<from<<" => "<<to<<" message '"<<m.text<<"'  checkCode = "<<m.checkCode<<sim::endl;
+}
+
+void ServerConnection::getNodeLoadMessage()
+{
+    NodeLoadMessage m;
+    char msg[sizeof (m)];
+    int bytes;
+    for (int i = 0; i < sizeof(m); i += bytes) {
+        if ((bytes = recv(sock, msg +i, sizeof(m)  - i, 0)) == -1){
+            sim::sout<<"error"<<sim::endl;
+            return;
+        }
+    }
+    memcpy(&m, msg, sizeof(m));
+    nodeLoad.set(m.load);
 }
 
 void ServerConnection::awaitConnection()

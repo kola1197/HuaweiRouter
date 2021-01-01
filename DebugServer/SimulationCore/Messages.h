@@ -15,7 +15,7 @@ enum Priority {
     LOW=0, MEDIUM=1, HIGH=2
 };
 
-enum MessageType {MESSAGE=0,PACKET_MESSAGE=1, PING_MESSAGE=2, TEST_MESSAGE=3, SYSTEM_MESSAGE=4, DEBUG_MESSAGE=5};
+enum MessageType {MESSAGE=0,PACKET_MESSAGE=1, PING_MESSAGE=2, TEST_MESSAGE=3, SYSTEM_MESSAGE=4, DEBUG_MESSAGE=5, NODE_LOAD_MESSAGE = 6};
 
 struct HarbingerMessage {                                           //sends before other messages, to set resiver to it
     //enum MessageType {MESSAGE=0,PACKET_MESSAGE=1, PING_MESSAGE=2, TEST_MESSAGE=3, SYSTEM_MESSAGE=4, DEBUG_MESSAGE=5};
@@ -39,8 +39,9 @@ struct PacketMessage:Message{
     Priority priority = Priority::MEDIUM;
     int currentPosition;
     bool delivered;
-    char uselessData [2390];
+    char uselessData [23900];
     int checkSum = 0;
+    int prevposition = -1;
     std::chrono::milliseconds timeOnCreation;
     MessageType type = MessageType::PACKET_MESSAGE;
 };
@@ -74,6 +75,13 @@ struct TestMessage:Message{
     MessageType type = MessageType::TEST_MESSAGE;
     int checkCode = 0;
 };
+
+struct NodeLoadMessage:Message{
+    float load;
+    MessageType type = MessageType::NODE_LOAD_MESSAGE;
+    Priority priority = Priority::HIGH;
+};
+
 
 class Messages {
 public:

@@ -57,7 +57,7 @@ private:
     Graph savedGraph;
 
     QTimer* tmr;
-
+    bool averageTimeShoved = true;
     void checkSimulationStatus();
     bool tableResized = false;
 

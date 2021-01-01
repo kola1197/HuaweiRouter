@@ -41,10 +41,11 @@ private:
     void updatePacketCountForDebugServer();
     int maxPacketsCount = 0;
     void updateEdgesUsage();
-
-    int randomSelectionAlgorithm();
+    void updateNodeLoadForLocalVoting();
+    int randomSelectionAlgorithm(int prevNodeNum);
     int drillSelectionAlgorithm();
-    int selectPacketPath();
+    int localVotingSelectionAlgorithm();
+    int selectPacketPath(int prevNodeNum);
 };
 
 

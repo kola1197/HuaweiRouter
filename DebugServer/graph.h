@@ -41,7 +41,7 @@ struct Packet
 
 enum Algorithms
         {
-            RANDOM, DRILL, DE_TAILS, LOCAL_FLOW
+            RANDOM = 0, DRILL = 1, DE_TAILS = 3, LOCAL_FLOW = 4, LOCAL_VOTING = 2
         };
 
 class Graph: public QObject

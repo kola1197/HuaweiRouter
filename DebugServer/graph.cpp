@@ -30,6 +30,7 @@ Graph& Graph::operator = (const Graph &obj)
     {
         addPacket(obj.packets[i]);
     }
+    this->selectedAlgorithm = obj.selectedAlgorithm;
     return *this;
 }
 
@@ -47,6 +48,7 @@ Graph::Graph(const Graph &obj)
     {
         addPacket(obj.packets[i]);
     }
+    this->selectedAlgorithm = obj.selectedAlgorithm;
 }
 
 void Graph::testInit()
