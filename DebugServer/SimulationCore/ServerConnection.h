@@ -58,6 +58,7 @@ public:
     int updateUsageDataCounter = 0;
     AsyncVar<float> bufferLoad{0};
     AsyncVar<bool> stopped{false};
+    SendingQueue sendingQueue;
 
     template <typename T>
     void sendMessage(T t){                       //in header because of stupid gcc compilation
@@ -124,7 +125,7 @@ private:
     std::thread thr;
     void updateCount(int i);
     void updateCountTo(int i);
-    SendingQueue sendingQueue;
+    //SendingQueue sendingQueue;
 };
 
 

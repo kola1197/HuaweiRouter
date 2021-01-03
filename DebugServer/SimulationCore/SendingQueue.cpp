@@ -89,6 +89,12 @@ void SendingQueue::updateLoadingSize()
                 break;
         }
     }
+    int packetsCountInt = 0;
+    for (int i=0;i<packetsTypes.size();i++)
+    {
+        packetsCountInt += packetsTypes[i]==PACKET_MESSAGE? 1 : 0 ;
+    }
+    packetsCount.set(packetsCountInt);
     packetsMutex.unlock();
     loadingSize.set(datasize);
 }

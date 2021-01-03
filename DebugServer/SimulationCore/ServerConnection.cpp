@@ -175,7 +175,7 @@ void ServerConnection::getPacketMessage()
         }
     }
     memcpy(&m, msg, sizeof(m));
-    sim::sout<<"Connection from "<<from<<" to "<<to<<" got message with id "<<m.id<<" checksum: "<<m.checkSum <<sim::endl;
+    sim::sout<<"Node "<<from<<" from "<<to<<" got message with id "<<m.id<<" checksum: "<<m.checkSum <<sim::endl;
     m.prevposition = m.currentPosition;
     m.currentPosition = from;
     emit transmit_to_node(m);

@@ -76,6 +76,7 @@ void ServerNode::loadPackets()
             m.currentPosition = serverNum;
             m.prevposition = m.currentPosition;
             m.type = graph.packets[i].type;
+            m.checkSum = 239239239;
             messagesStack.push_back(m);
         }
     }
@@ -266,7 +267,7 @@ int ServerNode::selectPacketPath(int prevNodeNum)
             return drillSelectionAlgorithm();
             break;
         case Algorithms::LOCAL_VOTING:
-            return localVotingSelectionAlgorithm();
+            return localVotingSelectionAlgorithm(prevNodeNum);
             break;
     }
 }
@@ -274,7 +275,7 @@ int ServerNode::selectPacketPath(int prevNodeNum)
 int ServerNode::randomSelectionAlgorithm(int prevNodeNum)
 {
     srand(time(0));
-    sim::sout<<"prev node num "<<prevNodeNum<<sim::endl;
+    //sim::sout<<"prev node num "<<prevNodeNum<<sim::endl;
     int a = prevNodeNum;
     a = rand() % (connections.size());
     while (prevNodeNum == connections[a]->to){
@@ -295,9 +296,9 @@ int ServerNode::drillSelectionAlgorithm()
     return connections[a]->bufferLoad.get() > connections[b]->bufferLoad.get() ? b : a;
 }
 
-int ServerNode::localVotingSelectionAlgorithm()
+int ServerNode::localVotingSelectionAlgorithm(int prevNodeNum)
 {
-    sim::sout<<"localVotingSelectionAlgorithm"<<sim::endl;
+    //sim::sout<<"localVotingSelectionAlgorithm"<<sim::endl;
     std::vector<float> nodesLoad;
     float sum=0;
     for (int i=0;i<connections.size();i++)
@@ -313,15 +314,22 @@ int ServerNode::localVotingSelectionAlgorithm()
         isum += nodesLoad[i];
     }
     srand(time(0));
-    int a = rand() % isum;
-    for (int i=0;i<nodesLoad.size();i++)
-    {
-        a -= nodesLoad[i];
-        if (a<0)
-        {
-            return i;
+    int result = prevNodeNum;
+    while (result == prevNodeNum) {
+        int a = rand() % isum;
+        for (int i = 0; i < nodesLoad.size(); i++) {
+            a -= nodesLoad[i];
+            if (a < 0) {
+                if (connections[i]->to != prevNodeNum) {
+                    result = i;
+                    return i;
+                } else {
+                    i = nodesLoad.size();
+                }
+            }
         }
     }
+    //return result;
 }
 
 void ServerNode::updateEdgesUsage()      // it will be broken with more than 99 edges in one node
@@ -345,11 +353,16 @@ std::chrono::milliseconds ServerNode::timeNow()
 
 void ServerNode::updatePacketCountForDebugServer()
 {
-    maxPacketsCount = maxPacketsCount>messagesStack.size() ? maxPacketsCount : messagesStack.size();
+    int packetsStackSize = messagesStack.size();
+    for (int i=0;i<connections.size();i++)
+    {
+        packetsStackSize += connections[i]->sendingQueue.packetsCount.get();
+    }
+    maxPacketsCount = maxPacketsCount > packetsStackSize ? maxPacketsCount : packetsStackSize;
     DebugMessage dmsg;
     dmsg.function = DebugMessage::PACKET_COUNT_STATUS;
     dmsg.i[0] = serverNum;
-    dmsg.i[1] = messagesStack.size();
+    dmsg.i[1] = packetsStackSize;
     dmsg.i[2] = maxPacketsCount;
     debugConnection->sendMessage(dmsg);
 }
@@ -415,7 +428,7 @@ void ServerNode::get_message(PacketMessage m)
     //sim::sout<<"Node"<< serverNum<<", message with id "<<m.id<<" got CHECKSUM = "<<m.checkSum<<sim::endl;
     if (m.checkSum!=239239239)
     {
-        //qFatal("Error on Node %s !!! Packet with id %s got wrong checksum ( %s )",serverNum,m.id, m.checkSum);
+        qFatal("Error on Node %s !!! Packet with id %s got wrong checksum ( %s )!!! Check your RAM!!!",serverNum,m.id, m.checkSum);
     }
     DebugMessage d;
     d.function = DebugMessage::PACKET_STATUS;
@@ -428,7 +441,9 @@ void ServerNode::get_message(PacketMessage m)
         updatePacketCountForDebugServer();
     }
     else{
-        m.delivered =true;
+        packetMessagesCounter++;
+        sim::sout<<"Node "<<serverNum<<": PacketMessage with id "<<m.id<<" is now at home. Already got "<<packetMessagesCounter<<" messages!"<<sim::endl;
+        m.delivered = true;
         std::chrono::milliseconds ms = timeNow();
         DebugMessage msg;
         msg.function = DebugMessage::PACKET_STATUS_DELIVERED;

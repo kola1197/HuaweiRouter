@@ -18,6 +18,7 @@ class SendingQueue {
 
 public:
     AsyncVar<int> loadingSize;
+    AsyncVar<int> packetsCount{0};
 
     template <typename T>
     void addMessage(T t)
@@ -27,6 +28,7 @@ public:
         packetsTypes.push_back(t.type);
         packetsPriority.push_back(t.priority);
         //TestMessage tt = *(TestMessage*)packets[0].get();
+        //packetsCount.set(packets.size());
         packetsMutex.unlock();
         updateByteQueue();
         updateLoadingSize();

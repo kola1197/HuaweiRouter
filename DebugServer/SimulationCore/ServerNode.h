@@ -44,8 +44,9 @@ private:
     void updateNodeLoadForLocalVoting();
     int randomSelectionAlgorithm(int prevNodeNum);
     int drillSelectionAlgorithm();
-    int localVotingSelectionAlgorithm();
+    int localVotingSelectionAlgorithm(int prevNodeNum);
     int selectPacketPath(int prevNodeNum);
+    int packetMessagesCounter = 0;
 };
 
 
