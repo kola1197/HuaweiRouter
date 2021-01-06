@@ -321,6 +321,7 @@ void Graph::get_system_message(SystemMessage m)
 
 void Graph::get_system_message(DebugMessage m)
 {
+    signalsMutex.lock();
     if (m.function == DebugMessage::CONNECTION_STATUS)
     {
         Ellips *e = getEllipseByNumber(m.i[0]);
@@ -385,6 +386,7 @@ void Graph::get_system_message(DebugMessage m)
         }
         emit repaint();
     }
+    signalsMutex.unlock();
     //sim::sout<<m.i[0]<<" send connection status "<<m.i[1]<<sim::endl;
 }
 

@@ -43,8 +43,11 @@ void SendingQueue::updateByteQueue()
                 messagesDataQueue.push_back(hData[i]);
             }
             queueMutex.unlock();
+            PacketMessage p;
             switch (type) {
                 case MessageType::PACKET_MESSAGE:
+                    p = PacketMessage(*((PacketMessage *) q.get()));
+                    sim::sout<<"Node "<<p.currentPosition<<" sending message with id "<<p.id<<" checksum: "<<p.checkSum<< sim::endl;
                     addToQueue(*((PacketMessage *) q.get()));
                     break;
                 case MessageType::PING_MESSAGE:

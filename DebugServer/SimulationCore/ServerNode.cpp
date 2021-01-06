@@ -428,6 +428,28 @@ void ServerNode::get_message(PacketMessage m)
     //sim::sout<<"Node"<< serverNum<<", message with id "<<m.id<<" got CHECKSUM = "<<m.checkSum<<sim::endl;
     if (m.checkSum!=239239239)
     {
+        /*PacketMessage mm;
+        mm.checkSum=239239239;
+        mm.from = 0;
+        mm.to = 1;
+        mm.currentPosition = 0;
+        mm.delivered = false;
+        char mhData[sizeof(mm)];
+        memcpy(mhData, &mm, sizeof(mm));
+        for (int i=0; i<sizeof(mhData); i++)
+        {
+            std::cout<<(int)mhData[i];
+        }
+        std::cout<<std::endl;
+        std::cout<<"---------------"<<std::endl;
+
+        char hData[sizeof(m)];
+        memcpy(hData, &m, sizeof(m));
+        for (int i=0; i<sizeof(hData); i++)
+        {
+            std::cout<<(int)hData[i];
+        }
+        std::cout<<std::endl;*/
         qFatal("Error on Node %s !!! Packet with id %s got wrong checksum ( %s )!!! Check your RAM!!!",serverNum,m.id, m.checkSum);
     }
     DebugMessage d;

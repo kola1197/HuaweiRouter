@@ -4,6 +4,7 @@
 #include <vector>
 #include <QObject>
 #include <SimulationCore/Messages.h>
+#include <mutex>
 
 
 struct Ellips
@@ -94,6 +95,7 @@ signals:
     void repaint();
     void updateTable();
 private:
+    std::mutex signalsMutex;
     float dist(float x1, float y1, float x2, float y2);
     int ellipseCounter = 0;
     int edgeCounter = 0;
