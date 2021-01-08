@@ -369,9 +369,11 @@ void MainWindow::on_saveButton_released()
 void MainWindow::on_loadButton_released()
 {
     QString q = QFileDialog::getOpenFileName(this,"Load Graph From File","", "Graph (*.grf);;All Files (*)");
-    ui->openGLWidget->graph.load(q);
-    ui->openGLWidget->update();
-    createUI();
+    if (q!= ""){
+        ui->openGLWidget->graph.load(q);
+        ui->openGLWidget->update();
+        createUI();
+    }
 }
 
 void MainWindow::setEllipseInfo(QString q)

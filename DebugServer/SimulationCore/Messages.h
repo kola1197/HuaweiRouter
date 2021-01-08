@@ -36,14 +36,15 @@ struct Message
 };
 
 struct PacketMessage:Message{
+    int firstCheckSum = 0;
     Priority priority = Priority::MEDIUM;
     int currentPosition;
     bool delivered;
-    char uselessData [23900];
-    int checkSum = 0;
+    char uselessData [23900] = {0};
     int prevposition = -1;
     std::chrono::milliseconds timeOnCreation;
     MessageType type = MessageType::PACKET_MESSAGE;
+    int checkSum = 0;
 };
 
 //enum Function {PING_MESSAGE, TEST_MESSAGE, SYSTEM_MESSAGE, DEBUG_MESSAGE, PACKET_MESSAGE};

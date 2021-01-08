@@ -1,7 +1,7 @@
 //
 // Created by nickolay on 27.09.2020.
 //
-
+#include <sys/stat.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <thread>
@@ -24,7 +24,11 @@ ServerConnection::ServerConnection(int _port, int _from, int _to, int _id):QObje
     id = _id;
     sendIntervalMS = Settings::getsendIntervalMS();
     sendBytesPerInterval = Settings::getSendBytesPerInterval();
-
+    sendingQueue.from = from;
+    sendingQueue.to = to;
+    mkdir("Debug", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+    //dwout.open(std::string ("Debug//Debug_write_"+QString::number(from).toStdString()+"___"+QString::number(to).toStdString()+".txt").c_str(),std::ios_base::out);
+    //drout.open(std::string ("Debug//Debug_read_"+QString::number(from).toStdString()+"___"+QString::number(to).toStdString()+".txt").c_str(),std::ios_base::out);
 }
 
 ServerConnection::~ServerConnection() noexcept
@@ -81,7 +85,7 @@ void ServerConnection::connectTo()
                     sim::sout << "\n Socket creation error \n" << sim::endl;
                 }
                 struct timeval tv;
-                tv.tv_sec = 1;
+                tv.tv_sec = 2;
                 tv.tv_usec = 0;
                 //if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT | SO_RCVTIMEO, &opt, sizeof(opt))) {
                 if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO , (const char *)&tv, sizeof(tv))) {
@@ -175,7 +179,33 @@ void ServerConnection::getPacketMessage()
         }
     }
     memcpy(&m, msg, sizeof(m));
-    sim::sout<<"Node "<<from<<" from "<<to<<" got PacketMessage with id "<<m.id<<" checksum: "<<m.checkSum <<sim::endl;
+    if (m.checkSum != 239239239){
+        /*PacketMessage mm;
+        mm.checkSum=239239239;
+        mm.firstCheckSum = 239239239;
+        mm.from = 0;
+        mm.to = 1;
+        mm.currentPosition = 0;
+        mm.delivered = false;
+        char mhData[sizeof(mm)];
+        memcpy(mhData, &mm, sizeof(mm));
+        for (int i=0; i<sizeof(mhData); i++)
+        {
+            std::cout<<std::hex<<(int)mhData[i]<<" ";
+        }
+        std::cout<<std::endl;
+        std::cout<<"---------------"<<std::endl;*/
+
+        /*char hData[sizeof(m)];
+        memcpy(hData, &m, sizeof(m));
+        for (int i=0; i<sizeof(hData); i++)
+        {
+            std::cout<<std::hex<<(int)hData[i]<<" ";
+            drout<<std::hex<<(int)hData[i]<<" ";
+        }
+        std::cout<<std::endl;*/
+        sim::sout<<"Node "<<from<<": from "<<to<<" got PacketMessage with id "<<m.id<<" checksum: "<<m.checkSum <<sim::endl;
+    }
     m.prevposition = m.currentPosition;
     m.currentPosition = from;
     emit transmit_to_node(m);
@@ -285,7 +315,7 @@ void ServerConnection::awaitConnection()
             //sim::sout<<"here2"<<sim::endl;
 
             struct timeval tv;
-            tv.tv_sec = 1;
+            tv.tv_sec = 2;
             tv.tv_usec = 0;
             //if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT | SO_RCVTIMEO, &opt, sizeof(opt))) {
             if (setsockopt(server_fd, SOL_SOCKET, SO_RCVTIMEO , (const char *)&tv, sizeof(tv))) {
@@ -465,9 +495,13 @@ void ServerConnection::sendMessagesFromBufferTick()
     for (int i=0;i<dataToSend.size();i++)
     {
         data[i] = dataToSend[i];
-        //sim::sout<<data[i]<<sim::endl;
+        //dwout<<std::hex<<(int)dataToSend[i]<<" ";
+        //debugBuffer.push_back(data[i]);
+        //sim::sout<<"from "<<from<<" to "<<to<<" sending "<<std::hex<<(int)data[i]<<sim::endl;
     }
+    //dwout<<"\n";
     sendMutex.lock();
+
     send(sock, &data, sizeof(data), 0);
     sendMutex.unlock();
     //}

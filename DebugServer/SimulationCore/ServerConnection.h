@@ -13,6 +13,7 @@
 #include <QtCore/QTimer>
 #include <QtCore/QThread>
 #include <arpa/inet.h>
+#include <fstream>
 
 enum ConnectionType{
     TO, FROM
@@ -126,6 +127,9 @@ private:
     void updateCount(int i);
     void updateCountTo(int i);
     //SendingQueue sendingQueue;
+    std::vector<char> debugBuffer;
+    //std::ofstream dwout;
+    //std::ofstream drout;
 };
 
 

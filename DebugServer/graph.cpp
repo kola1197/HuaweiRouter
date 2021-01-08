@@ -169,10 +169,11 @@ void Graph::load(QString path)
             }
         }
         in.close();
+        sim::sout<<"File loaded"<<sim::endl;
     }
     else
     {
-        sim::sout<<"unable load file";
+        sim::sout<<"unable load file"<<sim::endl;
     }
 }
 
@@ -335,7 +336,7 @@ void Graph::get_system_message(DebugMessage m)
         //sim::sout<<"GOT PACKET STATUS "<<m.i[0]<<"   "<<m.i[1]<<sim::endl;
         for (int i = 0;i < packets.size();i++)
         {
-            if (packets[i].id == m.i[0])
+            if (packets[i].id == m.i[0] && !packets[i].delivered)
             {
                 packets[i].currentPosition = m.i[1];
                 tableIndexesToUpdate.push_back(i);

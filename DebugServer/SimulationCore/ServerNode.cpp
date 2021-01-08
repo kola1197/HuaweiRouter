@@ -22,6 +22,7 @@ ServerNode::ServerNode(int _serverNum,int _debugSocketAdress, Graph g):QObject()
     serverNum= _serverNum;
     debugSocketAdress = _debugSocketAdress;
     connections.clear();
+
 }
 
 ServerNode::~ServerNode() noexcept
@@ -77,6 +78,7 @@ void ServerNode::loadPackets()
             m.prevposition = m.currentPosition;
             m.type = graph.packets[i].type;
             m.checkSum = 239239239;
+            m.firstCheckSum = 239239239;
             messagesStack.push_back(m);
         }
     }
@@ -374,7 +376,8 @@ void ServerNode::addDebugConnection()
     //ServerConnection debugConnection(debugSocketAdress + serverNum, serverNum,-1);
     debugConnection = new ServerConnection(debugSocketAdress + serverNum, serverNum,-1);
     //sim::sout<<"port to recive = "<<debugSocketAdress<<" + "<<serverNum<<sim::endl;
-
+    debugConnection->sendBytesPerInterval = 6000;
+    debugConnection->sendIntervalMS = 33;
     //connections.push_back(debugConnection);
     debugConnection->connectTo();
     connect(debugConnection, SIGNAL(transmit_to_node(SystemMessage)),this,SLOT(get_message(SystemMessage)));
@@ -438,7 +441,7 @@ void ServerNode::get_message(PacketMessage m)
         memcpy(mhData, &mm, sizeof(mm));
         for (int i=0; i<sizeof(mhData); i++)
         {
-            std::cout<<(int)mhData[i];
+            std::cout<<std::hex<<mhData[i];
         }
         std::cout<<std::endl;
         std::cout<<"---------------"<<std::endl;
@@ -447,7 +450,7 @@ void ServerNode::get_message(PacketMessage m)
         memcpy(hData, &m, sizeof(m));
         for (int i=0; i<sizeof(hData); i++)
         {
-            std::cout<<(int)hData[i];
+            std::cout<<std::hex<<hData[i];
         }
         std::cout<<std::endl;*/
         qFatal("Error on Node %s !!! Packet with id %s got wrong checksum ( %s )!!! Check your RAM!!!",serverNum,m.id, m.checkSum);
@@ -463,8 +466,8 @@ void ServerNode::get_message(PacketMessage m)
         updatePacketCountForDebugServer();
     }
     else{
-        packetMessagesCounter++;
-        sim::sout<<"Node "<<serverNum<<": PacketMessage with id "<<m.id<<" is now at home. Already got "<<packetMessagesCounter<<" messages!"<<sim::endl;
+        packetMessagesCounter.increase(1);
+        sim::sout<<"Node "<<serverNum<<": PacketMessage with id "<<m.id<<" is now at home. Already got "<<packetMessagesCounter.get()<<" messages!"<<sim::endl;
         m.delivered = true;
         std::chrono::milliseconds ms = timeNow();
         DebugMessage msg;

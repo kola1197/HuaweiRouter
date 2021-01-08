@@ -35,7 +35,8 @@ public:
         //sim::sout<<"message set"<<sim::endl;
     }
 
-
+    int from = -1;
+    int to = -1;
     std::vector<char> getData(int sendBytesPerInterval);
 
 private:
@@ -43,6 +44,14 @@ private:
     void addToQueue(T t)
     {
         //sim::sout<<"HERE"<<sim::endl;
+        if (typeid(T).name() == typeid(PacketMessage).name()){
+            PacketMessage * p = (PacketMessage*) &t;
+            if ( p->checkSum!= 239239239)
+            {
+                sim::sout<<"ERROR! WRONG CHECKSUM!!!"<<sim::endl;
+            }
+
+        }
         char mData[sizeof(t)];
         memcpy(mData, &t, sizeof(t));
         queueMutex.lock();

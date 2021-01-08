@@ -46,7 +46,7 @@ private:
     int drillSelectionAlgorithm();
     int localVotingSelectionAlgorithm(int prevNodeNum);
     int selectPacketPath(int prevNodeNum);
-    int packetMessagesCounter = 0;
+    AsyncVar<int> packetMessagesCounter {0};
 };
 
 

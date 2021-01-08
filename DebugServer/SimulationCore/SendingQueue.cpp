@@ -26,13 +26,21 @@ void SendingQueue::updateByteQueue()
                 }
             }
             MessageType type = packetsTypes[selected];
-            packetsTypes.erase(packetsTypes.begin() + selected);
             //Message m = *packets[selected].get();
+            PacketMessage p;
+            if (type == MessageType::PACKET_MESSAGE){
+                p = PacketMessage( *(PacketMessage *) packets[selected].get());
+            }
+            //PacketMessage p =  PacketMessage(*((PacketMessage *) packets[selected].data()));
             QSharedPointer<Message> q = packets[selected];
-            packets.erase(packets.begin() + selected);
+            //p = PacketMessage(*((PacketMessage *) q.get()));
+            PacketMessage pp;
+            //packets.erase(packets.begin() + selected);
             priority = packetsPriority[selected];
+            //packetsPriority.erase(packetsPriority.begin()+selected);
+            packets.erase(packets.begin() + selected);
+            packetsTypes.erase(packetsTypes.begin() + selected);
             packetsPriority.erase(packetsPriority.begin()+selected);
-
             packetsMutex.unlock();
             HarbingerMessage h;
             h.type = type;
@@ -43,12 +51,22 @@ void SendingQueue::updateByteQueue()
                 messagesDataQueue.push_back(hData[i]);
             }
             queueMutex.unlock();
-            PacketMessage p;
+
             switch (type) {
                 case MessageType::PACKET_MESSAGE:
-                    p = PacketMessage(*((PacketMessage *) q.get()));
-                    sim::sout<<"Node "<<p.currentPosition<<" sending message with id "<<p.id<<" checksum: "<<p.checkSum<< sim::endl;
-                    addToQueue(*((PacketMessage *) q.get()));
+                    //p = PacketMessage(*((PacketMessage *) q.get()));
+                    if (p.checkSum != 239239239)
+                    {
+                        sim::sout<<"ERROR HERE!!!"<<sim::endl;
+                    }
+                    memcpy(&pp, &p, sizeof(p));
+                    //sim::sout<<"Node "<<from<<": updateByteQueue message with id "<<p.id<<" to "<<to<<" checksum: "<<p.checkSum<< sim::endl;
+                    //addToQueue(*((PacketMessage *) q.get()));
+                    if (pp.checkSum != 239239239)
+                    {
+                        sim::sout<<"ERROR HERE!!!"<<sim::endl;
+                    }
+                    addToQueue(pp);
                     break;
                 case MessageType::PING_MESSAGE:
                     addToQueue(*((PingMessage *) q.get()));
@@ -65,7 +83,11 @@ void SendingQueue::updateByteQueue()
                 default:
                     break;
             }
-            //packetsMutex.lock();
+            /*packetsMutex.lock();
+            packets.erase(packets.begin() + selected);
+            packetsTypes.erase(packetsTypes.begin() + selected);
+            packetsPriority.erase(packetsPriority.begin()+selected);
+            packetsMutex.unlock();*/
         }
         else{
             packetsMutex.unlock();
