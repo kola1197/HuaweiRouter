@@ -108,6 +108,7 @@ void ServerNode::Start()       //on start we connect to debug server
         }
         //sim::sout<<"Node "<<serverNum<<": debugServer active now "<<sim::endl;
         DebugMessage d;
+        d.checksum = 239239239;
         d.function = DebugMessage::CONNECTION_STATUS;
         d.i[0]=serverNum;
         d.i[1]=2;
@@ -186,6 +187,7 @@ void ServerNode::Start()       //on start we connect to debug server
         debugConnection->sendMessage(m);
 
         DebugMessage dd;
+        dd.checksum = 239239239;
         dd.function = DebugMessage::CONNECTION_STATUS;
         dd.i[0] = serverNum;
         dd.i[1] = 3;
@@ -205,6 +207,7 @@ void ServerNode::Start()       //on start we connect to debug server
             messagesStack[i].timeOnCreation = ms;
         }
         updatePacketCountForDebugServer();
+        bool zeroPacketCountSent = false;
         //sim::sout<<"Node "<<serverNum<<":"<<grn<<" STARTING WORK"<<def<<sim::endl;
         while (!stopNode.get())
         {
@@ -219,8 +222,13 @@ void ServerNode::Start()       //on start we connect to debug server
                 connections[i]->sendMessage(m);
                 updatePacketCountForDebugServer();
                 updateNodeLoadForLocalVoting();
+                zeroPacketCountSent = false;
             }
             else{
+                if (!zeroPacketCountSent){
+                    updatePacketCountForDebugServer();
+                    zeroPacketCountSent = true;
+                }
                 //sim::sout<<"Node "<<serverNum<<":"<<red<<" I AM EMPTY!!! "<<def<<sim::endl;
                 usleep(10000);
             }
@@ -337,6 +345,7 @@ int ServerNode::localVotingSelectionAlgorithm(int prevNodeNum)
 void ServerNode::updateEdgesUsage()      // it will be broken with more than 99 edges in one node
 {
     DebugMessage d;
+    d.checksum = 239239239;
     d.function = DebugMessage::EDGES_USAGE_STATUS;
     d.i[0] = connections.size();
     for (int j=0;j<d.i[0];j++)
@@ -362,6 +371,7 @@ void ServerNode::updatePacketCountForDebugServer()
     }
     maxPacketsCount = maxPacketsCount > packetsStackSize ? maxPacketsCount : packetsStackSize;
     DebugMessage dmsg;
+    dmsg.checksum = 239239239;
     dmsg.function = DebugMessage::PACKET_COUNT_STATUS;
     dmsg.i[0] = serverNum;
     dmsg.i[1] = packetsStackSize;
@@ -378,6 +388,7 @@ void ServerNode::addDebugConnection()
     //sim::sout<<"port to recive = "<<debugSocketAdress<<" + "<<serverNum<<sim::endl;
     debugConnection->sendBytesPerInterval = 6000;
     debugConnection->sendIntervalMS = 33;
+    debugConnection->sendingWithoutQueue = true;
     //connections.push_back(debugConnection);
     debugConnection->connectTo();
     connect(debugConnection, SIGNAL(transmit_to_node(SystemMessage)),this,SLOT(get_message(SystemMessage)));
@@ -428,8 +439,9 @@ void ServerNode::addConnection(int to)
 
 void ServerNode::get_message(PacketMessage m)
 {
+    getPacketsMutex.lock();
     //sim::sout<<"Node"<< serverNum<<", message with id "<<m.id<<" got CHECKSUM = "<<m.checkSum<<sim::endl;
-    if (m.checkSum!=239239239)
+    if (m.checkSum!=239239239 || m.firstCheckSum!=239239239)
     {
         /*PacketMessage mm;
         mm.checkSum=239239239;
@@ -456,6 +468,7 @@ void ServerNode::get_message(PacketMessage m)
         qFatal("Error on Node %s !!! Packet with id %s got wrong checksum ( %s )!!! Check your RAM!!!",serverNum,m.id, m.checkSum);
     }
     DebugMessage d;
+    d.checksum = 239239239;
     d.function = DebugMessage::PACKET_STATUS;
     d.i[0] = m.id;
     d.i[1] = serverNum;
@@ -471,12 +484,14 @@ void ServerNode::get_message(PacketMessage m)
         m.delivered = true;
         std::chrono::milliseconds ms = timeNow();
         DebugMessage msg;
+        msg.checksum = 239239239;
         msg.function = DebugMessage::PACKET_STATUS_DELIVERED;
         msg.deliveringTime = ms - m.timeOnCreation;
         msg.i[0] = m.id;
         msg.i[1] = serverNum;
         debugConnection->sendMessage(msg);
     }
+    getPacketsMutex.unlock();
 }
 
 void ServerNode::get_message(SystemMessage m)

@@ -33,6 +33,7 @@ struct Message
     std::chrono::milliseconds timeOnCreation;
     std::chrono::milliseconds deliveredToThisNode;
     MessageType type = MessageType::MESSAGE;
+    int checksum = 0;
 };
 
 struct PacketMessage:Message{
@@ -64,6 +65,7 @@ struct DebugMessage:Message{
     Function function;
     std::chrono::milliseconds deliveringTime;
     MessageType type = MessageType::DEBUG_MESSAGE;
+    int checksum = 0;
 };
 
 struct PingMessage:Message{

@@ -12,11 +12,11 @@ void SendingQueue::updateByteQueue()
     if (messagesDataQueue.size()==0){
         queueMutex.unlock();
         packetsMutex.lock();
-        if (packets.size()>0) {
+        if (packetsData.size()>0) {
             int selected = 0;
             //MessageType type = packetsTypes[0];
             Priority priority = packetsPriority[0];
-            for (int i=0;i<packets.size();i++)
+            for (int i=0;i<packetsData.size();i++)
             {
                 if (priority < packetsPriority[i] )
                 {
@@ -26,19 +26,16 @@ void SendingQueue::updateByteQueue()
                 }
             }
             MessageType type = packetsTypes[selected];
-            //Message m = *packets[selected].get();
-            PacketMessage p;
-            if (type == MessageType::PACKET_MESSAGE){
-                p = PacketMessage( *(PacketMessage *) packets[selected].get());
+
+            char cdata [packetsData[selected].get()->size()] ;
+            for (int i = 0;  i < packetsData[selected].get()->size(); i++)
+            {
+                cdata[i] = (*packetsData[selected].get())[i];
             }
-            //PacketMessage p =  PacketMessage(*((PacketMessage *) packets[selected].data()));
-            QSharedPointer<Message> q = packets[selected];
-            //p = PacketMessage(*((PacketMessage *) q.get()));
-            PacketMessage pp;
-            //packets.erase(packets.begin() + selected);
+
             priority = packetsPriority[selected];
             //packetsPriority.erase(packetsPriority.begin()+selected);
-            packets.erase(packets.begin() + selected);
+            packetsData.erase(packetsData.begin() + selected);
             packetsTypes.erase(packetsTypes.begin() + selected);
             packetsPriority.erase(packetsPriority.begin()+selected);
             packetsMutex.unlock();
@@ -51,34 +48,49 @@ void SendingQueue::updateByteQueue()
                 messagesDataQueue.push_back(hData[i]);
             }
             queueMutex.unlock();
-
+            //char data [pdata.size()] = pdata.data();
+            PacketMessage p;
+            PingMessage pingP;
+            TestMessage testP;
+            SystemMessage sysP;
+            DebugMessage debP;
             switch (type) {
                 case MessageType::PACKET_MESSAGE:
                     //p = PacketMessage(*((PacketMessage *) q.get()));
+                    memcpy(&p, cdata, sizeof(p));
                     if (p.checkSum != 239239239)
                     {
                         sim::sout<<"ERROR HERE!!!"<<sim::endl;
                     }
-                    memcpy(&pp, &p, sizeof(p));
+
+                    //memcpy(&pp, &p, sizeof(p));
                     //sim::sout<<"Node "<<from<<": updateByteQueue message with id "<<p.id<<" to "<<to<<" checksum: "<<p.checkSum<< sim::endl;
                     //addToQueue(*((PacketMessage *) q.get()));
-                    if (pp.checkSum != 239239239)
+                    /*if (pp.checkSum != 239239239)
                     {
                         sim::sout<<"ERROR HERE!!!"<<sim::endl;
-                    }
-                    addToQueue(pp);
+                    }*/
+                    addToQueue(p);
                     break;
                 case MessageType::PING_MESSAGE:
-                    addToQueue(*((PingMessage *) q.get()));
+                    memcpy(&pingP, cdata, sizeof(pingP));
+                    addToQueue(pingP);
+                    //addToQueue(*((PingMessage *) q.get()));
                     break;
                 case MessageType::TEST_MESSAGE:
-                    addToQueue(*((TestMessage *) q.get()));
+                    memcpy(&testP, cdata, sizeof(testP));
+                    addToQueue(testP);
+                    //addToQueue(*((TestMessage *) q.get()));
                     break;
                 case MessageType::SYSTEM_MESSAGE:
-                    addToQueue(*((SystemMessage *) q.get()));
+                    memcpy(&sysP, cdata, sizeof(sysP));
+                    addToQueue(sysP);
+                    //addToQueue(*((SystemMessage *) q.get()));
                     break;
                 case MessageType::DEBUG_MESSAGE:
-                    addToQueue(*((DebugMessage *) q.get()));
+                    memcpy(&debP, cdata, sizeof(debP));
+                    addToQueue(debP);
+                    //addToQueue(*((DebugMessage *) q.get()));
                     break;
                 default:
                     break;
@@ -103,9 +115,9 @@ void SendingQueue::updateLoadingSize()
     int datasize = messagesDataQueue.size();
     queueMutex.unlock();
     packetsMutex.lock();
-    for (int i=0;i<packets.size();i++)
+    for (int i=0;i<packetsTypes.size();i++)
     {
-        switch (packets[i].get()->type) {
+        switch (packetsTypes[i]) {
             case MESSAGE:
                 datasize += sizeof(Message);
                 break;

@@ -187,7 +187,9 @@ void Graph::addPacketmessage(int _type, int _from, int _to)
     m.currentPosition = -1;
     m.delivered = false;
     packets.push_back(m);
+    packetsToUpdateListMutex.lock();
     tableIndexesToUpdate.push_back(packets.size()-1);
+    packetsToUpdateListMutex.unlock();
 }
 
 void Graph::addEllips(float x,float y)
@@ -223,7 +225,9 @@ void Graph::addPacket(Packet m)
     p.delivered = m.delivered;
     p.timeOnCreation = m.timeOnCreation;
     packets.push_back(p);
+    packetsToUpdateListMutex.lock();
     tableIndexesToUpdate.push_back(packets.size()-1);
+    packetsToUpdateListMutex.unlock();
 }
 
 Ellips * Graph::getEllipseByNumber(int num)
@@ -322,73 +326,66 @@ void Graph::get_system_message(SystemMessage m)
 
 void Graph::get_system_message(DebugMessage m)
 {
-    signalsMutex.lock();
-    if (m.function == DebugMessage::CONNECTION_STATUS)
-    {
-        Ellips *e = getEllipseByNumber(m.i[0]);
-        e->connected = m.i[1]==1;
-        e->colorStatus = m.i[1];
-        //sim::sout<<m.i[0]<<" send system message, colorStatus now is "<<e->colorStatus<<sim::endl;
-        emit repaint();
-    }
-    if (m.function == DebugMessage::PACKET_STATUS)
-    {
-        //sim::sout<<"GOT PACKET STATUS "<<m.i[0]<<"   "<<m.i[1]<<sim::endl;
-        for (int i = 0;i < packets.size();i++)
-        {
-            if (packets[i].id == m.i[0] && !packets[i].delivered)
-            {
-                packets[i].currentPosition = m.i[1];
-                tableIndexesToUpdate.push_back(i);
-            }
+    if (m.checksum == 239239239) {
+        signalsMutex.lock();
+        if (m.function == DebugMessage::CONNECTION_STATUS) {
+            Ellips *e = getEllipseByNumber(m.i[0]);
+            e->connected = m.i[1] == 1;
+            e->colorStatus = m.i[1];
+            //sim::sout<<m.i[0]<<" send system message, colorStatus now is "<<e->colorStatus<<sim::endl;
+            emit repaint();
         }
-        //emit repaint();
-        emit updateTable();
-    }
-    if (m.function == DebugMessage::PACKET_STATUS_DELIVERED)
-    {
-        for (int i = 0;i < packets.size();i++)
-        {
-            if (packets[i].id == m.i[0])
-            {
-                packets[i].currentPosition = m.i[1];
-                packets[i].delivered = true;
-                packets[i].timeOnCreation = m.deliveringTime;
+        packetsToUpdateListMutex.lock();
+        if (m.function == DebugMessage::PACKET_STATUS) {
+            //sim::sout<<"GOT PACKET STATUS "<<m.i[0]<<"   "<<m.i[1]<<sim::endl;
+            for (int i = 0; i < packets.size(); i++) {
+                if (packets[i].id == m.i[0] && !packets[i].delivered) {
+                    packets[i].currentPosition = m.i[1];
+                    tableIndexesToUpdate.push_back(i);
+                }
             }
+            //emit repaint();
+            //emit updateTable();
         }
+        if (m.function == DebugMessage::PACKET_STATUS_DELIVERED) {
+            for (int i = 0; i < packets.size(); i++) {
+                if (packets[i].id == m.i[0]) {
+                    packets[i].currentPosition = m.i[1];
+                    packets[i].delivered = true;
+                    packets[i].timeOnCreation = m.deliveringTime;
+                }
+            }
             emit updateTable();
-    }
-    if (m.function == DebugMessage::PACKET_COUNT_STATUS)
-    {
-        Ellips *e = getEllipseByNumber(m.i[0]);
-        e->packetCount = m.i[1];
-        e->maxPacketCount = m.i[2];
-        emit repaint();
-    }
-    if (m.function == DebugMessage::EDGES_USAGE_STATUS)
-    {
-        int count = m.i[0];
-        for (int j = 0;j<count;j++)
-        {
-            for (int i=0;i<edges.size();i++)
-            {
-                if (edges[i].id == m.i[j*3 + 1])
-                {
-                    if (edges[i].from == m.i[j*3 +2])
-                    {
-                        edges[i].loadFromTo = m.i[j*3 + 3];
-                    }
-                    if (edges[i].to == m.i[j*3 +2])
-                    {
-                        edges[i].loadToFrom = m.i[j*3 + 3];
+        }
+        if (m.function == DebugMessage::PACKET_COUNT_STATUS) {
+            Ellips *e = getEllipseByNumber(m.i[0]);
+            e->packetCount = m.i[1];
+            e->maxPacketCount = m.i[2];
+            emit repaint();
+        }
+        packetsToUpdateListMutex.unlock();
+        if (m.function == DebugMessage::EDGES_USAGE_STATUS) {
+            int count = m.i[0];
+            for (int j = 0; j < count; j++) {
+                for (int i = 0; i < edges.size(); i++) {
+                    if (edges[i].id == m.i[j * 3 + 1]) {
+                        if (edges[i].from == m.i[j * 3 + 2]) {
+                            edges[i].loadFromTo = m.i[j * 3 + 3];
+                        }
+                        if (edges[i].to == m.i[j * 3 + 2]) {
+                            edges[i].loadToFrom = m.i[j * 3 + 3];
+                        }
                     }
                 }
             }
+            emit repaint();
         }
-        emit repaint();
+        signalsMutex.unlock();
+        //sim::sout<<m.i[0]<<" send connection status "<<m.i[1]<<sim::endl;
     }
-    signalsMutex.unlock();
-    //sim::sout<<m.i[0]<<" send connection status "<<m.i[1]<<sim::endl;
+    else {
+        sim::sout<<"DebugMessage checksum error"<<sim::endl;
+    }
 }
 
 void Graph::addPacket()
@@ -403,6 +400,8 @@ void Graph::addPacket()
     m.timeOnCreation;
     m.delivered = false;
     packets.push_back(m);
+    packetsToUpdateListMutex.lock();
     tableIndexesToUpdate.push_back(packets.size()-1);
+    packetsToUpdateListMutex.unlock();
     emit repaint();
 }

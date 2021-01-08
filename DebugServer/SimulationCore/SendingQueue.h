@@ -24,7 +24,15 @@ public:
     void addMessage(T t)
     {
         packetsMutex.lock();
-        packets.push_back(QSharedPointer<typeof(T)>(new T{t}));
+        char c [sizeof(t)];
+        memcpy(&c, &t, sizeof(t));
+        std::vector<char> v;
+        for (int i=0;i< sizeof(c); i++)
+        {
+            v.push_back(c[i]);
+        }
+        //packetsData.push_back(QSharedPointer<typeof(T)>(new T{t}));
+        packetsData.push_back(QSharedPointer<std::vector<char>>(new std::vector<char>(v)));
         packetsTypes.push_back(t.type);
         packetsPriority.push_back(t.priority);
         //TestMessage tt = *(TestMessage*)packets[0].get();
@@ -63,7 +71,8 @@ private:
     }
 
     void updateByteQueue();
-    std::vector<QSharedPointer<Message>> packets;
+    //std::vector<QSharedPointer<Message>> packets;
+    std::vector<QSharedPointer<std::vector<char>>> packetsData;
     std::vector<MessageType> packetsTypes;
     std::vector<Priority> packetsPriority;
 

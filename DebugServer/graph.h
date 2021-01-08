@@ -88,6 +88,9 @@ public:
     int cpuLoadCriticalFrames = 0;
     int cpuFrames = 0;
     Algorithms selectedAlgorithm = Algorithms::RANDOM;
+
+    std::mutex packetsToUpdateListMutex;
+
 public slots:
     void get_system_message(SystemMessage m);
     void get_system_message(DebugMessage m);
@@ -100,6 +103,7 @@ private:
     int ellipseCounter = 0;
     int edgeCounter = 0;
     void deleteEllips(int number);
+
 };
 
 #endif // GRAPH_H

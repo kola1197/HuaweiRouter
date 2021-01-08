@@ -60,6 +60,7 @@ public:
     AsyncVar<float> bufferLoad{0};
     AsyncVar<bool> stopped{false};
     SendingQueue sendingQueue;
+    bool sendingWithoutQueue = false;
 
     template <typename T>
     void sendMessage(T t){                       //in header because of stupid gcc compilation
@@ -67,8 +68,17 @@ public:
         std::string type = typeid(t).name();
         if (Messages::getMessageTypeByName(type, &h.type)) //HarbingerMessage::PING_MESSAGE;
         {
+            if (h.type == DEBUG_MESSAGE)
+            {
+                //t.checksum;
+                //sim::sout<<"Sending DebugMessage from "<<t.from<<" to "<<t.to<<" checksum = "<<t.checksum<<sim::endl;
+                if (t.checksum != 239239239)
+                {
+                    sim::sout<<"Sending BROKEN DebugMessage from "<<t.from<<" to "<<t.to<<" checksum = "<<t.checksum<<sim::endl;
+                }
+            }
             h.code = 239;
-            if (!oldway)
+            if (!sendingWithoutQueue)
             {
                 sendingQueue.addMessage(t);
                 /*messageBuffer.lock();
@@ -120,7 +130,6 @@ private:
     //std::vector<PacketMessage> messagesQueue;
     //std::vector<char> messagesDataQueue;
     QTimer* timer = new QTimer();
-    bool oldway = false;
     bool isServer = false;
     std::thread thr1;
     std::thread thr;

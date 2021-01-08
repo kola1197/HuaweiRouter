@@ -229,6 +229,7 @@ void MainWindow::createUI()
             }
         }
         else{
+            ui->openGLWidget->graph.packetsToUpdateListMutex.lock();
             QTableWidgetItem *protoitem = new QTableWidgetItem();
             protoitem->setTextAlignment(Qt::AlignmentFlag::AlignCenter);
             for (int j = 0; j < ui->openGLWidget->graph.packets.size(); j++) {
@@ -251,6 +252,8 @@ void MainWindow::createUI()
                     }
                 }
             }
+            ui->openGLWidget->graph.tableIndexesToUpdate.clear();
+            ui->openGLWidget->graph.packetsToUpdateListMutex.unlock();
         }
     }
 }
@@ -495,7 +498,7 @@ void MainWindow::updateTable()
 void MainWindow::checkSimulationStatus()
 {
 
-    bool allPacketsDelivered = simulationIsActive;
+    bool allPacketsDelivered = true;
     float time = 0;
     for (int i=0;i< ui->openGLWidget->graph.packets.size();i++)
     {

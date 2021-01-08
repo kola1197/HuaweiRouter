@@ -112,7 +112,7 @@ void ServerConnection::connectTo()
                                        usleep(sendIntervalMS);
                                    }
                                });
-            if (!oldway){
+            if (!sendingWithoutQueue){
                 thr1.detach();
             }
             while (!needToStop.get())
@@ -179,6 +179,7 @@ void ServerConnection::getPacketMessage()
         }
     }
     memcpy(&m, msg, sizeof(m));
+    //sim::sout<<"Node "<<from<<": from "<<to<<" got PacketMessage with id "<<m.id<<" checksum: "<<m.checkSum <<sim::endl;
     if (m.checkSum != 239239239){
         /*PacketMessage mm;
         mm.checkSum=239239239;
@@ -204,7 +205,7 @@ void ServerConnection::getPacketMessage()
             drout<<std::hex<<(int)hData[i]<<" ";
         }
         std::cout<<std::endl;*/
-        sim::sout<<"Node "<<from<<": from "<<to<<" got PacketMessage with id "<<m.id<<" checksum: "<<m.checkSum <<sim::endl;
+        //sim::sout<<"Node "<<from<<": from "<<to<<" got PacketMessage with id "<<m.id<<" checksum: "<<m.checkSum <<sim::endl;
     }
     m.prevposition = m.currentPosition;
     m.currentPosition = from;
@@ -213,6 +214,7 @@ void ServerConnection::getPacketMessage()
 
 void ServerConnection::getDebugMessage()
 {
+
     DebugMessage m;
     char msg[sizeof (m)];
     int bytes;
@@ -223,7 +225,13 @@ void ServerConnection::getDebugMessage()
         }
     }
     memcpy(&m, msg, sizeof(m));
-    emit transmit_to_gui(m);
+    if (m.checksum == 239239239)
+    {
+        emit transmit_to_gui(m);
+    }
+    else {
+        sim::sout<<"DebugMessage checksum error"<<sim::endl;
+    }
 }
 
 void ServerConnection::getSystemMessage()
@@ -360,7 +368,7 @@ void ServerConnection::awaitConnection()
                     usleep(sendIntervalMS);
                 }
             });
-            if (!oldway){
+            if (!sendingWithoutQueue){
                 thr1.detach();
             }
             while (!needToStop.get())
