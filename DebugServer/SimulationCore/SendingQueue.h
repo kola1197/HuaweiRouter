@@ -54,9 +54,10 @@ private:
         //sim::sout<<"HERE"<<sim::endl;
         if (typeid(T).name() == typeid(PacketMessage).name()){
             PacketMessage * p = (PacketMessage*) &t;
-            if ( p->checkSum!= 239239239)
+            if ( p->checkSum!= Messages::getChecksum(p))
             {
                 sim::sout<<"ERROR! WRONG CHECKSUM!!!"<<sim::endl;
+                qFatal("Error on Node %s !!! Packet with id %s got wrong checksum ( %s )!!! Check your RAM!!!",p->id, p->checkSum);
             }
 
         }

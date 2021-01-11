@@ -58,9 +58,11 @@ void SendingQueue::updateByteQueue()
                 case MessageType::PACKET_MESSAGE:
                     //p = PacketMessage(*((PacketMessage *) q.get()));
                     memcpy(&p, cdata, sizeof(p));
-                    if (p.checkSum != 239239239)
+                    if (p.checkSum != Messages::getChecksum(&p))
                     {
                         sim::sout<<"ERROR HERE!!!"<<sim::endl;
+                        qFatal("Error !!! Packet with id %s got wrong checksum ( %s )!!! Check your RAM!!!",p.id, p.checkSum);
+
                     }
 
                     //memcpy(&pp, &p, sizeof(p));

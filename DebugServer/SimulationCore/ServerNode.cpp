@@ -77,7 +77,7 @@ void ServerNode::loadPackets()
             m.currentPosition = serverNum;
             m.prevposition = m.currentPosition;
             m.type = graph.packets[i].type;
-            m.checkSum = 239239239;
+            m.checkSum = Messages::getChecksum(&m);
             m.firstCheckSum = 239239239;
             messagesStack.push_back(m);
         }
@@ -284,7 +284,7 @@ int ServerNode::selectPacketPath(int prevNodeNum)
 
 int ServerNode::randomSelectionAlgorithm(int prevNodeNum)
 {
-    srand(time(0));
+    //srand(time(0));
     //sim::sout<<"prev node num "<<prevNodeNum<<sim::endl;
     int a = prevNodeNum;
     a = rand() % (connections.size());
@@ -296,7 +296,7 @@ int ServerNode::randomSelectionAlgorithm(int prevNodeNum)
 
 int ServerNode::drillSelectionAlgorithm()
 {
-    srand(time(0));
+    //srand(time(0));
     int a = rand() % (connections.size());
     int b = a;
     while (b == a)
@@ -323,7 +323,7 @@ int ServerNode::localVotingSelectionAlgorithm(int prevNodeNum)
         nodesLoad[i] = qRound(nodesLoad[i]);
         isum += nodesLoad[i];
     }
-    srand(time(0));
+    //srand(time(0));
     int result = prevNodeNum;
     while (result == prevNodeNum) {
         int a = rand() % isum;
@@ -446,7 +446,7 @@ void ServerNode::get_message(PacketMessage m)
 {
     getPacketsMutex.lock();
     //sim::sout<<"Node"<< serverNum<<", message with id "<<m.id<<" got CHECKSUM = "<<m.checkSum<<sim::endl;
-    if (m.checkSum!=239239239 || m.firstCheckSum!=239239239)
+    if (m.checkSum!= Messages::getChecksum(&m) || m.firstCheckSum!=239239239)
     {
         /*PacketMessage mm;
         mm.checkSum=239239239;

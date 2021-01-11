@@ -117,13 +117,13 @@ public:
         return false;
     }
 
-    static int getPacketMessageChecksum(PacketMessage* p)
+    static int getChecksum(PacketMessage* p)
     {
         int result = 0;
         result+=p->id;
         result+=p->from;
         result+=p->to;
-        result+=p->timeOnCreation.count();
+        //result+=p->timeOnCreation.count();
         return result;
     }
 };

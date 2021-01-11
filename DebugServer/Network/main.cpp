@@ -92,11 +92,20 @@ void testMultiThreading(int sendingThreadsAmount) {
 
 void randomTest()
 {
+    int r[10]{0};
+    srand(time(NULL));
+    for (int i=0;i<10000;i++)
+    {
+        r[rand() % (10)] += 1;
+    }
+    /*
     srand(time(NULL));
     int a = rand() % (10);
     int b = rand() % (10);
-    int c = rand() % (10);
-    sim::sout<<a<<", "<<b<<", "<<c<<sim::endl;
+    int c = rand() % (10);*/
+    for (int i=0;i<10;i++) {
+        sim::sout << r[i] << sim::endl;
+    }
 }
 
 void initSettings()
@@ -169,9 +178,11 @@ void newMessagesQueueTest()
 }
 
 int main(int argc, char *argv[]) {
+    //randomTest();
     //newMessagesQueueTest();
     //sim::sout<<CpuInfo::getCPUName()<<sim::endl;
     QApplication a(argc, argv);
+    srand(time(NULL));
     a.setApplicationName("Simulation");
     MainWindow w;
     w.setWindowTitle("Simulation");
