@@ -403,5 +403,5 @@ void Graph::addPacket()
     packetsToUpdateListMutex.lock();
     tableIndexesToUpdate.push_back(packets.size()-1);
     packetsToUpdateListMutex.unlock();
-    emit repaint();
+    //emit repaint();
 }

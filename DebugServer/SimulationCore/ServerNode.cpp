@@ -225,10 +225,10 @@ void ServerNode::Start()       //on start we connect to debug server
                 zeroPacketCountSent = false;
             }
             else{
-                if (!zeroPacketCountSent){
+                //if (!zeroPacketCountSent){
                     updatePacketCountForDebugServer();
-                    zeroPacketCountSent = true;
-                }
+                    //zeroPacketCountSent = true;
+                //}
                 //sim::sout<<"Node "<<serverNum<<":"<<red<<" I AM EMPTY!!! "<<def<<sim::endl;
                 usleep(10000);
             }
@@ -364,19 +364,24 @@ std::chrono::milliseconds ServerNode::timeNow()
 
 void ServerNode::updatePacketCountForDebugServer()
 {
-    int packetsStackSize = messagesStack.size();
-    for (int i=0;i<connections.size();i++)
+    std::chrono::milliseconds end = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+    if ((end - updatePacketPrevSendingTime).count() > 1000)
     {
-        packetsStackSize += connections[i]->sendingQueue.packetsCount.get();
+        updatePacketPrevSendingTime = end;
+        int packetsStackSize = messagesStack.size();
+        for (int i=0;i<connections.size();i++)
+        {
+            packetsStackSize += connections[i]->sendingQueue.packetsCount.get();
+        }
+        maxPacketsCount = maxPacketsCount > packetsStackSize ? maxPacketsCount : packetsStackSize;
+        DebugMessage dmsg;
+        dmsg.checksum = 239239239;
+        dmsg.function = DebugMessage::PACKET_COUNT_STATUS;
+        dmsg.i[0] = serverNum;
+        dmsg.i[1] = packetsStackSize;
+        dmsg.i[2] = maxPacketsCount;
+        debugConnection->sendMessage(dmsg);
     }
-    maxPacketsCount = maxPacketsCount > packetsStackSize ? maxPacketsCount : packetsStackSize;
-    DebugMessage dmsg;
-    dmsg.checksum = 239239239;
-    dmsg.function = DebugMessage::PACKET_COUNT_STATUS;
-    dmsg.i[0] = serverNum;
-    dmsg.i[1] = packetsStackSize;
-    dmsg.i[2] = maxPacketsCount;
-    debugConnection->sendMessage(dmsg);
 }
 
 void ServerNode::addDebugConnection()

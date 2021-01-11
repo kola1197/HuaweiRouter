@@ -47,7 +47,7 @@ private:
     int localVotingSelectionAlgorithm(int prevNodeNum);
     int selectPacketPath(int prevNodeNum);
     AsyncVar<int> packetMessagesCounter {0};
-
+    std::chrono::milliseconds updatePacketPrevSendingTime;
     std::mutex getPacketsMutex;
 };
 

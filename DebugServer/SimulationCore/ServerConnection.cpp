@@ -268,6 +268,7 @@ void ServerConnection::getPingMessage()
 
 void ServerConnection::getTestMessage()
 {
+
     //sim::sout<<"awaiting test message"<<sim::endl;
     TestMessage m;
     //m.testTexst = "";
