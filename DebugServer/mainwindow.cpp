@@ -101,7 +101,7 @@ void MainWindow::updateCpuLabel()
     ui->CpuInfoLabel->setText(result);
     float ftemp = CpuInfo::getCPUTemp();
     ui->CpuTempLabel->setStyleSheet(ftemp > criticalTemp ? "color: rgb(200, 0, 0)" : "color: rgb(0, 0, 0)");
-    QString temp = "CPU temp = "+QString::number(ftemp,'f',2)+"°C";
+    QString temp = ftemp!=0? "CPU temp = "+QString::number(ftemp,'f',2)+"°C" : "Cannot read your CPU \n temp from driver";
     ui->openGLWidget->graph.cpuFrames++;
     if (limit)
     {
@@ -237,13 +237,10 @@ void MainWindow::createUI()
                 {
                     if (j == ui->openGLWidget->graph.tableIndexesToUpdate[i])
                     {
-
-
                         QTableWidgetItem *newitem2 = protoitem->clone();
                         newitem2->setText(QString::number(ui->openGLWidget->graph.packets[j].currentPosition));
                         ui->tableWidget->setItem(j, 5, newitem2);
                         //ui->tableWidget->setItem(j,5, new QTableWidgetItem(QString::number(ui->openGLWidget->graph.packets[j].currentPosition)));
-
                         QString deliveringTime = ui->openGLWidget->graph.packets[j].delivered ? QString::number(
                                 ui->openGLWidget->graph.packets[j].timeOnCreation.count()) : "Not delivered";
                         QTableWidgetItem *newitem3 = protoitem->clone();

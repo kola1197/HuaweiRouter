@@ -99,7 +99,7 @@ void ServerNode::Start()       //on start we connect to debug server
         }*/
         //sim::sout<<"Node "<<serverNum<<": GOT  "<<counter<<" packets"<<sim::endl;
 
-
+        updatePacketPrevSendingTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
         addDebugConnection();
         //sim::sout<<"Node "<<serverNum<<": awaiting for debug server "<<sim::endl;
         while (!debugConnection->connected.get())
@@ -470,6 +470,7 @@ void ServerNode::get_message(PacketMessage m)
             std::cout<<std::hex<<hData[i];
         }
         std::cout<<std::endl;*/
+        sim::sout<<"Error on Node "<<serverNum<<" !!! Packet with id "<<m.id <<" got wrong checksum ( "<<m.checkSum<<" )!!! Check your RAM!!!"<<sim::endl;
         qFatal("Error on Node %s !!! Packet with id %s got wrong checksum ( %s )!!! Check your RAM!!!",serverNum,m.id, m.checkSum);
     }
     DebugMessage d;

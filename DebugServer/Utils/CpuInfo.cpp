@@ -129,35 +129,41 @@ void CpuInfo::PrintStats(const std::vector<CPUData> & entries1, const std::vecto
     }
 }
 
-float CpuInfo::getCPUTemp()
+float CpuInfo::getCPUTemp()               // WINDOWS LINUX
 {
-    QString cpuName = QString::fromUtf8(getCPUName().c_str());
-    if (cpuName.contains("AMD")) {
-        std::ifstream fileStat("/sys/class/hwmon/hwmon0/temp1_input");
-        std::string line;
-        float result = -1;
-        while (std::getline(fileStat, line)) {
-            std::istringstream ss(line);
-            if (result == -1) {
-                result = std::stof(ss.str());
-            }
-        }
-        result = result / 1000;
-        return result;
-    }
-    else{
-        QProcess linuxcpuinfo;
-        linuxcpuinfo.start("bash", QStringList() << "-c" << "paste <(cat /sys/class/thermal/thermal_zone*/type) <(cat /sys/class/thermal/thermal_zone*/temp) | column -s $'\\t' -t | sed 's/\\(.\\)..$/.\\1°C/'");
-        linuxcpuinfo.waitForFinished();
-        QString linuxOutput = linuxcpuinfo.readAllStandardOutput();
-        QStringList res = linuxOutput.split("\n");
-        QString s = res[res.size() - 2];
-        QStringList ss = s.split(" ");
-        s = ss[ss.size()-1];
-        s = s.split("°")[0];
-        float result = s.toFloat();
-        return result;
-    }
+//    QString cpuName = QString::fromUtf8(getCPUName().c_str());
+//    if (cpuName.contains("AMD")) {
+//        std::ifstream fileStat("/sys/class/hwmon/hwmon0/temp1_input");
+//        std::string line;
+//        float result = -1;
+//        while (std::getline(fileStat, line)) {
+//            std::istringstream ss(line);
+//            if (result == -1) {
+//                result = std::stof(ss.str());
+//            }
+//        }
+//        result = result / 1000;
+//        return result;
+//    }
+//    else{
+//        float result = 0;
+//        try {
+//            QProcess linuxcpuinfo;
+//            linuxcpuinfo.start("bash", QStringList() << "-c"
+//                                                     << "paste <(cat /sys/class/thermal/thermal_zone*/type) <(cat /sys/class/thermal/thermal_zone*/temp) | column -s $'\\t' -t | sed 's/\\(.\\)..$/.\\1°C/'");
+//            linuxcpuinfo.waitForFinished();
+//            QString linuxOutput = linuxcpuinfo.readAllStandardOutput();
+//            QStringList res = linuxOutput.split("\n");
+//            QString s = res[res.size() - 2];
+//            QStringList ss = s.split(" ");
+//            s = ss[ss.size() - 1];
+//            s = s.split("°")[0];
+//            result = s.toFloat();
+//        }
+//        catch (QRegExp){}
+//        return result;
+//    }
+    return 0;
 }
 
 std::string CpuInfo::getCPUName()
