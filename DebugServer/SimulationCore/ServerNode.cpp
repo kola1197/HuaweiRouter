@@ -217,7 +217,7 @@ void ServerNode::Start()       //on start we connect to debug server
                 PacketMessage m(messagesStack[0]);
                 messagesStack.erase(messagesStack.begin());
                 int prevNodeNum = m.prevposition;
-                int i = selectPacketPath(prevNodeNum);
+                int i = selectPacketPath(prevNodeNum, m.to);
                 sim::sout<<"Node "<<serverNum<<":"<<grn<<" sending packet with id "<<m.id<<" to "<<connections[i]->to<<def<<sim::endl;
                 connections[i]->sendMessage(m);
                 updatePacketCountForDebugServer();
@@ -261,7 +261,7 @@ void ServerNode::updateNodeLoadForLocalVoting()
     }
 }
 
-int ServerNode::selectPacketPath(int prevNodeNum)
+int ServerNode::selectPacketPath(int prevNodeNum, int to)
 {
     switch (graph.selectedAlgorithm) {
         case Algorithms::RANDOM:
@@ -277,7 +277,7 @@ int ServerNode::selectPacketPath(int prevNodeNum)
             return drillSelectionAlgorithm();
             break;
         case Algorithms::LOCAL_VOTING:
-            return localVotingSelectionAlgorithm(prevNodeNum);
+            return localVotingSelectionAlgorithm(prevNodeNum, to);
             break;
     }
 }
@@ -306,14 +306,17 @@ int ServerNode::drillSelectionAlgorithm()
     return connections[a]->bufferLoad.get() > connections[b]->bufferLoad.get() ? b : a;
 }
 
-int ServerNode::localVotingSelectionAlgorithm(int prevNodeNum)
+int ServerNode::localVotingSelectionAlgorithm(int prevNodeNum, int to)
 {
     //sim::sout<<"localVotingSelectionAlgorithm"<<sim::endl;
     std::vector<float> nodesLoad;
     float sum=0;
     for (int i=0;i<connections.size();i++)
     {
-        nodesLoad.push_back(connections[i]->nodeLoad.get() * connections[i]->bufferLoad.get() + 1);
+        float a = connections[i]->nodeLoad.get();
+        float b = connections[i]->bufferLoad.get();
+        float c = pathLength(connections[i]->to,to);
+        nodesLoad.push_back( (a + b + c * c) * (a + b + c * c) + 1);
         sum += nodesLoad[nodesLoad.size()-1];
     }
     int isum = 0;
@@ -339,7 +342,12 @@ int ServerNode::localVotingSelectionAlgorithm(int prevNodeNum)
             }
         }
     }
-    //return result;
+}
+
+int ServerNode::pathLength(int nodeFrom, int nodeTo)
+{
+    graph.calculatePathLength(nodeFrom);
+    return graph.getEllipseByNumber(nodeTo)->pathLength;
 }
 
 void ServerNode::updateEdgesUsage()      // it will be broken with more than 99 edges in one node

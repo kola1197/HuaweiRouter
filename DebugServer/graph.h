@@ -18,6 +18,7 @@ struct Ellips
     int maxPacketCount = 0;
     int packetCount = 0;
     int colorStatus = 0; // 0 - orange - default but not connected, 1 - blue - active for movement, 2 - yellow - conected, packets not loaded, 3 - green packets loaded, started //
+    int pathLength =- 1;
 };
 
 struct Edge
@@ -90,7 +91,7 @@ public:
     Algorithms selectedAlgorithm = Algorithms::RANDOM;
 
     std::mutex packetsToUpdateListMutex;
-
+    void calculatePathLength(int nodeId);
 public slots:
     void get_system_message(SystemMessage m);
     void get_system_message(DebugMessage m);
@@ -104,6 +105,7 @@ private:
     int edgeCounter = 0;
     void deleteEllips(int number);
 
+    void setPathLength(int nodeId);
 };
 
 #endif // GRAPH_H

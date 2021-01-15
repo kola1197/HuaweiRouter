@@ -405,3 +405,31 @@ void Graph::addPacket()
     packetsToUpdateListMutex.unlock();
     //emit repaint();
 }
+
+void Graph::calculatePathLength(int nodeId)
+{
+    for (int i=0; i < ellipses.size();i++)
+    {
+        ellipses[i].pathLength = 88888;
+    }
+    Ellips *e = getEllipseByNumber(nodeId);
+    e->pathLength=0;
+    setPathLength(nodeId);
+}
+
+void Graph::setPathLength(int nodeId)
+{
+    Ellips *e = getEllipseByNumber(nodeId);
+    for (int i=0; i< edges.size();i++)
+    {
+        if (edges[i].from == nodeId)
+        {
+            Ellips *ee = getEllipseByNumber(edges[i].to);
+            if (ee->pathLength > e->pathLength+1)
+            {
+                ee->pathLength = e->pathLength+1;
+                setPathLength(ee->number);
+            }
+        }
+    }
+}
