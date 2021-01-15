@@ -7,10 +7,13 @@
 
 #include "QObject"
 #include "Messages.h"
+#include "SendingQueue.h"
 #include <Utils/MutexBool.h>
 #include <Utils/AsyncVar.h>
 #include <QtCore/QTimer>
 #include <QtCore/QThread>
+#include <arpa/inet.h>
+#include <fstream>
 
 enum ConnectionType{
     TO, FROM
@@ -25,11 +28,12 @@ public:
     void connectTo();
     void awaitConnection();
     MutexBool connected {false};
-    void sendMessage(PingMessage m);
+    /*void sendMessage(PingMessage m);
     void sendMessage(SystemMessage m);
     void sendMessage(TestMessage m);
     void sendMessage(DebugMessage m);
     void sendMessage(PacketMessage m);
+*/
     static AsyncVar<int> connectionsCount;
     static AsyncVar<int> connectionsCountTo;
     void getMessage();
@@ -38,7 +42,8 @@ public:
     void getSystemMessage();
     void getDebugMessage();
     void getPacketMessage();
-
+    void getNodeLoadMessage();
+    AsyncVar<float> nodeLoad{0};
     void stop();
 
     int from = -1;
@@ -54,6 +59,56 @@ public:
     int updateUsageDataCounter = 0;
     AsyncVar<float> bufferLoad{0};
     AsyncVar<bool> stopped{false};
+    SendingQueue sendingQueue;
+    bool sendingWithoutQueue = false;
+
+    template <typename T>
+    void sendMessage(T t){                       //in header because of stupid gcc compilation
+        HarbingerMessage h{};
+        std::string type = typeid(t).name();
+        if (Messages::getMessageTypeByName(type, &h.type)) //HarbingerMessage::PING_MESSAGE;
+        {
+            if (h.type == DEBUG_MESSAGE)
+            {
+                //t.checksum;
+                //sim::sout<<"Sending DebugMessage from "<<t.from<<" to "<<t.to<<" checksum = "<<t.checksum<<sim::endl;
+                if (t.checksum != 239239239)
+                {
+                    sim::sout<<"Sending BROKEN DebugMessage from "<<t.from<<" to "<<t.to<<" checksum = "<<t.checksum<<sim::endl;
+                }
+            }
+            h.code = 239;
+            if (!sendingWithoutQueue)
+            {
+                sendingQueue.addMessage(t);
+                /*messageBuffer.lock();
+                char hData[sizeof(h)];
+                memcpy(hData, &h, sizeof(h));
+                for (int i=0; i<sizeof(hData); i++)
+                {
+                    messagesDataQueue.push_back(hData[i]);
+                }
+                char mData[sizeof(t)];
+                memcpy(mData, &t, sizeof(t));
+                for (int i=0; i<sizeof(mData); i++)
+                {
+                    messagesDataQueue.push_back(mData[i]);
+                }
+                messageBuffer.unlock();*/
+            }
+            else{
+                sendMutex.lock();
+                char hData[sizeof(h)];
+                memcpy(hData, &h, sizeof(h));
+                send(sock, &hData, sizeof(h), 0);
+                //sim::sout<<"sizeof m"<< sizeof(m)<<sim::endl;
+                char mData[sizeof(t)];
+                memcpy(mData, &t, sizeof(t));
+                send(sock, &mData, sizeof(t), 0);
+                sendMutex.unlock();
+            }
+        }
+    }
 signals:
     void transmit_to_gui(SystemMessage m);
     void transmit_to_gui(DebugMessage m);
@@ -73,14 +128,17 @@ private:
     std::string ip = "127.0.0.2";
     std::mutex sendMutex;
     //std::vector<PacketMessage> messagesQueue;
-    std::vector<char> messagesDataQueue;
+    //std::vector<char> messagesDataQueue;
     QTimer* timer = new QTimer();
-    bool oldway = false;
     bool isServer = false;
     std::thread thr1;
     std::thread thr;
     void updateCount(int i);
     void updateCountTo(int i);
+    //SendingQueue sendingQueue;
+    std::vector<char> debugBuffer;
+    //std::ofstream dwout;
+    //std::ofstream drout;
 };
 
 

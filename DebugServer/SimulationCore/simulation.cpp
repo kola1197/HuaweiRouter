@@ -95,7 +95,11 @@ void Simulation::Start()
     {
         QSharedPointer<ServerNode> node = QSharedPointer<ServerNode>(new ServerNode(graph->ellipses[i].number,Settings::getDebugFirstPortNum(),*graph));
         serverNodes.push_back(node);
-        node->Start();
+        node->loadPackets();
+    }
+    for (int i=0;i<graph->ellipses.size();i++)
+    {
+        serverNodes[i]->Start();
         sim::sout<<"node "<<graph->ellipses[i].number<<" started"<<sim::endl;
     }
 }

@@ -34,22 +34,30 @@ private slots:
     void updateTable();
     void on_algorithmBox_currentIndexChanged(int index);
 
-    void on_count_of_bytes_editingFinished();
-    void on_send_interval_editingFinished();
-
+    void onnn_count_of_bytes_editingFinished();                      // QT thinks that "on_" is system slot ?!
+    void onnn_send_interval_editingFinished();                       // QT thinks that "on_" is system slot ?!
+    void repaint_on_simulation_finish_done();
+signals:
+    void simulation_finish_done();
 public slots:
-    void on_settingsButton_released();
+    void updateAllScreen();
+    void onnn_settingsButton_released();                              // QT thinks that "on_" is system slot ?!
     void repaintOGLWidget();
     void onBtnClicked();
     void unBlockInterface();
+    void updateCpuLabel();
     //void get_system_message(SystemMessage m);
 private:
+    int screenUpdateFrameCounter;
+    void updatePacketsLabel();
     Simulation* simulation;
     Ui::MainWindow *ui;
     void connectSlots();
     void createUI();
     Graph savedGraph;
 
+    QTimer* tmr;
+    bool averageTimeShoved = true;
     void checkSimulationStatus();
     bool tableResized = false;
 

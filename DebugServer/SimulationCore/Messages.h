@@ -10,74 +10,123 @@
 
 #define int64 int64_t
 
+//new generation
+enum Priority {
+    LOW=0, MEDIUM=1, HIGH=2
+};
+
+enum MessageType {MESSAGE=0,PACKET_MESSAGE=1, PING_MESSAGE=2, TEST_MESSAGE=3, SYSTEM_MESSAGE=4, DEBUG_MESSAGE=5, NODE_LOAD_MESSAGE = 6};
+
 struct HarbingerMessage {                                           //sends before other messages, to set resiver to it
-    enum Type {PING_MESSAGE, TEST_MESSAGE, SYSTEM_MESSAGE, DEBUG_MESSAGE, PACKET_MESSAGE};
-    Type type;
+    //enum MessageType {MESSAGE=0,PACKET_MESSAGE=1, PING_MESSAGE=2, TEST_MESSAGE=3, SYSTEM_MESSAGE=4, DEBUG_MESSAGE=5};
+    MessageType type;
     int code;
 };
 
-//struct MessageWithImage {                                           //get image from vehicle
-//    enum Type {LEFT_IMAGE, RIGHT_IMAGE};
-//    char text[200];
-//    int i;
-//    int height;
-//    int width;
-//    int dataSize;
-//    //cv::Mat image;
-//    uchar imData [240400];                                                  //230400   //2352000
-//    Type type;
-//};
+struct Message
+{
+    //enum MessageType {MESSAGE=0,PACKET_MESSAGE=1, PING_MESSAGE=2, TEST_MESSAGE=3, SYSTEM_MESSAGE=4, DEBUG_MESSAGE=5};
+    Priority priority = Priority::MEDIUM;
+    int id;
+    int to;
+    int from;
+    std::chrono::milliseconds timeOnCreation;
+    std::chrono::milliseconds deliveredToThisNode;
+    MessageType type = MessageType::MESSAGE;
+    int checksum = 0;
+};
 
-//struct MessageWithGrayImage {                                           //get image from vehicle
-//    enum Type {LEFT_IMAGE, RIGHT_IMAGE};
-//    char text[200];
-//    int i;
-//    int height;
-//    int width;
-//    int dataSize;
-//    //cv::Mat image;
-//    uchar imData [100000];                                               //100000   //230400   //2352000
-//    Type type;
-//};
+struct PacketMessage:Message{
+    int firstCheckSum = 0;
+    Priority priority = Priority::MEDIUM;
+    int currentPosition;
+    bool delivered;
+    char uselessData [23900] = {0};
+    int prevposition = -1;
+    std::chrono::milliseconds timeOnCreation;
+    MessageType type = MessageType::PACKET_MESSAGE;
+    int checkSum = 0;
+};
 
-struct SystemMessage {
-    enum Type {TEXT_ALLERT, START_SIMULATION_FLAG, SERVERS_READY, DEBUG_SERVER_READY};
+//enum Function {PING_MESSAGE, TEST_MESSAGE, SYSTEM_MESSAGE, DEBUG_MESSAGE, PACKET_MESSAGE};
+struct SystemMessage:Message {
+    enum Function {TEXT_ALLERT, START_SIMULATION_FLAG, SERVERS_READY, DEBUG_SERVER_READY};
     char text[200];
     int i[8];
     int authorNum;
-    Type type;
+    Function function;
+    MessageType type = MessageType::SYSTEM_MESSAGE;
 };
 
-struct DebugMessage{
-    enum Type {CONNECTION_STATUS, PACKET_STATUS, PACKET_STATUS_DELIVERED, PACKET_COUNT_STATUS, EDGES_USAGE_STATUS};
+struct DebugMessage:Message{
+    enum Function {CONNECTION_STATUS, PACKET_STATUS, PACKET_STATUS_DELIVERED, PACKET_COUNT_STATUS, EDGES_USAGE_STATUS};
     //char text[200];
     int i[200];
-    Type type;
+    Function function;
     std::chrono::milliseconds deliveringTime;
+    MessageType type = MessageType::DEBUG_MESSAGE;
+    int checksum = 0;
 };
 
-struct PingMessage{
+struct PingMessage:Message{
     int64 time[2];
+    MessageType type = MessageType::PING_MESSAGE;
 };
 
-struct TestMessage{
+struct TestMessage:Message{
     char text[200];
-    //std::string testTexst;
+    MessageType type = MessageType::TEST_MESSAGE;
+    int checkCode = 0;
 };
 
-struct PacketMessage{
-    enum Type {DEFAULT_PACKET=0};
-    int from;
-    int to;
-    int id;
-    int currentPosition;
-    bool delivered;
-    char uselessData [239000];
-    int checkSum = 239239239;
-    std::chrono::milliseconds timeOnCreation;
-    Type type;
+struct NodeLoadMessage:Message{
+    float load;
+    MessageType type = MessageType::NODE_LOAD_MESSAGE;
+    Priority priority = Priority::HIGH;
 };
 
+
+class Messages {
+public:
+    static bool getMessageTypeByName(std::string name,MessageType * type) {
+        if (name == typeid(SystemMessage).name())
+        {
+            *type = MessageType::SYSTEM_MESSAGE;
+            return true;
+        }
+        if (name == typeid(DebugMessage).name())
+        {
+            *type = MessageType::DEBUG_MESSAGE;
+            return true;
+        }
+        if (name == typeid(PingMessage).name())
+        {
+            *type = MessageType::PING_MESSAGE;
+            return true;
+        }
+        if (name == typeid(TestMessage).name())
+        {
+            *type = MessageType::TEST_MESSAGE;
+            return true;
+        }
+        if (name == typeid(PacketMessage).name())
+        {
+            *type = MessageType::PACKET_MESSAGE;
+            return true;
+        }
+        return false;
+    }
+
+    static int getChecksum(PacketMessage* p)
+    {
+        int result = 0;
+        result+=p->id;
+        result+=p->from;
+        result+=p->to;
+        //result+=p->timeOnCreation.count();
+        return result;
+    }
+};
 //class Messages {
 
 //};

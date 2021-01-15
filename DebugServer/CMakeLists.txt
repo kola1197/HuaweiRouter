@@ -12,6 +12,7 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++2a -pthread")
 
+#SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /clr")
 # QtCreator supports the following variables for Android, which are identical to qmake Android variables.
 # Check http://doc.qt.io/qt-5/deployment-android.html for more information.
 # They need to be set before the find_package(Qt5 ...) call.
@@ -87,7 +88,16 @@ else()
           settingsform.cpp
           settingsform.h
           settingsform.ui
-          Utils/Settings.cpp Utils/sout.cpp Utils/sout.h)
+          Utils/Settings.cpp
+          Utils/sout.cpp
+          Utils/sout.h
+          SimulationCore/SendingQueue.cpp
+          SimulationCore/SendingQueue.h
+          Utils/CpuInfo.cpp
+          Utils/CpuInfo.h
+          SimulationCore/SimulationReport.cpp
+          SimulationCore/SimulationReport.h
+          icon.qrc)
 endif()
 
 target_link_libraries(HuaweiRouter PRIVATE Qt5::Widgets  ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES})

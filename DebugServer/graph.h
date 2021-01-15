@@ -4,6 +4,7 @@
 #include <vector>
 #include <QObject>
 #include <SimulationCore/Messages.h>
+#include <mutex>
 
 
 struct Ellips
@@ -17,6 +18,7 @@ struct Ellips
     int maxPacketCount = 0;
     int packetCount = 0;
     int colorStatus = 0; // 0 - orange - default but not connected, 1 - blue - active for movement, 2 - yellow - conected, packets not loaded, 3 - green packets loaded, started //
+    int pathLength =- 1;
 };
 
 struct Edge
@@ -28,9 +30,20 @@ struct Edge
     float loadToFrom = 0;
 };
 
+struct Packet
+{
+    int id;
+    int from;
+    int to;
+    int currentPosition = -1;
+    bool delivered = false;
+    std::chrono::milliseconds timeOnCreation;
+    MessageType type = MessageType::PACKET_MESSAGE;
+};
+
 enum Algorithms
         {
-            RANDOM, DRILL, DE_TAILS, LOCAL_FLOW
+            RANDOM = 0, DRILL = 1, DE_TAILS = 3, LOCAL_FLOW = 4, LOCAL_VOTING = 2
         };
 
 class Graph: public QObject
@@ -51,6 +64,9 @@ public:
     void load(QString path);
     Ellips *getEllipseByNumber(int num);
     int activeNumberForEdge = -1;
+    bool needReaintTable = false;
+
+    std::vector<int> tableIndexesToUpdate;
 
     bool addEdge(int number);
     void addEdge(Edge e);
@@ -61,12 +77,21 @@ public:
 
     void deleteActiveEllips();
 
-    std::vector<PacketMessage> packets;
+    std::vector<Packet> packets;
     void addPacket();
-    void addPacket(PacketMessage m);
+    void addPacket(Packet m);
     void addPacketmessage(int _type, int _from, int _to);
+
     int packetIdCounter = 0;
+    float averageTime = 0;
+    bool cpuCorrect = true;
+    int cpuTermCriticalFrames = 0;
+    int cpuLoadCriticalFrames = 0;
+    int cpuFrames = 0;
     Algorithms selectedAlgorithm = Algorithms::RANDOM;
+
+    std::mutex packetsToUpdateListMutex;
+    void calculatePathLength(int nodeId);
 public slots:
     void get_system_message(SystemMessage m);
     void get_system_message(DebugMessage m);
@@ -74,10 +99,13 @@ signals:
     void repaint();
     void updateTable();
 private:
+    std::mutex signalsMutex;
     float dist(float x1, float y1, float x2, float y2);
     int ellipseCounter = 0;
     int edgeCounter = 0;
     void deleteEllips(int number);
+
+    void setPathLength(int nodeId);
 };
 
 #endif // GRAPH_H

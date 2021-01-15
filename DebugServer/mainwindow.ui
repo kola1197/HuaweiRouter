@@ -94,9 +94,9 @@
      <widget class="QPushButton" name="startButton">
       <property name="geometry">
        <rect>
-        <x>1650</x>
+        <x>1640</x>
         <y>380</y>
-        <width>111</width>
+        <width>131</width>
         <height>31</height>
        </rect>
       </property>
@@ -157,9 +157,9 @@
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>20</y>
+        <y>50</y>
         <width>1601</width>
-        <height>771</height>
+        <height>741</height>
        </rect>
       </property>
      </widget>
@@ -252,6 +252,45 @@
         <width>131</width>
         <height>25</height>
        </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="CpuInfoLabel">
+      <property name="geometry">
+       <rect>
+        <x>230</x>
+        <y>10</y>
+        <width>1391</width>
+        <height>34</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QLabel" name="CpuTempLabel">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>10</y>
+        <width>191</width>
+        <height>34</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QLabel" name="PacketsCounterLabel">
+      <property name="geometry">
+       <rect>
+        <x>1660</x>
+        <y>870</y>
+        <width>101</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
       </property>
      </widget>
     </widget>
@@ -386,7 +425,7 @@
    <sender>actionSettings</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
-   <slot>on_settingsButton_released()</slot>
+   <slot>onnn_settingsButton_released()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -402,7 +441,7 @@
    <sender>CountOfBytes</sender>
    <signal>editingFinished()</signal>
    <receiver>MainWindow</receiver>
-   <slot>on_count_of_bytes_editingFinished()</slot>
+   <slot>onnn_count_of_bytes_editingFinished()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>1706</x>
@@ -418,7 +457,7 @@
    <sender>sendIntervalMS</sender>
    <signal>editingFinished()</signal>
    <receiver>MainWindow</receiver>
-   <slot>on_send_interval_editingFinished()</slot>
+   <slot>onnn_send_interval_editingFinished()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>1706</x>
@@ -436,8 +475,8 @@
   <slot>SavePacketClick()</slot>
   <slot>on_saveButton_released()</slot>
   <slot>on_loadButton_released()</slot>
-  <slot>on_settingsButton_released()</slot>
-  <slot>on_count_of_bytes_editingFinished()</slot>
-  <slot>on_send_interval_editingFinished()</slot>
+  <slot>onnn_settingsButton_released()</slot>
+  <slot>onnn_count_of_bytes_editingFinished()</slot>
+  <slot>onnn_send_interval_editingFinished()</slot>
  </slots>
 </ui>

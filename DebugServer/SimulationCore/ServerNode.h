@@ -16,6 +16,7 @@ public:
     ServerNode(int serverNum,int debugSocketAdress, Graph g);
     ~ServerNode();
     void Start();
+    void loadPackets();
     //std::vector<std::shared_ptr<ServerConnection>> connections;
     std::vector<ServerConnection*> connections;
     ServerConnection* debugConnection;
@@ -40,10 +41,16 @@ private:
     void updatePacketCountForDebugServer();
     int maxPacketsCount = 0;
     void updateEdgesUsage();
-
-    int randomSelectionAlgorithm();
+    void updateNodeLoadForLocalVoting();
+    int randomSelectionAlgorithm(int prevNodeNum);
     int drillSelectionAlgorithm();
-    int selectPacketPath();
+    int localVotingSelectionAlgorithm(int prevNodeNum, int to);
+    int selectPacketPath(int prevNodeNum, int to);
+    AsyncVar<int> packetMessagesCounter {0};
+    std::chrono::milliseconds updatePacketPrevSendingTime;
+    std::mutex getPacketsMutex;
+
+    int pathLength(int nodeFrom, int nodeTo);
 };
 
 
