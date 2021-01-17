@@ -42,7 +42,7 @@ private:
     int maxPacketsCount = 0;
     void updateEdgesUsage();
     void updateNodeLoadForLocalVoting();
-    int randomSelectionAlgorithm(int prevNodeNum);
+    int randomSelectionAlgorithm(int prevNodeNum, int to);
     int drillSelectionAlgorithm();
     int localVotingSelectionAlgorithm(int prevNodeNum, int to);
     int selectPacketPath(int prevNodeNum, int to);

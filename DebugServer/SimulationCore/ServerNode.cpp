@@ -265,7 +265,7 @@ int ServerNode::selectPacketPath(int prevNodeNum, int to)
 {
     switch (graph.selectedAlgorithm) {
         case Algorithms::RANDOM:
-            return randomSelectionAlgorithm(prevNodeNum);
+            return randomSelectionAlgorithm(prevNodeNum, to);
             break;
         case Algorithms::DRILL:
             return drillSelectionAlgorithm();
@@ -282,14 +282,30 @@ int ServerNode::selectPacketPath(int prevNodeNum, int to)
     }
 }
 
-int ServerNode::randomSelectionAlgorithm(int prevNodeNum)
+int ServerNode::randomSelectionAlgorithm(int prevNodeNum, int to)
 {
     //srand(time(0));
     //sim::sout<<"prev node num "<<prevNodeNum<<sim::endl;
+    int minPathSize = 8888;
+    std::vector<int> selectedConnections;
+    for (int i=0;i<connections.size();i++)
+    {
+        int length = pathLength(connections[i]->to, to);
+        if (length == minPathSize)
+        {
+            selectedConnections.push_back(i);
+        }
+        if (length < minPathSize)
+        {
+            selectedConnections.clear();
+            minPathSize = length;
+            selectedConnections.push_back(i);
+        }
+    }
     int a = prevNodeNum;
-    a = rand() % (connections.size());
+    a = selectedConnections[rand() % (selectedConnections.size())];
     while (prevNodeNum == connections[a]->to){
-        a = rand() % (connections.size());
+        a = selectedConnections[rand() % (selectedConnections.size())];
     }
     return a;
 }
