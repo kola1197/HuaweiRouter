@@ -33,6 +33,10 @@ public:
         }
         //packetsData.push_back(QSharedPointer<typeof(T)>(new T{t}));
         packetsData.push_back(QSharedPointer<std::vector<char>>(new std::vector<char>(v)));
+        if (t.type == NODE_LOAD_MESSAGE)
+        {
+            sim::sout<<"NODE LOAD MESSAGE"<<sim::endl;
+        }
         packetsTypes.push_back(t.type);
         packetsPriority.push_back(t.priority);
         //TestMessage tt = *(TestMessage*)packets[0].get();

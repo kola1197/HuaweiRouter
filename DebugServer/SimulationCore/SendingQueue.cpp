@@ -54,6 +54,8 @@ void SendingQueue::updateByteQueue()
             TestMessage testP;
             SystemMessage sysP;
             DebugMessage debP;
+            NodeLoadMessage nodP;
+            NodeLoadForDeTailMessage nodDP;
             switch (type) {
                 case MessageType::PACKET_MESSAGE:
                     //p = PacketMessage(*((PacketMessage *) q.get()));
@@ -94,14 +96,25 @@ void SendingQueue::updateByteQueue()
                     addToQueue(debP);
                     //addToQueue(*((DebugMessage *) q.get()));
                     break;
+                case MessageType::NODE_LOAD_MESSAGE:
+                    memcpy(&nodP, cdata, sizeof(nodP));
+                    if (nodP.secondLoad != nodP.load)
+                    {
+                        sim::sout<<"ERROR nodP"<<sim::endl;
+                    }
+                    addToQueue(nodP);
+                    //addToQueue(*((DebugMessage *) q.get()));
+                    break;
+                case MessageType::NODE_LOAD_FOR_DE_TAIL_MESSAGE:
+                    memcpy(&nodDP, cdata, sizeof(nodDP));
+                    addToQueue(nodDP);
+                    //addToQueue(*((DebugMessage *) q.get()));
+                    break;
+
                 default:
                     break;
             }
-            /*packetsMutex.lock();
-            packets.erase(packets.begin() + selected);
-            packetsTypes.erase(packetsTypes.begin() + selected);
-            packetsPriority.erase(packetsPriority.begin()+selected);
-            packetsMutex.unlock();*/
+
         }
         else{
             packetsMutex.unlock();

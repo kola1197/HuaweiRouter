@@ -431,5 +431,14 @@ void Graph::setPathLength(int nodeId)
                 setPathLength(ee->number);
             }
         }
+        if (edges[i].to == nodeId)
+        {
+            Ellips *ee = getEllipseByNumber(edges[i].from);
+            if (ee->pathLength > e->pathLength+1)
+            {
+                ee->pathLength = e->pathLength+1;
+                setPathLength(ee->number);
+            }
+        }
     }
 }

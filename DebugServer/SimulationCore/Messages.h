@@ -81,9 +81,9 @@ struct TestMessage:Message{
 
 struct NodeLoadMessage:Message{
     int load = -1;
-    char text[200];
     MessageType type = MessageType::NODE_LOAD_MESSAGE;
-    Priority priority = Priority::MEDIUM;
+    Priority priority = Priority::HIGH;
+    int secondLoad = -1;
 };
 
 struct NodeLoadForDeTailMessage:Message{

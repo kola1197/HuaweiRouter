@@ -158,16 +158,23 @@ void newMessagesQueueTest()
     {
         tt.text[i] = test1[i];
     }
+    NodeLoadMessage n;
+    n.load = 1239;
+    n.secondLoad = 1239;
+    n.priority = HIGH;
     PacketMessage packetMessage{};
-    packetMessage.checkSum=2391197;
     packetMessage.priority = HIGH;
     packetMessage.to = 1;
+    packetMessage.checkSum = Messages::getChecksum(&packetMessage);
+    packetMessage.firstCheckSum = Messages::getChecksum(&packetMessage);
+    s1->sendMessage(n);
     s1->sendMessage(t);
     s1->sendMessage(packetMessage);
     s1->sendMessage(t);
     //usleep(100000);
     s1->sendMessage(tt);
     s1->sendMessage(t);
+    s1->sendMessage(n);
     s1->sendMessage(t);
     s1->sendMessage(t);
     s1->sendMessage(tt);

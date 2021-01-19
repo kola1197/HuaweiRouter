@@ -319,6 +319,10 @@ void ServerConnection::getNodeLoadMessage()
         }
     }
     memcpy(&m, msg, sizeof(m));
+    if (m.load != m.secondLoad)
+    {
+        sim::sout<<"Error in NodeLoad "<<m.load<<sim::endl;
+    }
     sim::sout<<"Got NodeLoad "<<m.load<<sim::endl;
     nodeLoad.set(m.load);
 }

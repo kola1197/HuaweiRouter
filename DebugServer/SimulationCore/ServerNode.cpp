@@ -225,7 +225,7 @@ void ServerNode::Start()       //on start we connect to debug server
                 counter++;
                 if (counter == 100){
                     updateNodeLoadForLocalVoting();
-                    counter=0;
+                    //counter=0;
                 }
                 zeroPacketCountSent = false;
             }
@@ -233,7 +233,7 @@ void ServerNode::Start()       //on start we connect to debug server
                 counter++;
                 if (counter == 100){
                     updateNodeLoadForLocalVoting();
-                    counter=0;
+                    //counter=0;
                 }
                 //if (!zeroPacketCountSent){
                     updatePacketCountForDebugServer();
@@ -294,6 +294,7 @@ void ServerNode::updateNodeLoadForLocalVoting()
         {
             NodeLoadMessage m;
             m.load = qRound(stackload + connectionsLoad);
+            m.secondLoad = qRound(stackload + connectionsLoad);
             //m.load = qRound(m.load);
             sim::sout<<"Node "<<serverNum<<" load: "<<m.load<<sim::endl;
             connections[i]->sendMessage(m);
