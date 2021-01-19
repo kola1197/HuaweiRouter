@@ -207,6 +207,7 @@ void ServerNode::Start()       //on start we connect to debug server
             messagesStack[i].timeOnCreation = ms;
         }
         updatePacketCountForDebugServer();
+        int counter = 0;
         bool zeroPacketCountSent = false;
         //sim::sout<<"Node "<<serverNum<<":"<<grn<<" STARTING WORK"<<def<<sim::endl;
         while (!stopNode.get())
@@ -221,10 +222,19 @@ void ServerNode::Start()       //on start we connect to debug server
                 sim::sout<<"Node "<<serverNum<<":"<<grn<<" sending packet with id "<<m.id<<" to "<<connections[i]->to<<def<<sim::endl;
                 connections[i]->sendMessage(m);
                 updatePacketCountForDebugServer();
-                updateNodeLoadForLocalVoting();
+                counter++;
+                if (counter == 100){
+                    updateNodeLoadForLocalVoting();
+                    counter=0;
+                }
                 zeroPacketCountSent = false;
             }
             else{
+                counter++;
+                if (counter == 100){
+                    updateNodeLoadForLocalVoting();
+                    counter=0;
+                }
                 //if (!zeroPacketCountSent){
                     updatePacketCountForDebugServer();
                     //zeroPacketCountSent = true;
@@ -232,10 +242,36 @@ void ServerNode::Start()       //on start we connect to debug server
                 //sim::sout<<"Node "<<serverNum<<":"<<red<<" I AM EMPTY!!! "<<def<<sim::endl;
                 usleep(10000);
             }
+            if (graph.selectedAlgorithm == Algorithms::DE_TAIL)
+            {
+                updateNodeLoadForDeTails();
+            }
         }
         sim::sout<<"NODE "<<serverNum<<" STOPPED"<<sim::endl;
     });
     thr.detach();
+}
+
+void ServerNode::updateNodeLoadForDeTails()
+{
+    float sum = 0.0f;
+    for (int i=0;i<connections.size();i++)
+    {
+        sum += connections[i]->bufferLoad.get();
+    }
+    for (int i=0;i<messagesStack.size();i++)
+    {
+        sum += sizeof(messagesStack[i]);
+    }
+    for (int i=0;i<connections.size();i++)
+    {
+        if (connections[i]->to != -1)
+        {
+            NodeLoadForDeTailMessage m;
+            m.load = sum;
+            connections[i]->sendMessage(m);
+        }
+    }
 }
 
 void ServerNode::updateNodeLoadForLocalVoting()
@@ -245,17 +281,21 @@ void ServerNode::updateNodeLoadForLocalVoting()
     {
         connectionsLoad += connections[i]->bufferLoad.get();
     }
-    float stackload = 1;
+    connectionsLoad = connectionsLoad/connections.size();
+    float stackload = 0;
     for (int i=0;i<messagesStack.size();i++)
     {
         stackload += sizeof(messagesStack[i]);
     }
+    stackload = stackload * 100 / (1000000 * connections[0]->sendBytesPerInterval / connections[0]->sendIntervalMS);
     for (int i=0;i<connections.size();i++)
     {
         if (connections[i]->to != -1)
         {
             NodeLoadMessage m;
-            m.load = stackload * connectionsLoad;
+            m.load = qRound(stackload + connectionsLoad);
+            //m.load = qRound(m.load);
+            sim::sout<<"Node "<<serverNum<<" load: "<<m.load<<sim::endl;
             connections[i]->sendMessage(m);
         }
     }
@@ -270,8 +310,8 @@ int ServerNode::selectPacketPath(int prevNodeNum, int to)
         case Algorithms::DRILL:
             return drillSelectionAlgorithm();
             break;
-        case Algorithms::DE_TAILS:
-            return drillSelectionAlgorithm();
+        case Algorithms::DE_TAIL:
+            return deTailSelectionAlgorithm(prevNodeNum, to);
             break;
         case Algorithms::LOCAL_FLOW:
             return drillSelectionAlgorithm();
@@ -279,6 +319,9 @@ int ServerNode::selectPacketPath(int prevNodeNum, int to)
         case Algorithms::LOCAL_VOTING:
             return localVotingSelectionAlgorithm(prevNodeNum, to);
             break;
+        /*case Algorithms::MY_LOCAL_VOTING:
+            return MyLocalVotingSelectionAlgorithm(prevNodeNum, to);
+            break;*/
     }
 }
 
@@ -322,6 +365,35 @@ int ServerNode::drillSelectionAlgorithm()
     return connections[a]->bufferLoad.get() > connections[b]->bufferLoad.get() ? b : a;
 }
 
+int ServerNode::deTailSelectionAlgorithm(int prevNodeNum, int to)
+{
+    int minPathSize = 8888;
+    std::vector<int> selectedConnections;
+    for (int i=0;i<connections.size();i++)
+    {
+        if (connections[i]->nodeLoadForDeTeil.get() < Settings::getConnectionsFirstPortNum())
+        {
+            int length = pathLength(connections[i]->to, to);
+            if (length == minPathSize)
+            {
+                selectedConnections.push_back(i);
+            }
+            if (length < minPathSize)
+            {
+                selectedConnections.clear();
+                minPathSize = length;
+                selectedConnections.push_back(i);
+            }
+        }
+    }
+    int a = prevNodeNum;
+    a = selectedConnections[rand() % (selectedConnections.size())];
+    while (prevNodeNum == connections[a]->to){
+        a = selectedConnections[rand() % (selectedConnections.size())];
+    }
+    return a;
+}
+
 int ServerNode::localVotingSelectionAlgorithm(int prevNodeNum, int to)
 {
     //sim::sout<<"localVotingSelectionAlgorithm"<<sim::endl;
@@ -332,7 +404,46 @@ int ServerNode::localVotingSelectionAlgorithm(int prevNodeNum, int to)
         float a = connections[i]->nodeLoad.get();
         float b = connections[i]->bufferLoad.get();
         float c = pathLength(connections[i]->to,to);
-        nodesLoad.push_back( (a + b + c * c) * (a + b + c * c) + 1);
+        nodesLoad.push_back( (a + b + c * c * c * c) * (a + b + c * c * c * c) + 1);
+        sim::sout<<"Local voting:   "<<a<<" "<<b<<" "<<c<<" "<<sim::endl;
+        sum += nodesLoad[nodesLoad.size()-1];
+    }
+    int isum = 0;
+    for (int i=0;i<nodesLoad.size();i++)
+    {
+        nodesLoad[i] = sum/nodesLoad[i];
+        nodesLoad[i] = qRound(nodesLoad[i]);
+        isum += nodesLoad[i];
+    }
+    //srand(time(0));
+    int result = prevNodeNum;
+    while (result == prevNodeNum) {
+        int a = rand() % isum;
+        for (int i = 0; i < nodesLoad.size(); i++) {
+            a -= nodesLoad[i];
+            if (a < 0) {
+                if (connections[i]->to != prevNodeNum) {
+                    result = i;
+                    return i;
+                } else {
+                    i = nodesLoad.size();
+                }
+            }
+        }
+    }
+}
+
+int ServerNode::MyLocalVotingSelectionAlgorithm(int prevNodeNum, int to)
+{
+    //sim::sout<<"localVotingSelectionAlgorithm"<<sim::endl;
+    std::vector<float> nodesLoad;
+    float sum=0;
+    for (int i=0;i<connections.size();i++)
+    {
+        float a = connections[i]->nodeLoad.get();
+        float b = connections[i]->bufferLoad.get();
+        float c = pathLength(connections[i]->to,to);
+        nodesLoad.push_back( (a + b + c * c * c * c) * (a + b + c * c * c * c) + 1);
         sum += nodesLoad[nodesLoad.size()-1];
     }
     int isum = 0;

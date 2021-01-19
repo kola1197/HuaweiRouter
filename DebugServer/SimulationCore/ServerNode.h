@@ -45,12 +45,16 @@ private:
     int randomSelectionAlgorithm(int prevNodeNum, int to);
     int drillSelectionAlgorithm();
     int localVotingSelectionAlgorithm(int prevNodeNum, int to);
+    int deTailSelectionAlgorithm(int prevNodeNum, int to);
+    int MyLocalVotingSelectionAlgorithm(int prevNodeNum, int to);
     int selectPacketPath(int prevNodeNum, int to);
     AsyncVar<int> packetMessagesCounter {0};
     std::chrono::milliseconds updatePacketPrevSendingTime;
     std::mutex getPacketsMutex;
 
     int pathLength(int nodeFrom, int nodeTo);
+
+    void updateNodeLoadForDeTails();
 };
 
 

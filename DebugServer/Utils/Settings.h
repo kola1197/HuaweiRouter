@@ -11,6 +11,7 @@ class Settings
     static int ConnectionsFirstPortNum;
     static float SendBytesPerInterval;
     static float sendIntervalMS;
+    static float limitForDeTail;
 public:
     static int getDebugFirstPortNum()
     {
@@ -44,7 +45,14 @@ public:
     {
         sendIntervalMS = i;
     }
-
+    static void setlimitForDeTail(float i)
+    {
+        limitForDeTail = i;
+    }
+    static float getLimitForDeTail()
+    {
+        return limitForDeTail;
+    }
 };
 
 

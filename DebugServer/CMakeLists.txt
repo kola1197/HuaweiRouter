@@ -12,20 +12,6 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++2a -pthread")
 
-#SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /clr")
-# QtCreator supports the following variables for Android, which are identical to qmake Android variables.
-# Check http://doc.qt.io/qt-5/deployment-android.html for more information.
-# They need to be set before the find_package(Qt5 ...) call.
-
-#if(ANDROID)
-#    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
-#    if (ANDROID_ABI STREQUAL "armeabi-v7a")
-#        set(ANDROID_EXTRA_LIBS
-#            ${CMAKE_CURRENT_SOURCE_DIR}/path/to/libcrypto.so
-#            ${CMAKE_CURRENT_SOURCE_DIR}/path/to/libssl.so)
-#    endif()
-#endif()
-
 find_package(OpenGL REQUIRED)
 #find_package(GLUT REQUIRED)
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
@@ -47,7 +33,18 @@ if(ANDROID)
     network.h
     network.cpp
     dir/channel.cpp
-          SimulationCore/ServerNode.cpp SimulationCore/ServerNode.h SimulationCore/ServerConnection.cpp SimulationCore/ServerConnection.h SimulationCore/DebugServer.cpp SimulationCore/DebugServer.h TextureImage.cpp TextureImage.h Utils/MutexInt.cpp Utils/MutexInt.h Utils/AsyncVar.cpp Utils/AsyncVar.h)
+    SimulationCore/ServerNode.cpp
+    SimulationCore/ServerNode.h
+    SimulationCore/ServerConnection.cpp
+    SimulationCore/ServerConnection.h
+    SimulationCore/DebugServer.cpp
+    SimulationCore/DebugServer.h
+    TextureImage.cpp
+    TextureImage.h
+    Utils/MutexInt.cpp
+    Utils/MutexInt.h
+    Utils/AsyncVar.cpp
+    Utils/AsyncVar.h)
 else()
   add_executable(HuaweiRouter
           Network/main.cpp

@@ -164,7 +164,30 @@ void ServerConnection::getMessage()
         {
             getPacketMessage();
         }
+        if (h.type == NODE_LOAD_MESSAGE)
+        {
+            getNodeLoadMessage();
+        }
+        if (h.type == NODE_LOAD_FOR_DE_TAIL_MESSAGE)
+        {
+            getNodeLoadForDetailMessage();
+        }
     }
+}
+
+void ServerConnection::getNodeLoadForDetailMessage()
+{
+    NodeLoadForDeTailMessage m;
+    char msg[sizeof (m)];
+    int bytes;
+    for (int i = 0; i < sizeof(m); i += bytes) {
+        if ((bytes = recv(sock, msg + i, sizeof(m)  - i, 0)) == -1){
+            sim::sout<<"error on receive DebugMessage"<<sim::endl;
+            return;
+        }
+    }
+    memcpy(&m, msg, sizeof(m));
+    nodeLoadForDeTeil.set(m.load);
 }
 
 void ServerConnection::getPacketMessage()
@@ -290,12 +313,13 @@ void ServerConnection::getNodeLoadMessage()
     char msg[sizeof (m)];
     int bytes;
     for (int i = 0; i < sizeof(m); i += bytes) {
-        if ((bytes = recv(sock, msg +i, sizeof(m)  - i, 0)) == -1){
-            sim::sout<<"error"<<sim::endl;
+        if ((bytes = recv(sock, msg + i, sizeof(m)  - i, 0)) == -1){
+            sim::sout<<"error on receive PacketMessage "<<sim::endl;
             return;
         }
     }
     memcpy(&m, msg, sizeof(m));
+    sim::sout<<"Got NodeLoad "<<m.load<<sim::endl;
     nodeLoad.set(m.load);
 }
 

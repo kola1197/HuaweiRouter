@@ -132,7 +132,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::createAlgprithmComboBox()
 {
-    ui->algorithmBox->addItems(QStringList() <<trUtf8("RANDOM") << trUtf8("DRILL") << trUtf8("LOCAL VOTING") /*<< trUtf8("DeTails") << trUtf8("LocalFlow")*/);
+    ui->algorithmBox->addItems(QStringList() <<trUtf8("RANDOM") << trUtf8("DRILL") << trUtf8("LOCAL VOTING") << trUtf8("DeTails") /*<< trUtf8("LocalFlow")*/);
     //ui->algorithmBox.
 }
 
@@ -556,7 +556,7 @@ void MainWindow::AddButtonClick()
 void MainWindow::on_algorithmBox_currentIndexChanged(int index)
 {
     ui->openGLWidget->graph.selectedAlgorithm = static_cast<Algorithms>(index);
-    std::string  res = ui->openGLWidget->graph.selectedAlgorithm == Algorithms::LOCAL_VOTING? "LOCAL_VOTING": "NOT LOCAL_VOTING";
+    std::string  res = ui->openGLWidget->graph.selectedAlgorithm == Algorithms::DE_TAIL ? "DE_TAIL" : "NOT DE_TAIL";
     sim::sout<<ui->openGLWidget->graph.selectedAlgorithm<<"   "<<res<<sim::endl;
 }
 

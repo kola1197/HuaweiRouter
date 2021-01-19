@@ -15,7 +15,7 @@ enum Priority {
     LOW=0, MEDIUM=1, HIGH=2
 };
 
-enum MessageType {MESSAGE=0,PACKET_MESSAGE=1, PING_MESSAGE=2, TEST_MESSAGE=3, SYSTEM_MESSAGE=4, DEBUG_MESSAGE=5, NODE_LOAD_MESSAGE = 6};
+enum MessageType {MESSAGE=0,PACKET_MESSAGE=1, PING_MESSAGE=2, TEST_MESSAGE=3, SYSTEM_MESSAGE=4, DEBUG_MESSAGE=5, NODE_LOAD_MESSAGE = 6, NODE_LOAD_FOR_DE_TAIL_MESSAGE = 7 };
 
 struct HarbingerMessage {                                           //sends before other messages, to set resiver to it
     //enum MessageType {MESSAGE=0,PACKET_MESSAGE=1, PING_MESSAGE=2, TEST_MESSAGE=3, SYSTEM_MESSAGE=4, DEBUG_MESSAGE=5};
@@ -80,11 +80,17 @@ struct TestMessage:Message{
 };
 
 struct NodeLoadMessage:Message{
-    float load;
+    int load = -1;
+    char text[200];
     MessageType type = MessageType::NODE_LOAD_MESSAGE;
-    Priority priority = Priority::HIGH;
+    Priority priority = Priority::MEDIUM;
 };
 
+struct NodeLoadForDeTailMessage:Message{
+    float load;
+    MessageType type = MessageType::NODE_LOAD_FOR_DE_TAIL_MESSAGE;
+    Priority priority = Priority::HIGH;
+};
 
 class Messages {
 public:
@@ -112,6 +118,16 @@ public:
         if (name == typeid(PacketMessage).name())
         {
             *type = MessageType::PACKET_MESSAGE;
+            return true;
+        }
+        if (name == typeid(NodeLoadMessage).name())
+        {
+            *type = MessageType::NODE_LOAD_MESSAGE;
+            return true;
+        }
+        if (name == typeid(NodeLoadForDeTailMessage).name())
+        {
+            *type = MessageType::NODE_LOAD_FOR_DE_TAIL_MESSAGE;
             return true;
         }
         return false;

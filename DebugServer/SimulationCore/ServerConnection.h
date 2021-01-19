@@ -43,6 +43,7 @@ public:
     void getDebugMessage();
     void getPacketMessage();
     void getNodeLoadMessage();
+    void getNodeLoadForDetailMessage();
     AsyncVar<float> nodeLoad{0};
     void stop();
 
@@ -59,6 +60,9 @@ public:
     int updateUsageDataCounter = 0;
     AsyncVar<float> bufferLoad{0};
     AsyncVar<bool> stopped{false};
+
+    AsyncVar<int> nodeLoadForDeTeil{0};
+
     SendingQueue sendingQueue;
     bool sendingWithoutQueue = false;
 

@@ -14,8 +14,8 @@
 #include "AsyncVar.h"
 #include <Utils/sout.h>
 
-//#define MUTEX_MODE
-//#define WRITE_CONSOLE_LOG
+#define MUTEX_MODE
+#define WRITE_CONSOLE_LOG
 
 class Sout
 {
