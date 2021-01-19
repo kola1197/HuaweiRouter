@@ -281,9 +281,6 @@ void OGLWidget::mousePressEvent(QMouseEvent *event)
             //sim::sout<<"ellips number now "<<el->number<<sim::endl;
             graph.active = el;
         }
-        else{
-            sim::sout<<"FREE AREA"<<sim::endl;
-        }
     }
     if (event->button() == Qt::RightButton)
     {

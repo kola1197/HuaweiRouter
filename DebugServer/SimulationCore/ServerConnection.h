@@ -72,10 +72,6 @@ public:
         std::string type = typeid(t).name();
         if (Messages::getMessageTypeByName(type, &h.type)) //HarbingerMessage::PING_MESSAGE;
         {
-            if (h.type == NODE_LOAD_MESSAGE)
-            {
-                sim::sout<<"NODE_LOAD_MESSAGE"<<sim::endl;
-            }
             if (h.type == DEBUG_MESSAGE)
             {
                 //t.checksum;
