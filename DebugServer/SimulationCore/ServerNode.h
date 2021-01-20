@@ -43,7 +43,7 @@ private:
     void updateEdgesUsage();
     void updateNodeLoadForLocalVoting();
     int randomSelectionAlgorithm(int prevNodeNum, int to);
-    int drillSelectionAlgorithm();
+    int drillSelectionAlgorithm(int prevNodeNum, int to);
     int localVotingSelectionAlgorithm(int prevNodeNum, int to);
     int deTailSelectionAlgorithm(int prevNodeNum, int to);
     int MyLocalVotingSelectionAlgorithm(int prevNodeNum, int to);

@@ -309,14 +309,14 @@ int ServerNode::selectPacketPath(int prevNodeNum, int to)
             return randomSelectionAlgorithm(prevNodeNum, to);
             break;
         case Algorithms::DRILL:
-            return drillSelectionAlgorithm();
+            return drillSelectionAlgorithm(prevNodeNum, to);
             break;
         case Algorithms::DE_TAIL:
             return deTailSelectionAlgorithm(prevNodeNum, to);
             break;
-        case Algorithms::LOCAL_FLOW:
+        /*case Algorithms::LOCAL_FLOW:
             return drillSelectionAlgorithm();
-            break;
+            break;*/
         case Algorithms::LOCAL_VOTING:
             return localVotingSelectionAlgorithm(prevNodeNum, to);
             break;
@@ -354,16 +354,43 @@ int ServerNode::randomSelectionAlgorithm(int prevNodeNum, int to)
     return a;
 }
 
-int ServerNode::drillSelectionAlgorithm()
+int ServerNode::drillSelectionAlgorithm(int prevNodeNum, int to)
 {
-    //srand(time(0));
-    int a = rand() % (connections.size());
+    int minPathSize = 8888;
+    std::vector<int> selectedConnections;
+    for (int i=0;i<connections.size();i++)
+    {
+        int length = pathLength(connections[i]->to, to);
+        if (length == minPathSize)
+        {
+            selectedConnections.push_back(i);
+        }
+        if (length < minPathSize)
+        {
+            selectedConnections.clear();
+            minPathSize = length;
+            selectedConnections.push_back(i);
+        }
+    }
+    int a = prevNodeNum;
+    int b = prevNodeNum;
+    a = selectedConnections[rand() % (selectedConnections.size())];
+    while (prevNodeNum == connections[a]->to){
+        a = selectedConnections[rand() % (selectedConnections.size())];
+    }
+    b = selectedConnections[rand() % (selectedConnections.size())];
+    while (prevNodeNum == connections[b]->to){
+        b = selectedConnections[rand() % (selectedConnections.size())];
+    }
+
+    return connections[a]->bufferLoad.get() < connections[b]->bufferLoad.get() ? a : b;
+    /*int a = rand() % (connections.size());
     int b = a;
     while (b == a)
     {
         b = rand() % (connections.size());
     }
-    return connections[a]->bufferLoad.get() > connections[b]->bufferLoad.get() ? b : a;
+    return connections[a]->bufferLoad.get() > connections[b]->bufferLoad.get() ? b : a;*/
 }
 
 int ServerNode::deTailSelectionAlgorithm(int prevNodeNum, int to)
