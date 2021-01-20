@@ -222,29 +222,24 @@ void ServerNode::Start()       //on start we connect to debug server
                 sim::sout<<"Node "<<serverNum<<":"<<grn<<" sending packet with id "<<m.id<<" to "<<connections[i]->to<<def<<sim::endl;
                 connections[i]->sendMessage(m);
                 updatePacketCountForDebugServer();
-                counter++;
-                if (counter == 15){
-                    updateNodeLoadForLocalVoting();
-                    counter=0;
-                }
+
                 zeroPacketCountSent = false;
             }
             else{
-                counter++;
-                if (counter == 15){
-                    updateNodeLoadForLocalVoting();
-                    counter=0;
-                }
-                //if (!zeroPacketCountSent){
                     updatePacketCountForDebugServer();
                     //zeroPacketCountSent = true;
                 //}
                 //sim::sout<<"Node "<<serverNum<<":"<<red<<" I AM EMPTY!!! "<<def<<sim::endl;
                 usleep(10000);
             }
-            if (graph.selectedAlgorithm == Algorithms::DE_TAIL)
-            {
-                updateNodeLoadForDeTails();
+            counter++;
+            if (counter == 15){
+                updateNodeLoadForLocalVoting();
+                counter=0;
+                if (graph.selectedAlgorithm == Algorithms::DE_TAIL)
+                {
+                    updateNodeLoadForDeTails();
+                }
             }
         }
         sim::sout<<"NODE "<<serverNum<<" STOPPED"<<sim::endl;
@@ -254,7 +249,20 @@ void ServerNode::Start()       //on start we connect to debug server
 
 void ServerNode::updateNodeLoadForDeTails()
 {
-
+    int load[connections.size()];
+    for (int i=0;i<connections.size();i++)
+    {
+        for (int j;j<connections[i]->sendingQueue.packetsFrom.size();j++)
+        {
+            load[std::get<1>(connections[i]->sendingQueue.packetsFrom[j])]++;
+        }
+    }
+    for (int i=0;i<connections.size();i++)
+    {
+        NodeLoadForDeTailMessage m;
+        m.load = load[i];
+        connections[i]->sendMessage(m);
+    }
     /*float sum = 0.0f;
     for (int i=0;i<connections.size();i++)
     {
@@ -297,7 +305,7 @@ void ServerNode::updateNodeLoadForLocalVoting()
             m.load = qRound(stackload + connectionsLoad);
             m.secondLoad = qRound(stackload + connectionsLoad);
             //m.load = qRound(m.load);
-            sim::sout<<"Node "<<serverNum<<" load: "<<m.load<<sim::endl;
+            //sim::sout<<"Node "<<serverNum<<" load: "<<m.load<<sim::endl;
             connections[i]->sendMessage(m);
         }
     }

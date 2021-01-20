@@ -7,4 +7,4 @@ int Settings::DebugFirstPortNum = 5555;
 int Settings::ConnectionsFirstPortNum = 6666;
 float Settings::SendBytesPerInterval = 64;
 float Settings::sendIntervalMS = 330;
-float Settings::limitForDeTail = 200;
+float Settings::limitForDeTail = 25;

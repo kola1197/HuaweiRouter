@@ -323,7 +323,7 @@ void ServerConnection::getNodeLoadMessage()
     {
         sim::sout<<"Error in NodeLoad "<<m.load<<sim::endl;
     }
-    sim::sout<<"Got NodeLoad "<<m.load<<sim::endl;
+    //sim::sout<<"Got NodeLoad "<<m.load<<sim::endl;
     nodeLoad.set(m.load);
 }
 
