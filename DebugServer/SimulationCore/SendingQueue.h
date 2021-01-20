@@ -33,9 +33,9 @@ public:
         }
         //packetsData.push_back(QSharedPointer<typeof(T)>(new T{t}));
         packetsData.push_back(QSharedPointer<std::vector<char>>(new std::vector<char>(v)));
-        if (t.type == NODE_LOAD_MESSAGE)
+        if (t.type == PACKET_MESSAGE)
         {
-            sim::sout<<"NODE LOAD MESSAGE"<<sim::endl;
+            packetsFrom.push_back(std::tuple<int,int>{t.id, t.prevposition});
         }
         packetsTypes.push_back(t.type);
         packetsPriority.push_back(t.priority);
@@ -50,7 +50,7 @@ public:
     int from = -1;
     int to = -1;
     std::vector<char> getData(int sendBytesPerInterval);
-
+    std::vector<std::tuple<int,int>> packetsFrom;
 private:
     template <typename T>
     void addToQueue(T t)
@@ -61,6 +61,7 @@ private:
             if ( p->checkSum!= Messages::getChecksum(p))
             {
                 sim::sout<<"ERROR! WRONG CHECKSUM!!!"<<sim::endl;
+                std::cout<< ("Error on Node %s !!! Packet with id %s got wrong checksum ( %s )!!! Check your RAM!!!",p->id, p->checkSum)<<std::endl;
                 qFatal("Error on Node %s !!! Packet with id %s got wrong checksum ( %s )!!! Check your RAM!!!",p->id, p->checkSum);
             }
 

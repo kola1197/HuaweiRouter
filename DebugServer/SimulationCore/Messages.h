@@ -34,6 +34,7 @@ struct Message
     std::chrono::milliseconds deliveredToThisNode;
     MessageType type = MessageType::MESSAGE;
     int checksum = 0;
+    int prevposition = -1;
 };
 
 struct PacketMessage:Message{

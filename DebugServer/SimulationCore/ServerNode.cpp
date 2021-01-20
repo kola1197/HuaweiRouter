@@ -223,17 +223,17 @@ void ServerNode::Start()       //on start we connect to debug server
                 connections[i]->sendMessage(m);
                 updatePacketCountForDebugServer();
                 counter++;
-                if (counter == 100){
+                if (counter == 15){
                     updateNodeLoadForLocalVoting();
-                    //counter=0;
+                    counter=0;
                 }
                 zeroPacketCountSent = false;
             }
             else{
                 counter++;
-                if (counter == 100){
+                if (counter == 15){
                     updateNodeLoadForLocalVoting();
-                    //counter=0;
+                    counter=0;
                 }
                 //if (!zeroPacketCountSent){
                     updatePacketCountForDebugServer();
@@ -254,7 +254,8 @@ void ServerNode::Start()       //on start we connect to debug server
 
 void ServerNode::updateNodeLoadForDeTails()
 {
-    float sum = 0.0f;
+
+    /*float sum = 0.0f;
     for (int i=0;i<connections.size();i++)
     {
         sum += connections[i]->bufferLoad.get();
@@ -271,7 +272,7 @@ void ServerNode::updateNodeLoadForDeTails()
             m.load = sum;
             connections[i]->sendMessage(m);
         }
-    }
+    }*/
 }
 
 void ServerNode::updateNodeLoadForLocalVoting()

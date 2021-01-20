@@ -56,6 +56,7 @@ void SendingQueue::updateByteQueue()
             DebugMessage debP;
             NodeLoadMessage nodP;
             NodeLoadForDeTailMessage nodDP;
+            int j =-1;
             switch (type) {
                 case MessageType::PACKET_MESSAGE:
                     //p = PacketMessage(*((PacketMessage *) q.get()));
@@ -66,14 +67,16 @@ void SendingQueue::updateByteQueue()
                         qFatal("Error !!! Packet with id %s got wrong checksum ( %s )!!! Check your RAM!!!",p.id, p.checkSum);
 
                     }
-
-                    //memcpy(&pp, &p, sizeof(p));
-                    //sim::sout<<"Node "<<from<<": updateByteQueue message with id "<<p.id<<" to "<<to<<" checksum: "<<p.checkSum<< sim::endl;
-                    //addToQueue(*((PacketMessage *) q.get()));
-                    /*if (pp.checkSum != 239239239)
+                    for(int i=0;i<packetsFrom.size();i++)
                     {
-                        sim::sout<<"ERROR HERE!!!"<<sim::endl;
-                    }*/
+                        if (get<0>(packetsFrom[i]) == p.id)
+                        {
+                            j = i;
+                        }
+                    }
+                    if (j!=-1) {
+                        packetsFrom.erase(packetsFrom.begin() + j);
+                    }
                     addToQueue(p);
                     break;
                 case MessageType::PING_MESSAGE:
