@@ -35,7 +35,9 @@ public:
         packetsData.push_back(QSharedPointer<std::vector<char>>(new std::vector<char>(v)));
         if (t.type == PACKET_MESSAGE)
         {
+            packetsFromMutex.lock();
             packetsFrom.push_back(std::tuple<int,int>{t.id, t.prevposition});
+            packetsFromMutex.unlock();
         }
         packetsTypes.push_back(t.type);
         packetsPriority.push_back(t.priority);
@@ -51,6 +53,7 @@ public:
     int to = -1;
     std::vector<char> getData(int sendBytesPerInterval);
     std::vector<std::tuple<int,int>> packetsFrom;
+    std::mutex packetsFromMutex;
 private:
     template <typename T>
     void addToQueue(T t)

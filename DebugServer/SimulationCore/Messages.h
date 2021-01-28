@@ -88,9 +88,10 @@ struct NodeLoadMessage:Message{
 };
 
 struct NodeLoadForDeTailMessage:Message{
-    float load;
+    int64 load = -1;
     MessageType type = MessageType::NODE_LOAD_FOR_DE_TAIL_MESSAGE;
     Priority priority = Priority::HIGH;
+    int64 secondLoad = -1;
 };
 
 class Messages {

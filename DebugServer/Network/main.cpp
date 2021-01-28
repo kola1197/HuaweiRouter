@@ -162,6 +162,12 @@ void newMessagesQueueTest()
     n.load = 1239;
     n.secondLoad = 1239;
     n.priority = HIGH;
+
+    NodeLoadForDeTailMessage m;
+    m.load = 12391239;
+    m.secondLoad = 12391239;
+    m.priority= MEDIUM;
+
     PacketMessage packetMessage{};
     packetMessage.priority = HIGH;
     packetMessage.to = 1;
@@ -170,7 +176,7 @@ void newMessagesQueueTest()
     s1->sendMessage(n);
     s1->sendMessage(t);
     s1->sendMessage(packetMessage);
-    s1->sendMessage(t);
+    s1->sendMessage(m);
     //usleep(100000);
     s1->sendMessage(tt);
     s1->sendMessage(t);
@@ -178,6 +184,8 @@ void newMessagesQueueTest()
     s1->sendMessage(t);
     s1->sendMessage(t);
     s1->sendMessage(tt);
+    s1->sendMessage(m);
+
     while (true)
     {
         usleep(100000);
@@ -200,7 +208,6 @@ int main(int argc, char *argv[]) {
     w.setWindowIconText("Simulation");
     w.show();
     return a.exec();
-
     //using namespace std;
     //TestNetworkDebug();
     //testMultiThreading(4);

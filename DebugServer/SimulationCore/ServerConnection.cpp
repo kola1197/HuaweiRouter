@@ -188,6 +188,11 @@ void ServerConnection::getNodeLoadForDetailMessage()
     }
     memcpy(&m, msg, sizeof(m));
     nodeLoadForDeTeil.set(m.load);
+    sim::sout<<"node load for detail: "<<m.load<<" = "<<m.secondLoad<<sim::endl;
+    if (m.load != m.secondLoad)
+    {
+        sim::sout<<"Error on recieving Node load for detail message"<<sim::endl;
+    }
 }
 
 void ServerConnection::getPacketMessage()

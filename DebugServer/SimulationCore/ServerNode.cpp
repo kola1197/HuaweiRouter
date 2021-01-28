@@ -249,18 +249,27 @@ void ServerNode::Start()       //on start we connect to debug server
 
 void ServerNode::updateNodeLoadForDeTails()
 {
-    int load[connections.size()];
-    for (int i=0;i<connections.size();i++)
+
+    int64 load[connections.size()];
+    for (int k=0; k < connections.size();k++)
     {
-        for (int j;j<connections[i]->sendingQueue.packetsFrom.size();j++)
+        load[k] = 0;
+    }
+
+    for (auto & connection : connections)
+    {
+        connection->sendingQueue.packetsFromMutex.lock();
+        for (int j;j<connection->sendingQueue.packetsFrom.size();j++)
         {
-            load[std::get<1>(connections[i]->sendingQueue.packetsFrom[j])]++;
+            load[std::get<1>(connection->sendingQueue.packetsFrom[j])]++;
         }
+        connection->sendingQueue.packetsFromMutex.unlock();
     }
     for (int i=0;i<connections.size();i++)
     {
         NodeLoadForDeTailMessage m;
         m.load = load[i];
+        m.secondLoad = load[i];
         connections[i]->sendMessage(m);
     }
     /*float sum = 0.0f;
@@ -304,7 +313,6 @@ void ServerNode::updateNodeLoadForLocalVoting()
             NodeLoadMessage m;
             m.load = qRound(stackload + connectionsLoad);
             m.secondLoad = qRound(stackload + connectionsLoad);
-            //m.load = qRound(m.load);
             //sim::sout<<"Node "<<serverNum<<" load: "<<m.load<<sim::endl;
             connections[i]->sendMessage(m);
         }
@@ -424,10 +432,17 @@ int ServerNode::deTailSelectionAlgorithm(int prevNodeNum, int to)
         }
     }
     int a = prevNodeNum;
-    a = selectedConnections[rand() % (selectedConnections.size())];
-    while (prevNodeNum == connections[a]->to){
+    if (!selectedConnections.empty() && selectedConnections[0] != prevNodeNum)
+    {
         a = selectedConnections[rand() % (selectedConnections.size())];
+        while (prevNodeNum == connections[a]->to){
+            a = selectedConnections[rand() % (selectedConnections.size())];
+        }
     }
+    else{
+        a = randomSelectionAlgorithm(prevNodeNum, to);
+    };
+
     return a;
 }
 

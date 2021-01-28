@@ -67,6 +67,7 @@ void SendingQueue::updateByteQueue()
                         qFatal("Error !!! Packet with id %s got wrong checksum ( %s )!!! Check your RAM!!!",p.id, p.checkSum);
 
                     }
+                    packetsFromMutex.lock();
                     for(int i=0;i<packetsFrom.size();i++)
                     {
                         if (std::get<0>(packetsFrom[i]) == p.id)
@@ -77,6 +78,7 @@ void SendingQueue::updateByteQueue()
                     if (j!=-1) {
                         packetsFrom.erase(packetsFrom.begin() + j);
                     }
+                    packetsFromMutex.unlock();
                     addToQueue(p);
                     break;
                 case MessageType::PING_MESSAGE:
