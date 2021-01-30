@@ -22,7 +22,7 @@ ServerNode::ServerNode(int _serverNum,int _debugSocketAdress, Graph g):QObject()
     serverNum= _serverNum;
     debugSocketAdress = _debugSocketAdress;
     connections.clear();
-
+    alpha = Settings::getAlpha();
 }
 
 ServerNode::~ServerNode() noexcept
@@ -233,7 +233,7 @@ void ServerNode::Start()       //on start we connect to debug server
                 usleep(10000);
             }
             counter++;
-            if (counter == 15){
+            if (counter == alpha){
                 updateNodeLoadForLocalVoting();
                 counter=0;
                 if (graph.selectedAlgorithm == Algorithms::DE_TAIL)
@@ -294,6 +294,7 @@ void ServerNode::updateNodeLoadForDeTails()
 
 void ServerNode::updateNodeLoadForLocalVoting()
 {
+
     float connectionsLoad = 0;
     for (int i=0;i<connections.size();i++)
     {
@@ -305,7 +306,16 @@ void ServerNode::updateNodeLoadForLocalVoting()
     {
         stackload += sizeof(messagesStack[i]);
     }
-    stackload = stackload * 100 / (1000000 * connections[0]->sendBytesPerInterval / connections[0]->sendIntervalMS);
+    if (graph.selectedAlgorithm == MY_LOCAL_VOTING) {
+        stackload = stackload * 100 / (1000000 * connections[0]->sendBytesPerInterval / connections[0]->sendIntervalMS);
+    } else{             //p ~= 200 000
+        float pSumm = 1;
+        for (int i=0;i<connections.size();i++)
+        {
+            pSumm += connections[i]->bufferLoad.get() < 100 ? connections[i]->bufferLoad.get() : 100;
+        }
+        stackload = stackload / (1000000 * connections[0]->sendBytesPerInterval / connections[0]->sendIntervalMS) * pSumm;
+    }
     for (int i=0;i<connections.size();i++)
     {
         if (connections[i]->to != -1)
@@ -317,6 +327,7 @@ void ServerNode::updateNodeLoadForLocalVoting()
             connections[i]->sendMessage(m);
         }
     }
+    nodeLoad = qRound(stackload + connectionsLoad);
 }
 
 int ServerNode::selectPacketPath(int prevNodeNum, int to)
@@ -337,9 +348,9 @@ int ServerNode::selectPacketPath(int prevNodeNum, int to)
         case Algorithms::LOCAL_VOTING:
             return localVotingSelectionAlgorithm(prevNodeNum, to);
             break;
-        /*case Algorithms::MY_LOCAL_VOTING:
+        case Algorithms::MY_LOCAL_VOTING:
             return MyLocalVotingSelectionAlgorithm(prevNodeNum, to);
-            break;*/
+            break;
     }
 }
 
@@ -449,36 +460,57 @@ int ServerNode::deTailSelectionAlgorithm(int prevNodeNum, int to)
 int ServerNode::localVotingSelectionAlgorithm(int prevNodeNum, int to)
 {
     //sim::sout<<"localVotingSelectionAlgorithm"<<sim::endl;
-    std::vector<float> nodesLoad;
-    float sum=0;
+    std::vector<std::tuple<float,float,float>> nodesLoad;
+    float zSum=0;
+    float uSum=0;
+    float wSum=0;
+
     for (int i=0;i<connections.size();i++)
     {
-        float a = connections[i]->nodeLoad.get();
-        float b = connections[i]->bufferLoad.get();
-        float c = pathLength(connections[i]->to,to);
-        nodesLoad.push_back( (a + b + c * c * c * c) * (a + b + c * c * c * c) + 1);
-        sim::sout<<"Local voting:   "<<a<<" "<<b<<" "<<c<<" "<<sim::endl;
-        sum += nodesLoad[nodesLoad.size()-1];
+        float z = 1/ (connections[i]->bufferLoad.get() + 1);
+        zSum += z;
+        float x = connections[i]->nodeLoad.get();
+        float u = alpha * (- x + nodeLoad);
+        u = u > 0 ? u : 0;
+        uSum += u;
+        float w = 1.0f/(pathLength(connections[i]->to,to) + 1);
+        wSum += w;
+        std::tuple<float,float,float> t(z,u,w);
+        nodesLoad.push_back(t);
+        //nodesLoad.push_back( (a + b + c * c * c * c) * (a + b + c * c * c * c) + 1);
+        //sim::sout<<"Local voting:   "<<a<<" "<<b<<" "<<c<<" "<<sim::endl;
     }
+    std::vector<float> nodesWeights;
+
     int isum = 0;
-    for (int i=0;i<nodesLoad.size();i++)
+    for (int i=0; i < nodesLoad.size();i++)
     {
-        nodesLoad[i] = sum/nodesLoad[i];
-        nodesLoad[i] = qRound(nodesLoad[i]);
-        isum += nodesLoad[i];
+        float z = 1000 * std::get<0>(nodesLoad[i]) / zSum;
+        float u = uSum == 0 ? 0 : 1000 * std::get<1>(nodesLoad[i]) / uSum;
+        float w = 1000 * std::get<2>(nodesLoad[i]) / wSum;
+        sim::sout<<"z:  "<<z<<" u:  "<<u<<" w:  "<<w<<sim::endl;
+        float weight = z + u + w;
+        nodesWeights.push_back(weight);
+        isum += qRound(weight);
     }
     //srand(time(0));
     int result = prevNodeNum;
+    int counter = 0;
     while (result == prevNodeNum) {
+        counter ++;
+        if (counter > 100)
+        {
+            sim::sout<<Color::ColorMode(Color::Code::FG_RED)<<"ERROR! Loop on "<<serverNum<<Color::ColorMode(Color::Code::FG_DEFAULT)<<sim::endl;
+        }
         int a = rand() % isum;
-        for (int i = 0; i < nodesLoad.size(); i++) {
-            a -= nodesLoad[i];
+        for (int i = 0; i < nodesWeights.size(); i++) {
+            a -= nodesWeights[i];
             if (a < 0) {
                 if (connections[i]->to != prevNodeNum) {
                     result = i;
                     return i;
                 } else {
-                    i = nodesLoad.size();
+                    i = nodesWeights.size();
                 }
             }
         }
@@ -496,6 +528,7 @@ int ServerNode::MyLocalVotingSelectionAlgorithm(int prevNodeNum, int to)
         float b = connections[i]->bufferLoad.get();
         float c = pathLength(connections[i]->to,to);
         nodesLoad.push_back( (a + b + c * c * c * c) * (a + b + c * c * c * c) + 1);
+        sim::sout<<"Local voting:   "<<a<<" "<<b<<" "<<c<<" "<<sim::endl;
         sum += nodesLoad[nodesLoad.size()-1];
     }
     int isum = 0;

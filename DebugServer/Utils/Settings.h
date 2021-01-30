@@ -12,6 +12,7 @@ class Settings
     static float SendBytesPerInterval;
     static float sendIntervalMS;
     static float limitForDeTail;
+    static int alpha;
 public:
     static int getDebugFirstPortNum()
     {
@@ -52,6 +53,14 @@ public:
     static float getLimitForDeTail()
     {
         return limitForDeTail;
+    }
+    static int getAlpha()
+    {
+        return alpha;
+    };
+    static void setAlpha(int i)
+    {
+        alpha = i;
     }
 };
 

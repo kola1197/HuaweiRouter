@@ -121,8 +121,10 @@ void MainWindow::setDefaultSettings()
 {
     Settings::setsendIntervalMS(330);
     Settings::setSendBytesPerInterval(64);
+    Settings::setAlpha(10);
     ui->CountOfBytes->setText(QString::number(Settings::getSendBytesPerInterval()));
     ui->sendIntervalMS->setText(QString::number(Settings::getsendIntervalMS()));
+    ui->lambdaText->setText(QString::number(Settings::getAlpha()));
 }
 
 MainWindow::~MainWindow()
@@ -132,7 +134,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::createAlgprithmComboBox()
 {
-    ui->algorithmBox->addItems(QStringList() <<trUtf8("RANDOM") << trUtf8("DRILL") << trUtf8("LOCAL VOTING") << trUtf8("DE TAIl") /*<< trUtf8("LocalFlow")*/);
+    ui->algorithmBox->addItems(QStringList() <<trUtf8("RANDOM") << trUtf8("DRILL") << trUtf8("LOCAL VOTING") << trUtf8("DE TAIl") << trUtf8("MY LOCAL VOTING")  /*<< trUtf8("LocalFlow")*/);
     //ui->algorithmBox.
 }
 
@@ -453,6 +455,7 @@ void MainWindow::blockInterface()
     ui->startButton->setEnabled(false);
     ui->CountOfBytes->setEnabled(false);
     ui->sendIntervalMS->setEnabled(false);
+    ui->lambdaText->setEnabled(false);
 }
 
 void MainWindow::unBlockInterface()
@@ -466,6 +469,7 @@ void MainWindow::unBlockInterface()
     ui->startButton->setEnabled(true);
     ui->CountOfBytes->setEnabled(true);
     ui->sendIntervalMS->setEnabled(true);
+    ui->lambdaText->setEnabled(true);
     updateStartButtonText();
 }
 
@@ -556,7 +560,7 @@ void MainWindow::AddButtonClick()
 void MainWindow::on_algorithmBox_currentIndexChanged(int index)
 {
     ui->openGLWidget->graph.selectedAlgorithm = static_cast<Algorithms>(index);
-    std::string  res = ui->openGLWidget->graph.selectedAlgorithm == Algorithms::DE_TAIL ? "DE_TAIL" : "NOT DE_TAIL";
+    std::string  res = ui->openGLWidget->graph.selectedAlgorithm == Algorithms::MY_LOCAL_VOTING ? "MY_LOCAL_VOTING" : "NOT MY_LOCAL_VOTING";
     sim::sout<<ui->openGLWidget->graph.selectedAlgorithm<<"   "<<res<<sim::endl;
 }
 
@@ -592,6 +596,24 @@ void MainWindow::onnn_count_of_bytes_editingFinished()
 }
 
 void MainWindow::onnn_send_interval_editingFinished()
+{
+    //sim::sout<<"changed"<<sim::endl;
+    bool* b = new bool;
+    *b = false;
+    QString text = ui->sendIntervalMS->text();
+    int res = text.toInt(b);
+    if (*b && res < 100000)
+    {
+        ui->sendIntervalMS->setStyleSheet("QLineEdit { background: rgb(255, 255, 255); selection-background-color: rgb(233, 99, 0); }");
+        Settings::setsendIntervalMS(res);
+    }
+    else {
+        ui->sendIntervalMS->setStyleSheet("QLineEdit { background: rgb(255, 65, 65); selection-background-color: rgb(233, 99, 0); }");
+        //Settings::
+    }
+}
+
+void MainWindow::onnn_lambda_editingFinished()
 {
     //sim::sout<<"changed"<<sim::endl;
     bool* b = new bool;

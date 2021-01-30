@@ -55,6 +55,9 @@ private:
     int pathLength(int nodeFrom, int nodeTo);
 
     void updateNodeLoadForDeTails();
+
+    int alpha = 10;
+    float nodeLoad = 0;
 };
 
 

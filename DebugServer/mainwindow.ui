@@ -293,6 +293,32 @@
        <string/>
       </property>
      </widget>
+     <widget class="QLineEdit" name="lambdaText">
+      <property name="geometry">
+       <rect>
+        <x>1640</x>
+        <y>460</y>
+        <width>131</width>
+        <height>25</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="infoLabel_3">
+      <property name="geometry">
+       <rect>
+        <x>1650</x>
+        <y>430</y>
+        <width>111</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>LV Alpha</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
     </widget>
    </widget>
   </widget>
@@ -469,6 +495,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>lambdaText</sender>
+   <signal>editingFinished()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onnn_lambda_editingFinished()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1706</x>
+     <y>495</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>894</x>
+     <y>499</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>AddButtonClick()</slot>
@@ -478,5 +520,6 @@
   <slot>onnn_settingsButton_released()</slot>
   <slot>onnn_count_of_bytes_editingFinished()</slot>
   <slot>onnn_send_interval_editingFinished()</slot>
+  <slot>onnn_lambda_editingFinished()</slot>
  </slots>
 </ui>

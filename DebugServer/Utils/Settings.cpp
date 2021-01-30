@@ -8,3 +8,4 @@ int Settings::ConnectionsFirstPortNum = 6666;
 float Settings::SendBytesPerInterval = 64;
 float Settings::sendIntervalMS = 330;
 float Settings::limitForDeTail = 25;
+int Settings::alpha = 10;

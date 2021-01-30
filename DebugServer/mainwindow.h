@@ -36,6 +36,7 @@ private slots:
 
     void onnn_count_of_bytes_editingFinished();                      // QT thinks that "on_" is system slot ?!
     void onnn_send_interval_editingFinished();                       // QT thinks that "on_" is system slot ?!
+    void onnn_lambda_editingFinished();
     void repaint_on_simulation_finish_done();
 signals:
     void simulation_finish_done();
