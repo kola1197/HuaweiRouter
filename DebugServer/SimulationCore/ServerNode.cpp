@@ -334,6 +334,7 @@ int ServerNode::selectPacketPath(int prevNodeNum, int to)
 {
     switch (graph.selectedAlgorithm) {
         case Algorithms::RANDOM:
+            sim::sout<<"RANDOM"<<sim::endl;
             return randomSelectionAlgorithm(prevNodeNum, to);
             break;
         case Algorithms::DRILL:
@@ -346,6 +347,7 @@ int ServerNode::selectPacketPath(int prevNodeNum, int to)
             return drillSelectionAlgorithm();
             break;*/
         case Algorithms::LOCAL_VOTING:
+            sim::sout<<"LOCAL_VOTING"<<sim::endl;
             return localVotingSelectionAlgorithm(prevNodeNum, to);
             break;
         case Algorithms::MY_LOCAL_VOTING:
@@ -488,7 +490,7 @@ int ServerNode::localVotingSelectionAlgorithm(int prevNodeNum, int to)
         float z = 1000 * std::get<0>(nodesLoad[i]) / zSum;
         float u = uSum == 0 ? 0 : 1000 * std::get<1>(nodesLoad[i]) / uSum;
         float w = 1000 * std::get<2>(nodesLoad[i]) / wSum;
-        sim::sout<<"z:  "<<z<<" u:  "<<u<<" w:  "<<w<<sim::endl;
+        //sim::sout<<"z:  "<<z<<" u:  "<<u<<" w:  "<<w<<sim::endl;
         float weight = z + u + w;
         nodesWeights.push_back(weight);
         isum += qRound(weight);

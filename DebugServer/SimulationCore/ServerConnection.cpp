@@ -99,7 +99,7 @@ void ServerConnection::connectTo()
                     sim::sout << "\nInvalid address/ Address not supported \n" << sim::endl;
                 }
                 if (::connect(sock, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
-                    printf("\nConnection Failed \n");
+                    //printf("\nConnection Failed \n");
                 } else{
                     connected.set(true);
                 }

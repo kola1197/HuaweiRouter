@@ -401,6 +401,7 @@ void MainWindow::on_startButton_released()   // lock the screen and start simula
         ui->openGLWidget->graph.cpuFrames = 0;
         blockInterface();
         savedGraph = Graph(ui->openGLWidget->graph);
+        on_algorithmBox_currentIndexChanged(ui->algorithmBox->currentIndex());
         simulation = new Simulation(&ui->openGLWidget->graph);
         simulation->Start();
         connectSlots();

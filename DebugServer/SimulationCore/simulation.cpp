@@ -15,6 +15,7 @@ Simulation::Simulation()
 Simulation::Simulation(Graph *_graph)
 {
     graph = _graph;
+    sim::sout<<"Alghoritm: "<<graph->selectedAlgorithm<<sim::endl;
 }
 
 Simulation::~Simulation()

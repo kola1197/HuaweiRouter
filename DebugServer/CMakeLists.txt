@@ -15,6 +15,10 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++2a -pthread")
 find_package(OpenGL REQUIRED)
 #find_package(GLUT REQUIRED)
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
+#find_package(Qt5 5.12 REQUIRED)
+#find_package(Qt5Widgets 5.12 EXACT REQUIRED)
+
+
 include_directories(include)
 if(ANDROID)
   add_library(HuaweiRouter SHARED
