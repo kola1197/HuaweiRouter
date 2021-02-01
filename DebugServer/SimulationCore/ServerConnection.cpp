@@ -208,7 +208,7 @@ void ServerConnection::getPacketMessage()
     }
     memcpy(&m, msg, sizeof(m));
     //sim::sout<<"Node "<<from<<": from "<<to<<" got PacketMessage with id "<<m.id<<" checksum: "<<m.checkSum <<sim::endl;
-    if (m.checkSum != 239239239){
+    if (m.checkSum!= Messages::getChecksum(&m) || m.firstCheckSum!=239239239){
         /*PacketMessage mm;
         mm.checkSum=239239239;
         mm.firstCheckSum = 239239239;
@@ -233,7 +233,7 @@ void ServerConnection::getPacketMessage()
             drout<<std::hex<<(int)hData[i]<<" ";
         }
         std::cout<<std::endl;*/
-        //sim::sout<<"Node "<<from<<": from "<<to<<" got PacketMessage with id "<<m.id<<" checksum: "<<m.checkSum <<sim::endl;
+        sim::sout<<"Node "<<from<<": from "<<to<<" got PacketMessage with id "<<m.id<<" checksum: "<<m.checkSum <<sim::endl;
     }
     m.prevposition = m.currentPosition;
     m.currentPosition = from;

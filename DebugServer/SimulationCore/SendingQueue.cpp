@@ -135,21 +135,22 @@ void SendingQueue::updateLoadingSize()
     int datasize = messagesDataQueue.size();
     queueMutex.unlock();
     packetsMutex.lock();
-    for (int i=0;i<packetsTypes.size();i++)
+    for (auto & packetsType : packetsTypes)
     {
-        switch (packetsTypes[i]) {
+        switch (packetsType) {
             case MESSAGE:
                 datasize += sizeof(Message);
                 break;
             case PACKET_MESSAGE:
                 datasize += sizeof(PacketMessage);
                 break;
+            default: break;
         }
     }
     int packetsCountInt = 0;
-    for (int i=0;i<packetsTypes.size();i++)
+    for (auto & packetsType : packetsTypes)
     {
-        packetsCountInt += packetsTypes[i]==PACKET_MESSAGE? 1 : 0 ;
+        packetsCountInt += packetsType==PACKET_MESSAGE? 1 : 0 ;
     }
     packetsCount.set(packetsCountInt);
     packetsMutex.unlock();
@@ -159,15 +160,16 @@ void SendingQueue::updateLoadingSize()
 std::vector<char> SendingQueue::getData(int sendBytesPerInterval)
 {
     queueMutex.lock();
-    int size = messagesDataQueue.size()>sendBytesPerInterval ? sendBytesPerInterval : messagesDataQueue.size();
+    u_long size = messagesDataQueue.size()>sendBytesPerInterval ? sendBytesPerInterval : messagesDataQueue.size();
     std::vector<char> result;
-    for (int i=0;i<size;i++)
+    for (u_long i=0;i<size;i++)
     {
         result.push_back(messagesDataQueue[0]);
-        messagesDataQueue.erase(messagesDataQueue.begin());
+        messagesDataQueue.erase(messagesDataQueue.begin());           //maybe error is here?
     }
+    bool messagesStackIsEmpty = messagesDataQueue.empty();
     queueMutex.unlock();
-    if (messagesDataQueue.empty())
+    if (messagesStackIsEmpty)
     {
         updateByteQueue();
     }

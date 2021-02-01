@@ -458,7 +458,7 @@ int ServerNode::deTailSelectionAlgorithm(int prevNodeNum, int to)
 
     return a;
 }
-
+/*
 int ServerNode::localVotingSelectionAlgorithm(int prevNodeNum, int to)
 {
     //sim::sout<<"localVotingSelectionAlgorithm"<<sim::endl;
@@ -517,7 +517,7 @@ int ServerNode::localVotingSelectionAlgorithm(int prevNodeNum, int to)
             }
         }
     }
-}
+}*/
 
 int ServerNode::MyLocalVotingSelectionAlgorithm(int prevNodeNum, int to)
 {
