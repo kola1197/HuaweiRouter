@@ -314,9 +314,25 @@ void Graph::deleteEllips(int number)
     {
         if (ellipses[i].number == number)
         {
+            sim::sout<<"Ellips "<<ellipses[i].number<<"deleted"<<sim::endl;
             ellipses.erase(ellipses.begin()+i);
         }
     }
+    std::vector<int> edgesToRemove;
+    bool found = true;
+    while (found)
+    for  (int j=0;j<edges.size();j++)
+    {
+        found = false;
+        if (edges[j].to == number || edges[j].from == number)
+        {
+            if (!found){
+            edges.erase(edges.begin() + j);
+            found = true;
+            }
+        }
+    }
+
 }
 
 void Graph::get_system_message(SystemMessage m)
