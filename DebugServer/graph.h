@@ -21,14 +21,25 @@ struct Ellips
     int pathLength =- 1;
 };
 
+
+struct EdgeData{
+    float x;
+    float y;
+    float SendBytesPerInterval = -1;
+    float sendIntervalMS = -1;
+};
+
 struct Edge
 {
     int id;
     int  from;
     int  to;
+    EdgeData toFromEdgeData;
+    EdgeData toToEdgeData;
     float loadFromTo = 0;
     float loadToFrom = 0;
 };
+
 
 struct Packet
 {
@@ -54,12 +65,15 @@ public:
     explicit Graph(QObject *parent = nullptr);
     Graph(const Graph &obj);
     Graph& operator = (const Graph &obj);
-
+    int sign(float i);
+    std::tuple<float,float,float,float>  countEdgeCircleCoords(Ellips* el1, Ellips* el2);
     std::vector<Ellips> ellipses;
     std::vector<Edge> edges;
     void testInit();
     Ellips *getEllipseByPoint(int x, int y);
+    std::tuple<Edge*, bool> getEdgeByPoint(int x, int y);
     Ellips *active = NULL;
+    EdgeData *activeEdgeData = nullptr;
     void save(QString path);
     void load(QString path);
     Ellips *getEllipseByNumber(int num);

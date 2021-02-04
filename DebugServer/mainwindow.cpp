@@ -28,6 +28,7 @@ MainWindow::MainWindow(QWidget *parent)
     setDefaultSettings();
     connect(ui->openGLWidget,SIGNAL(transmit_info(QString)),this,SLOT(setEllipseInfo(QString)));
     connect(this,SIGNAL(simulation_finish_done()), this, SLOT(repaint_on_simulation_finish_done()));
+    connect(ui->openGLWidget,SIGNAL(transmitActiveEdgeChange()),this,SLOT(updateEdgePerfomanceLabels()));
     draw();
     tmr = new QTimer();
     tmr->setInterval(84);
@@ -122,8 +123,9 @@ void MainWindow::setDefaultSettings()
     Settings::setsendIntervalMS(330);
     Settings::setSendBytesPerInterval(64);
     Settings::setAlpha(10);
-    ui->CountOfBytes->setText(QString::number(Settings::getSendBytesPerInterval()));
-    ui->sendIntervalMS->setText(QString::number(Settings::getsendIntervalMS()));
+    updateEdgePerfomanceLabels();
+//    ui->CountOfBytes->setText(QString::number(Settings::getSendBytesPerInterval()));
+//    ui->sendIntervalMS->setText(QString::number(Settings::getsendIntervalMS()));
     ui->lambdaText->setText(QString::number(Settings::getAlpha()));
 }
 
@@ -565,6 +567,19 @@ void MainWindow::on_algorithmBox_currentIndexChanged(int index)
     sim::sout<<ui->openGLWidget->graph.selectedAlgorithm<<"   "<<res<<sim::endl;
 }
 
+void MainWindow::updateEdgePerfomanceLabels()
+{
+    if (ui->openGLWidget->graph.activeEdgeData == nullptr) {
+        ui->CountOfBytes->setText(QString::number(Settings::getSendBytesPerInterval()));
+        ui->sendIntervalMS->setText(QString::number(Settings::getsendIntervalMS()));
+    } else {
+        ui->CountOfBytes->setText(QString::number(ui->openGLWidget->graph.activeEdgeData->SendBytesPerInterval == -1 ?
+                                                  Settings::getSendBytesPerInterval() :ui->openGLWidget->graph.activeEdgeData->SendBytesPerInterval));
+        ui->sendIntervalMS->setText(QString::number(ui->openGLWidget->graph.activeEdgeData->sendIntervalMS == -1 ?
+                                                    Settings::getsendIntervalMS():ui->openGLWidget->graph.activeEdgeData->sendIntervalMS));
+    }
+}
+
 void MainWindow::onnn_settingsButton_released()
 {
     /*settingsForm = new SettingsForm;
@@ -588,7 +603,11 @@ void MainWindow::onnn_count_of_bytes_editingFinished()
     if (*b && res < 1024)
     {
         ui->CountOfBytes->setStyleSheet("QLineEdit { background: rgb(255, 255, 255); selection-background-color: rgb(233, 99, 0); }");
-        Settings::setSendBytesPerInterval(res);
+        if (ui->openGLWidget->graph.activeEdgeData == nullptr) {
+            Settings::setSendBytesPerInterval(res);
+        } else {
+            ui->openGLWidget->graph.activeEdgeData->SendBytesPerInterval = res;
+        }
     }
     else {
         ui->CountOfBytes->setStyleSheet("QLineEdit { background: rgb(255, 65, 65); selection-background-color: rgb(233, 99, 0); }");
@@ -606,11 +625,14 @@ void MainWindow::onnn_send_interval_editingFinished()
     if (*b && res < 100000)
     {
         ui->sendIntervalMS->setStyleSheet("QLineEdit { background: rgb(255, 255, 255); selection-background-color: rgb(233, 99, 0); }");
-        Settings::setsendIntervalMS(res);
+        if (ui->openGLWidget->graph.activeEdgeData == nullptr) {
+            Settings::setsendIntervalMS(res);
+        } else {
+            ui->openGLWidget->graph.activeEdgeData->sendIntervalMS = res;
+        }
     }
     else {
         ui->sendIntervalMS->setStyleSheet("QLineEdit { background: rgb(255, 65, 65); selection-background-color: rgb(233, 99, 0); }");
-        //Settings::
     }
 }
 

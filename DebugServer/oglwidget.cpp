@@ -53,28 +53,35 @@ void OGLWidget::paintGL()
         Ellips *el2 = graph.getEllipseByNumber(e.to);
         if (el1!=NULL && el2!=NULL)
         {
-            std::tuple<float,float,float,float> newCoords = countCoords(el1,el2);
+            std::tuple<float,float,float,float> newCoords = graph.countEdgeCircleCoords(el1,el2);
             float x1,x2,y1,y2;
             std::tie(x1,y1,x2,y2) = newCoords;
             drawEdge(x1,y1,x2,y2);
         }
     }
-    for (Edge e:graph.edges)
+    //for (Edge e:graph.edges)
+    for (int i=0;i<graph.edges.size();i++)
     {
-        Ellips *el1 = graph.getEllipseByNumber(e.from);
-        Ellips *el2 = graph.getEllipseByNumber(e.to);
+        Ellips *el1 = graph.getEllipseByNumber(graph.edges[i].from);
+        Ellips *el2 = graph.getEllipseByNumber(graph.edges[i].to);
         if (el1!=NULL && el2!=NULL)
         {
-            std::tuple<float,float,float,float> newCoords = countCoords(el1,el2);
+            std::tuple<float,float,float,float> newCoords = graph.countEdgeCircleCoords(el1,el2);
             float x1,x2,y1,y2;
             std::tie(x1,y1,x2,y2) = newCoords;
-            drawLableCircle(x1,y1,x2,y2, QString::number(e.loadFromTo));
-            drawLableCircle(x2,y2,x1,y1, QString::number(e.loadToFrom));
+            graph.edges[i].toToEdgeData.x = (x1 * 9 + x2) / 10;
+            graph.edges[i].toToEdgeData.y = (y1 * 9 + y2) / 10;
+            graph.edges[i].toFromEdgeData.x = (x2 * 9 + x1) / 10;
+            graph.edges[i].toFromEdgeData.y = (y2 * 9 + y1) / 10;;
+            bool toToEdgeDefault = graph.edges[i].toToEdgeData.sendIntervalMS ==-1 && graph.edges[i].toToEdgeData.SendBytesPerInterval ==-1;
+            bool toFromEdgeDefault = graph.edges[i].toFromEdgeData.sendIntervalMS ==-1 && graph.edges[i].toFromEdgeData.SendBytesPerInterval ==-1;
+            drawLableCircle(x1,y1,x2,y2, QString::number(graph.edges[i].loadFromTo),toToEdgeDefault);
+            drawLableCircle(x2,y2,x1,y1, QString::number(graph.edges[i].loadToFrom),toFromEdgeDefault);
         }
     }
 }
 
-void OGLWidget::drawLableCircle(float x1, float y1, float x2,float y2, QString edgeUsage)
+void OGLWidget::drawLableCircle(float x1, float y1, float x2,float y2, QString edgeUsage, bool defaultPerformance)
 {
     float x = (x1*9+x2)/10;
     float y = (y1*9+y2)/10;
@@ -87,7 +94,17 @@ void OGLWidget::drawLableCircle(float x1, float y1, float x2,float y2, QString e
     }
     glEnd();
     radius++;
-    glColor3f(0.0, 0.0, 1.0);
+    if (graph.activeEdgeData!= nullptr && graph.activeEdgeData->x == x && graph.activeEdgeData->y == y)
+    {    glColor3f(1.0, 0.0, 0.0);
+    }
+    else{
+        if (defaultPerformance){
+            glColor3f(0.0, 0.0, 1.0);
+        }
+        else {
+            glColor3f(0.0, 1.0, 0.0);
+        }
+    }
     glBegin(GL_LINE_LOOP);
     for (int i = 0; i <= 20; i++)   {
         glVertex2f ((x + (radius * cos(i * float(2 * M_PI) / 20))), (y + (radius * sin(i * float(2 * M_PI) / 20))) );
@@ -152,50 +169,50 @@ void OGLWidget::drawEllipse(Ellips *e)      //color 0 - default, 1 - active elli
     renderText(e->x-34,e->y+10,ellipseMaxCount);
 }
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "cppcoreguidelines-narrowing-conversions"
-std::tuple<float,float,float,float> OGLWidget::countCoords(Ellips* el1, Ellips* el2)
-{
-    float x1 = el1->x;
-    float x2 = el2->x;
-    float y1 = el1->y;
-    float y2 = el2->y;
-    if (x1!=x2) {
-        float k = (y1 - y2) / (x1 - x2);
-        float b = el1->y - el1->x * k;
+//#pragma clang diagnostic push
+//#pragma ide diagnostic ignored "cppcoreguidelines-narrowing-conversions"
+//std::tuple<float,float,float,float> OGLWidget::countCoords(Ellips* el1, Ellips* el2)
+//{
+//    float x1 = el1->x;
+//    float x2 = el2->x;
+//    float y1 = el1->y;
+//    float y2 = el2->y;
+//    if (x1!=x2) {
+//        float k = (y1 - y2) / (x1 - x2);
+//        float b = el1->y - el1->x * k;
+//
+//        float a = el1->x;
+//        float c = el1->y;
+//        float resX1 = (a - 4*b*k +4*c*k - sign(el1->x - el2->x)*2*sqrt(-a*a*k*k -2*a*b*k + 2*a*c*k -b*b +2*b*c - c*c + 2500*k*k +625))
+//                / (4 * k * k +1);
+//        float resY1 = resX1 * k + b;
+//
+//        a = el2->x;
+//        c = el2->y;
+//        float resX2 = (a - 4*b*k +4*c*k - sign(el2->x - el1->x)*2*sqrt(-a*a*k*k -2*a*b*k + 2*a*c*k -b*b +2*b*c - c*c + 2500*k*k +625))
+//                      / (4 * k * k +1);
+//        float resY2 = resX2 * k + b;
+//
+//
+//        //float resX = (-8*b*k + sign(el2->x - el1->x) * sqrt(64 * k * k * b * b - 4 * ( 4 * (4 * k * k + 1)) * ( 4 * b * b - 50 * 50 )))
+//        //        /(2*(4*k*k+1));
+//        //float resX1 = resX + el1->x;
+//        //float resY1 = k * resX1 + b;
+//        //float resX2 = resX + el2->x;
+//        //float resY2 = k * resX2 + b;
+//        return std::tuple<float,float, float, float>(resX1, resY1, resX2, resY2 );
+//    } else {
+//        return std::tuple<float,float, float, float>(el1->x, el1->y + sign(el2->y - el1->y) * 25,el2->x , el2->y + sign(el1->y - el2->y) * 25);
+//    }
+//}
+//#pragma clang diagnostic pop
 
-        float a = el1->x;
-        float c = el1->y;
-        float resX1 = (a - 4*b*k +4*c*k - sign(el1->x - el2->x)*2*sqrt(-a*a*k*k -2*a*b*k + 2*a*c*k -b*b +2*b*c - c*c + 2500*k*k +625))
-                / (4 * k * k +1);
-        float resY1 = resX1 * k + b;
-
-        a = el2->x;
-        c = el2->y;
-        float resX2 = (a - 4*b*k +4*c*k - sign(el2->x - el1->x)*2*sqrt(-a*a*k*k -2*a*b*k + 2*a*c*k -b*b +2*b*c - c*c + 2500*k*k +625))
-                      / (4 * k * k +1);
-        float resY2 = resX2 * k + b;
 
 
-        //float resX = (-8*b*k + sign(el2->x - el1->x) * sqrt(64 * k * k * b * b - 4 * ( 4 * (4 * k * k + 1)) * ( 4 * b * b - 50 * 50 )))
-        //        /(2*(4*k*k+1));
-        //float resX1 = resX + el1->x;
-        //float resY1 = k * resX1 + b;
-        //float resX2 = resX + el2->x;
-        //float resY2 = k * resX2 + b;
-        return std::tuple<float,float, float, float>(resX1, resY1, resX2, resY2 );
-    } else {
-        return std::tuple<float,float, float, float>(el1->x, el1->y + sign(el2->y - el1->y) * 25,el2->x , el2->y + sign(el1->y - el2->y) * 25);
-    }
-}
-#pragma clang diagnostic pop
-
-
-
-int OGLWidget::sign(float i)
-{
-    return i>0 ? 1 : -1;
-}
+//int OGLWidget::sign(float i)
+//{
+//    return i>0 ? 1 : -1;
+//}
 
 void OGLWidget::renderText(double x, double y, const QString &str, bool bold, QColor color)
 {
@@ -263,6 +280,7 @@ void OGLWidget::mousePressEvent(QMouseEvent *event)
 {
     if (!screenLocked && event->button() == Qt::LeftButton)
     {
+        graph.activeEdgeData = nullptr;
         sim::sout<<event->x()<<"::"<<event->y()<<sim::endl;
         float x = event->x();
         float y = event->y();
@@ -280,12 +298,32 @@ void OGLWidget::mousePressEvent(QMouseEvent *event)
             //sim::sout<<el->x<<"*"<<el->y<<sim::endl;
             //sim::sout<<"ellips number now "<<el->number<<sim::endl;
             graph.active = el;
+        } else{
+            Edge *edge = nullptr;
+            bool toFrom = false;
+            std::tuple<Edge*,bool> EdgeD = graph.getEdgeByPoint(x,y);
+            std::tie(edge,toFrom)  = EdgeD;
+            if (edge!=nullptr)
+            {
+                if (!toFrom ) {
+                    sim::sout << "EDGE from " << edge->from << " to " << edge->to << " found" << sim::endl;
+                    graph.activeEdgeData = &edge->toToEdgeData;
+                }
+                else{
+                    sim::sout << "EDGE from " << edge->to << " to " << edge->from << " found" << sim::endl;
+                    graph.activeEdgeData = &edge->toFromEdgeData;
+                }
+            }
+            else {
+                //sim::sout<<"EDGE NOT FOUND "<<sim::endl;
+            }
         }
     }
     if (event->button() == Qt::RightButton)
     {
         graph.addEdge(-1);
     }
+    emit(transmitActiveEdgeChange());
 }
 
 void OGLWidget::mouseMoveEvent(QMouseEvent *event)

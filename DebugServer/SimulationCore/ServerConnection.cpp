@@ -26,7 +26,7 @@ ServerConnection::ServerConnection(int _port, int _from, int _to, int _id):QObje
     sendBytesPerInterval = Settings::getSendBytesPerInterval();
     sendingQueue.from = from;
     sendingQueue.to = to;
-    mkdir("Debug", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+    //mkdir("Debug", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
     //dwout.open(std::string ("Debug//Debug_write_"+QString::number(from).toStdString()+"___"+QString::number(to).toStdString()+".txt").c_str(),std::ios_base::out);
     //drout.open(std::string ("Debug//Debug_read_"+QString::number(from).toStdString()+"___"+QString::number(to).toStdString()+".txt").c_str(),std::ios_base::out);
 }

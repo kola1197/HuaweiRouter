@@ -126,12 +126,12 @@ void ServerNode::Start()       //on start we connect to debug server
             if (graph.edges[i].from == serverNum)
             {
                 c++;
-                addConnection(graph.edges[i].to);
+                addConnection(graph.edges[i].to,&graph.edges[i].toToEdgeData);
             }
             if (graph.edges[i].to == serverNum)
             {
                 c++;
-                addConnection(graph.edges[i].from);
+                addConnection(graph.edges[i].from,&graph.edges[i].toFromEdgeData);
             }
         }
         bool allServerConnectionsReady = false;
@@ -622,7 +622,7 @@ void ServerNode::addDebugConnection()
 
 }
 
-void ServerNode::addConnection(int to)
+void ServerNode::addConnection(int to, EdgeData * edgeData)
 {
     //int portDelta = serverNum>to?serverNum:to;
     //int port = debugSocketAdress + portDelta;
@@ -644,7 +644,10 @@ void ServerNode::addConnection(int to)
         //sim::sout<<"debugSocketAdress = "<<debugSocketAdress<<sim::endl;
 
         ServerConnection* newConnection = new ServerConnection(port, serverNum, to, edgeID);
-
+        if (edgeData != nullptr){
+            newConnection->sendBytesPerInterval = edgeData->SendBytesPerInterval == -1 ? newConnection->sendBytesPerInterval : edgeData->SendBytesPerInterval;
+            newConnection->sendIntervalMS = edgeData->sendIntervalMS == -1 ? newConnection->sendIntervalMS : edgeData->sendIntervalMS;
+        }
         connections.push_back(newConnection);
         if (serverNum > to)
         {

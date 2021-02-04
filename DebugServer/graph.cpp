@@ -177,6 +177,50 @@ void Graph::load(QString path)
     }
 }
 
+int Graph::sign(float i)
+{
+    return i>0 ? 1 : -1;
+}
+
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "cppcoreguidelines-narrowing-conversions"
+std::tuple<float,float,float,float> Graph::countEdgeCircleCoords(Ellips* el1, Ellips* el2)
+{
+    float x1 = el1->x;
+    float x2 = el2->x;
+    float y1 = el1->y;
+    float y2 = el2->y;
+    if (x1!=x2) {
+        float k = (y1 - y2) / (x1 - x2);
+        float b = el1->y - el1->x * k;
+
+        float a = el1->x;
+        float c = el1->y;
+        float resX1 = (a - 4*b*k +4*c*k - sign(el1->x - el2->x)*2*sqrt(-a*a*k*k -2*a*b*k + 2*a*c*k -b*b +2*b*c - c*c + 2500*k*k +625))
+                      / (4 * k * k +1);
+        float resY1 = resX1 * k + b;
+
+        a = el2->x;
+        c = el2->y;
+        float resX2 = (a - 4*b*k +4*c*k - sign(el2->x - el1->x)*2*sqrt(-a*a*k*k -2*a*b*k + 2*a*c*k -b*b +2*b*c - c*c + 2500*k*k +625))
+                      / (4 * k * k +1);
+        float resY2 = resX2 * k + b;
+
+
+        //float resX = (-8*b*k + sign(el2->x - el1->x) * sqrt(64 * k * k * b * b - 4 * ( 4 * (4 * k * k + 1)) * ( 4 * b * b - 50 * 50 )))
+        //        /(2*(4*k*k+1));
+        //float resX1 = resX + el1->x;
+        //float resY1 = k * resX1 + b;
+        //float resX2 = resX + el2->x;
+        //float resY2 = k * resX2 + b;
+        return std::tuple<float,float, float, float>(resX1, resY1, resX2, resY2 );
+    } else {
+        return std::tuple<float,float, float, float>(el1->x, el1->y + sign(el2->y - el1->y) * 25,el2->x , el2->y + sign(el1->y - el2->y) * 25);
+    }
+}
+#pragma clang diagnostic pop
+
+
 void Graph::addPacketmessage(int _type, int _from, int _to)
 {
     Packet m;
@@ -244,6 +288,32 @@ Ellips * Graph::getEllipseByNumber(int num)
     }
     return result;
 }
+
+std::tuple<Edge*, bool> Graph::getEdgeByPoint(int x,int y)
+{
+    Edge * resultEdge = nullptr;
+    bool from;
+    for (auto & edge : edges)
+    {
+        if (dist(x, y, edge.toFromEdgeData.x, edge.toFromEdgeData.y) < 15 )
+        {
+            from = true;
+            sim::sout<<"Edge "<<edge.to<<" to "<<edge.from<<sim::endl;
+            resultEdge = &edge;
+        }
+        //sim::sout << edge.toFromEdgeData.x << ", " << edge.toFromEdgeData.y << " to " << x << ", " << y << " < 15" << sim::endl;
+        if (dist(x, y, edge.toToEdgeData.x, edge.toToEdgeData.y) < 15 )
+        {
+            from = false;
+            sim::sout<<"Edge "<<edge.from<<" to "<<edge.to<<sim::endl;
+            resultEdge = &edge;
+        }
+        //sim::sout<<edge.toToEdgeData.x<<", "<<edge.toToEdgeData.y<<" to "<<x<<", "<<y<<" < 15"<<sim::endl;
+    }
+    std::tuple<Edge*,bool> result {resultEdge,from};
+    return result;
+}
+
 
 Ellips * Graph::getEllipseByPoint(int x,int y)
 {
@@ -318,21 +388,22 @@ void Graph::deleteEllips(int number)
             ellipses.erase(ellipses.begin()+i);
         }
     }
-    std::vector<int> edgesToRemove;
+    int counter = 0;
     bool found = true;
-    while (found)
-    for  (int j=0;j<edges.size();j++)
-    {
+    while (found) {
         found = false;
-        if (edges[j].to == number || edges[j].from == number)
-        {
-            if (!found){
-            edges.erase(edges.begin() + j);
-            found = true;
+        for (int j = 0; j < edges.size(); j++) {
+            if (edges[j].to == number || edges[j].from == number) {
+                if (!found) {
+                    edges.erase(edges.begin() + j);
+                    found = true;
+                    counter ++;
+                }
             }
         }
     }
-
+    activeNumberForEdge = -1;
+    //sim::sout<<counter<<" edges deleted"<<sim::endl;
 }
 
 void Graph::get_system_message(SystemMessage m)

@@ -47,6 +47,7 @@ public slots:
     void onBtnClicked();
     void unBlockInterface();
     void updateCpuLabel();
+    void updateEdgePerfomanceLabels();
     //void get_system_message(SystemMessage m);
 private:
     int screenUpdateFrameCounter;

@@ -31,7 +31,7 @@ public slots:
     void get_message(PacketMessage m);
     void get_message(SystemMessage m);
 protected:
-    void addConnection(int to);
+    void addConnection(int to, EdgeData * edgeData = nullptr);
     Graph graph;
     int serverNum = -1;
     int debugSocketAdress = -1;
