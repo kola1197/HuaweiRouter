@@ -10,6 +10,7 @@
 #include <Utils/sout.h>
 #include <SimulationCore/SendingQueue.h>
 #include <Utils/CpuInfo.h>
+#include <QSurfaceFormat>
 
 using namespace std;
 
@@ -197,6 +198,9 @@ int main(int argc, char *argv[]) {
     //newMessagesQueueTest();
     //sim::sout<<CpuInfo::getCPUName()<<sim::endl;
     QApplication a(argc, argv);
+    QSurfaceFormat fmt;
+    fmt.setSamples(20);
+    QSurfaceFormat::setDefaultFormat(fmt);
     srand(time(NULL));
     a.setApplicationName("Simulation");
     MainWindow w;
