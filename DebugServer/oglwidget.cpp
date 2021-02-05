@@ -20,17 +20,24 @@ OGLWidget::~OGLWidget()
 
 void OGLWidget::initializeGL()
 {
+    //glfwWindowHint(GLFW_SAMPLES, 4);
+    QSurfaceFormat fmt;
+    fmt.setSamples(4);
+    setFormat(fmt);
     glClearColor(1,1,1,1);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_LIGHT0);
     glEnable(GL_LIGHTING);
+    glEnable(GL_MULTISAMPLE);
     glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
     glEnable(GL_COLOR_MATERIAL);
+
 }
 
 
 void OGLWidget::paintGL()
 {
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     for (Ellips e:graph.ellipses)

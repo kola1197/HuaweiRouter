@@ -105,7 +105,8 @@ void Graph::save(QString path)
     ofs<<"*.\n";
     for (int i=0;i<edges.size();i++)
     {
-        ofs<<edges[i].from<<" "<<edges[i].to<<".\n";
+        ofs<<edges[i].from<<" "<<edges[i].to<<" "<<edges[i].toToEdgeData.sendIntervalMS<<" "<<edges[i].toToEdgeData.SendBytesPerInterval
+           <<" "<<edges[i].toFromEdgeData.sendIntervalMS<<" "<<edges[i].toFromEdgeData.SendBytesPerInterval<<".\n";
     }
     ofs<<"*.\n";
     for (int i = 0; i<packets.size();i++)
@@ -131,20 +132,25 @@ void Graph::load(QString path)
         {
             sim::sout<< line<<'\n';
             QString q = QString::fromStdString(line);
-            float arr[3];
+            float arr[6];
             int counter = 0;
             QString buff = "";
             if (q[0]!='*')
             {
+                bool belowZero = false;
+                for (int j=0;j<6;j++){arr[j] = -1;}
                 for (int i=0;i<q.length();i++)
                 {
-
                     if (q[i].isDigit())
                     {
                         buff += q[i];
                     }
+                    else if(q[i] == '-'){
+                        belowZero = true;
+                    }
                     else{
-                        arr[counter] = buff.toFloat();
+                        arr[counter] = belowZero ? -buff.toFloat() : buff.toFloat();
+                        belowZero = false;
                         buff = "";
                         counter++;
                     }
@@ -155,9 +161,18 @@ void Graph::load(QString path)
                 }
                 if (loadPart == 1)
                 {
+                    Edge edge;
+                    edge.from = (int)arr[0];
+                    edge.to = (int)arr[1];
+                    edge.toToEdgeData.sendIntervalMS = arr[2];
+                    edge.toToEdgeData.SendBytesPerInterval = arr[3];
+                    edge.toFromEdgeData.sendIntervalMS = arr[4];
+                    edge.toFromEdgeData.SendBytesPerInterval = arr[5];
+                    addEdge(edge);
                     //sim::sout<<" "<<arr[0]<<" "<<arr[1]<<sim::endl;
-                    addEdge((int)arr[0]);
-                    addEdge((int)arr[1]);
+                    //addEdge((int)arr[0]);
+                    //addEdge((int)arr[1]);
+
                 }
                 if (loadPart == 2)
                 {
@@ -176,6 +191,7 @@ void Graph::load(QString path)
         sim::sout<<"unable load file"<<sim::endl;
     }
 }
+
 
 int Graph::sign(float i)
 {
@@ -341,6 +357,8 @@ float Graph::dist(float x1,float y1,float x2,float y2)
 
 void Graph::addEdge(Edge e)
 {
+    e.id = edgeCounter;
+    edgeCounter++;
     edges.push_back(e);
 //    addEdge(e.from);
 //    addEdge(e.to);
