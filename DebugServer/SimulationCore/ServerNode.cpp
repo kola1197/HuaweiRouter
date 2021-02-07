@@ -209,21 +209,84 @@ void ServerNode::Start()       //on start we connect to debug server
         updatePacketCountForDebugServer();
         int counter = 0;
         bool zeroPacketCountSent = false;
+        localFlowLastUpdate = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
         //sim::sout<<"Node "<<serverNum<<":"<<grn<<" STARTING WORK"<<def<<sim::endl;
         while (!stopNode.get())
         {
             updateEdgesUsage();
             if (!messagesStack.empty())
             {
-                PacketMessage m(messagesStack[0]);
-                messagesStack.erase(messagesStack.begin());
-                int prevNodeNum = m.prevposition;
-                int i = selectPacketPath(prevNodeNum, m.to);
-                sim::sout<<"Node "<<serverNum<<":"<<grn<<" sending packet with id "<<m.id<<" to "<<connections[i]->to<<def<<sim::endl;
-                connections[i]->sendMessage(m);
-                updatePacketCountForDebugServer();
+                if (graph.selectedAlgorithm != LOCAL_FLOW) {
+                    PacketMessage m(messagesStack[0]);
+                    messagesStack.erase(messagesStack.begin());
+                    int prevNodeNum = m.prevposition;
+                    int i = selectPacketPath(prevNodeNum, m.to);
+                    if (i != -1) {
+                        sim::sout << "Node " << serverNum << ":" << grn << " sending packet with id " << m.id << " to "
+                                  << connections[i]->to << def << sim::endl;
+                        connections[i]->sendMessage(m);
+                    }
+                }
+                else{
+                    if (localFlowBufferOpened){
+                        PacketMessage m(messagesStack[0]);
+                        messagesStack.erase(messagesStack.begin());
+                        int prevNodeNum = m.prevposition;
+                        localFlowStack.push_back(m);
+                    }
+                    std::chrono::milliseconds timeNow = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+                    if ((timeNow - localFlowLastUpdate).count() > 4000)
+                    {
+                        localFlowLastUpdate = timeNow;
+                        localFlowBufferOpened = false;
+                        int edgesDestinationsCounter [graph.edges.size()];
+                        for (int i=0;i<graph.edges.size();i++)
+                        {
+                            edgesDestinationsCounter[i] = 0;
+                        }
+                        for (auto & j : localFlowStack)
+                        {
+                            edgesDestinationsCounter[j.to]++;
+                        }
 
-                zeroPacketCountSent = false;
+                        while (!localFlowStack.empty())
+                        {
+                            int maxI = 0;
+                            int max = edgesDestinationsCounter[0];
+                            for(int i = 0; i < graph.edges.size(); i++){
+                                if (edgesDestinationsCounter[i] > max) {
+                                    max = edgesDestinationsCounter[i];
+                                    maxI = i;
+                                }
+                            }
+
+                            int minPathSize = 8888;
+                            std::vector<int> selectedConnections;
+                            for (int i=0;i<connections.size();i++)
+                            {
+                                int length = pathLength(connections[i]->to, maxI);
+                                if (length == minPathSize && connections[i]->nodeLoad.get() < Settings::getLocalFowConnectionLoadLimit())
+                                {
+                                    selectedConnections.push_back(i);
+                                }
+                                if (length < minPathSize && connections[i]->nodeLoad.get() < Settings::getLocalFowConnectionLoadLimit())
+                                {
+                                    selectedConnections.clear();
+                                    minPathSize = length;
+                                    selectedConnections.push_back(i);
+                                }
+                            }
+
+
+
+                        }
+                        localFlowBufferOpened = true;
+                    }
+                }
+
+            updatePacketCountForDebugServer();
+
+            zeroPacketCountSent = false;
             }
             else{
                     updatePacketCountForDebugServer();
@@ -334,7 +397,6 @@ int ServerNode::selectPacketPath(int prevNodeNum, int to)
 {
     switch (graph.selectedAlgorithm) {
         case Algorithms::RANDOM:
-            sim::sout<<"RANDOM"<<sim::endl;
             return randomSelectionAlgorithm(prevNodeNum, to);
             break;
         case Algorithms::DRILL:
@@ -343,16 +405,24 @@ int ServerNode::selectPacketPath(int prevNodeNum, int to)
         case Algorithms::DE_TAIL:
             return deTailSelectionAlgorithm(prevNodeNum, to);
             break;
-        /*case Algorithms::LOCAL_FLOW:
-            return drillSelectionAlgorithm();
-            break;*/
+        case Algorithms::LOCAL_FLOW:
+            return localFlowSelectionAlgorithm(prevNodeNum, to);
+            break;
         case Algorithms::LOCAL_VOTING:
-            sim::sout<<"LOCAL_VOTING"<<sim::endl;
             return localVotingSelectionAlgorithm(prevNodeNum, to);
             break;
         case Algorithms::MY_LOCAL_VOTING:
             return MyLocalVotingSelectionAlgorithm(prevNodeNum, to);
             break;
+    }
+}
+
+int ServerNode::localFlowSelectionAlgorithm(int prevNodeNum, int to)
+{
+    std::chrono::milliseconds timeNow = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+    if ((timeNow - localFlowLastUpdate).count() > 4000)
+    {
+
     }
 }
 

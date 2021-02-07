@@ -47,17 +47,22 @@ private:
     int localVotingSelectionAlgorithm(int prevNodeNum, int to);
     int deTailSelectionAlgorithm(int prevNodeNum, int to);
     int MyLocalVotingSelectionAlgorithm(int prevNodeNum, int to);
+    int localFlowSelectionAlgorithm(int prevNodeNum, int to);
     int selectPacketPath(int prevNodeNum, int to);
     AsyncVar<int> packetMessagesCounter {0};
     std::chrono::milliseconds updatePacketPrevSendingTime;
     std::mutex getPacketsMutex;
 
     int pathLength(int nodeFrom, int nodeTo);
+    std::vector<PacketMessage> localFlowStack;
+    bool localFlowBufferOpened = true;
 
     void updateNodeLoadForDeTails();
 
     int alpha = 10;
     float nodeLoad = 0;
+
+    std::chrono::milliseconds localFlowLastUpdate;
 };
 
 

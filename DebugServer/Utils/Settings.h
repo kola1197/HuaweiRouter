@@ -13,6 +13,7 @@ class Settings
     static float sendIntervalMS;
     static float limitForDeTail;
     static int alpha;
+    static float localFowConnectionLoadLimit;
 public:
     static int getDebugFirstPortNum()
     {
@@ -62,6 +63,15 @@ public:
     {
         alpha = i;
     }
+    static float getLocalFowConnectionLoadLimit()
+    {
+        return localFowConnectionLoadLimit;
+    };
+    static void setLocalFowConnectionLoadLimit(float i)
+    {
+        localFowConnectionLoadLimit = i;
+    }
+
 };
 
 
