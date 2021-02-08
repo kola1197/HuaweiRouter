@@ -214,7 +214,7 @@ void ServerNode::Start()       //on start we connect to debug server
         while (!stopNode.get())
         {
             updateEdgesUsage();
-            if (!messagesStack.empty())
+            if (!messagesStack.empty() || !localFlowStack.empty())
             {
                 if (graph.selectedAlgorithm != LOCAL_FLOW) {
                     PacketMessage m(messagesStack[0]);
@@ -228,15 +228,19 @@ void ServerNode::Start()       //on start we connect to debug server
                     }
                 }
                 else{
-                    if (localFlowBufferOpened){
-                        PacketMessage m(messagesStack[0]);
+                    if (localFlowBufferOpened && !messagesStack.empty()){
+                        sim::sout << "LOCAL FLOW ADD TO BUFFER "<< sim::endl;
+                        messageStackMutex.lock();
+                        PacketMessage mm(messagesStack[0]);
                         messagesStack.erase(messagesStack.begin());
-                        int prevNodeNum = m.prevposition;
-                        localFlowStack.push_back(m);
+                        localFlowStack.push_back(mm);
+                        messageStackMutex.unlock();
                     }
                     std::chrono::milliseconds timeNow = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-                    if ((timeNow - localFlowLastUpdate).count() > 4000)
+                    //sim::sout << "LOCAL FLOW timer: "<<(timeNow - localFlowLastUpdate).count()<< sim::endl;
+                    if ((timeNow - localFlowLastUpdate).count() > 1000)
                     {
+                        sim::sout << "LOCAL FLOW UPDATE "<< sim::endl;
                         localFlowLastUpdate = timeNow;
                         localFlowBufferOpened = false;
                         int edgesDestinationsCounter [graph.edges.size()];
@@ -265,19 +269,30 @@ void ServerNode::Start()       //on start we connect to debug server
                             for (int i=0;i<connections.size();i++)
                             {
                                 int length = pathLength(connections[i]->to, maxI);
-                                if (length == minPathSize && connections[i]->nodeLoad.get() < Settings::getLocalFowConnectionLoadLimit())
+                                if (length == minPathSize /*&& connections[i]->nodeLoad.get() < Settings::getLocalFowConnectionLoadLimit()*/)
                                 {
                                     selectedConnections.push_back(i);
                                 }
-                                if (length < minPathSize && connections[i]->nodeLoad.get() < Settings::getLocalFowConnectionLoadLimit())
+                                if (length < minPathSize /*&& connections[i]->nodeLoad.get() < Settings::getLocalFowConnectionLoadLimit()*/)
                                 {
                                     selectedConnections.clear();
                                     minPathSize = length;
                                     selectedConnections.push_back(i);
                                 }
                             }
-
-
+                            messageStackMutex.lock();
+                            PacketMessage packetM(localFlowStack[0]);
+                            localFlowStack.erase(localFlowStack.begin());
+                            messageStackMutex.unlock();
+                            int prevNodeNum = packetM.prevposition;
+                            int a = prevNodeNum;
+                            a = selectedConnections[rand() % (selectedConnections.size())];
+                            while (prevNodeNum == connections[a]->to){
+                                a = selectedConnections[rand() % (selectedConnections.size())];
+                            }
+                            sim::sout << "Node " << serverNum << ":" << grn << " sending packet with id " << packetM.id << " to "
+                                      << connections[a]->to << def << sim::endl;
+                            connections[a]->sendMessage(packetM);
 
                         }
                         localFlowBufferOpened = true;
@@ -296,8 +311,10 @@ void ServerNode::Start()       //on start we connect to debug server
                 usleep(10000);
             }
             counter++;
-            if (counter == alpha){
-                updateNodeLoadForLocalVoting();
+            if (counter == alpha) {
+                if (graph.selectedAlgorithm == Algorithms::LOCAL_VOTING || graph.selectedAlgorithm == Algorithms::MY_LOCAL_VOTING){
+                    updateNodeLoadForLocalVoting();
+            }
                 counter=0;
                 if (graph.selectedAlgorithm == Algorithms::DE_TAIL)
                 {
@@ -774,9 +791,12 @@ void ServerNode::get_message(PacketMessage m)
     d.i[0] = m.id;
     d.i[1] = serverNum;
     debugConnection->sendMessage(d);
+
     if (m.to != serverNum)
     {
+        messageStackMutex.lock();
         messagesStack.push_back(m);
+        messageStackMutex.unlock();
         updatePacketCountForDebugServer();
     }
     else{

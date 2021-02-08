@@ -56,7 +56,7 @@ private:
     int pathLength(int nodeFrom, int nodeTo);
     std::vector<PacketMessage> localFlowStack;
     bool localFlowBufferOpened = true;
-
+    std::mutex messageStackMutex;
     void updateNodeLoadForDeTails();
 
     int alpha = 10;
