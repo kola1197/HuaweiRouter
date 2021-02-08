@@ -31,7 +31,7 @@ void SimulationReport::generateReport(Graph* g, std::string alg)
     fout<<" CPU temp status:       "<<cpuTempStatus<<"                  \n";
     fout<<" Average time:     "<<g->averageTime<<"          \n";
     fout<<" Max time:         "<<g->maxTime<<"          \n";
-    fout<<" Max edge load:    "<<g->maxLoad<<"          \n\n";
+    fout<<" Max edge load:    "<<g->maxLoad<<"%         \n\n";
 
     for (int k=0;k<g->edges.size();k++){
         Edge* e = &g->edges[k];
