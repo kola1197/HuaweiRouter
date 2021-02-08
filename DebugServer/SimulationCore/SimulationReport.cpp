@@ -29,7 +29,17 @@ void SimulationReport::generateReport(Graph* g, std::string alg)
     fout<<" CPU load status:       "<<cpuLoadStatus<<"                  \n";
     std::string cpuTempStatus = g->cpuTermCriticalFrames < 1 ? "OK" : "OVEHEAT ( we've got " + QString::number(g->cpuTermCriticalFrames).toStdString() +" overheat frames: "+QString::number(g->cpuTermCriticalFrames*100/g->cpuFrames).toStdString()+"% of time )";
     fout<<" CPU temp status:       "<<cpuTempStatus<<"                  \n";
-    fout<<" Average time:     "<<g->averageTime<<"          \n\n";
+    fout<<" Average time:     "<<g->averageTime<<"          \n";
+    fout<<" Max time:         "<<g->maxTime<<"          \n";
+    fout<<" Max edge load:    "<<g->maxLoad<<"          \n\n";
+
+    for (int k=0;k<g->edges.size();k++){
+        Edge* e = &g->edges[k];
+        fout<<" Edge from "<<e->from<<"  to "<<e->to<<" max load:"<<e->maxLoadFromTo <<"%\n";
+        fout<<" Edge from "<<e->to<<"  to "<<e->from<<" max load:"<<e->maxLoadToFrom <<"%\n";
+    }
+
+    fout<<"\n";
     for (int j=0;j<g->packets.size();j++)
     {
         Packet* p = &g->packets[j];

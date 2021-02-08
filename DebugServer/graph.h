@@ -38,6 +38,9 @@ struct Edge
     EdgeData toToEdgeData;
     float loadFromTo = 0;
     float loadToFrom = 0;
+    float maxLoadFromTo = 0;
+    float maxLoadToFrom = 0;
+
 };
 
 
@@ -98,6 +101,8 @@ public:
 
     int packetIdCounter = 0;
     float averageTime = 0;
+    float maxTime = 0;
+    float maxLoad = 0;
     bool cpuCorrect = true;
     int cpuTermCriticalFrames = 0;
     int cpuLoadCriticalFrames = 0;

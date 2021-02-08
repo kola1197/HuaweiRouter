@@ -476,9 +476,11 @@ void Graph::get_system_message(DebugMessage m)
                     if (edges[i].id == m.i[j * 3 + 1]) {
                         if (edges[i].from == m.i[j * 3 + 2]) {
                             edges[i].loadFromTo = m.i[j * 3 + 3];
+                            edges[i].maxLoadFromTo = edges[i].maxLoadFromTo > edges[i].loadFromTo ? edges[i].maxLoadFromTo : edges[i].loadFromTo;
                         }
                         if (edges[i].to == m.i[j * 3 + 2]) {
                             edges[i].loadToFrom = m.i[j * 3 + 3];
+                            edges[i].maxLoadToFrom = edges[i].maxLoadToFrom > edges[i].loadToFrom ? edges[i].maxLoadToFrom : edges[i].loadToFrom;
                         }
                     }
                 }

@@ -504,19 +504,29 @@ void MainWindow::checkSimulationStatus()
 
     bool allPacketsDelivered = true;
     float time = 0;
+    float maxTime = 0;
+    float maxLoad = 0;
     for (int i=0;i< ui->openGLWidget->graph.packets.size();i++)
     {
         //sim::sout<<"Packet "<<i<<" delivering  status = "<<ui->openGLWidget->graph.packets[i].delivered<<sim::endl;
         //allPacketsDelivered *= ui->openGLWidget->graph.packets[i].delivered;
-        allPacketsDelivered = allPacketsDelivered ? ui->openGLWidget->graph.packets[i].delivered : false;
+        allPacketsDelivered = allPacketsDelivered && ui->openGLWidget->graph.packets[i].delivered;
         time += ui->openGLWidget->graph.packets[i].timeOnCreation.count();
+        maxTime = ui->openGLWidget->graph.packets[i].timeOnCreation.count() > maxTime ? ui->openGLWidget->graph.packets[i].timeOnCreation.count() : maxTime;
+    }
+    for (int j=0;j<ui->openGLWidget->graph.edges.size();j++)
+    {
+        maxLoad = ui->openGLWidget->graph.edges[j].maxLoadToFrom > maxLoad ? ui->openGLWidget->graph.edges[j].maxLoadToFrom : maxLoad;
+        maxLoad = ui->openGLWidget->graph.edges[j].maxLoadFromTo > maxLoad ? ui->openGLWidget->graph.edges[j].maxLoadFromTo : maxLoad;
     }
     if (allPacketsDelivered) {
         if (!averageTimeShoved) {
             time /= ui->openGLWidget->graph.packets.size();
             ui->openGLWidget->graph.averageTime = time;
+            ui->openGLWidget->graph.maxTime = maxTime;
+            ui->openGLWidget->graph.maxLoad = maxLoad;
             QMessageBox msgBox;
-            msgBox.setText("All packets delivered. \nAverage time: " + QString::number(time));
+            msgBox.setText("All packets delivered. \nAverage delivery time: " + QString::number(time) +"\nMax delivery time: " + QString::number(maxTime) +"\nMax node Load: " +  QString::number(maxLoad)+"%");
             msgBox.exec();
             averageTimeShoved = true;
             unBlockInterface();
