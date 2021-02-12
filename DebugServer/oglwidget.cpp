@@ -117,6 +117,46 @@ void OGLWidget::drawLableCircle(float x1, float y1, float x2,float y2, QString e
         glVertex2f ((x + (radius * cos(i * float(2 * M_PI) / 20))), (y + (radius * sin(i * float(2 * M_PI) / 20))) );
     }
     glEnd();
+
+    glColor3f(0.0, 0.0, 1.0);
+    float xx = (x*7+x2)/8;
+    float yy = (y*7+y2)/8;
+    float k = (yy - y2)/(xx - x2);
+    float b = yy-xx*k;
+    float k1 = (tan(45 * 3.14 / 180) + k)/(1 - tan(45 * 3.14 / 180) * k);//tan(120 * 3.14 / 180 + std::atan(k));
+    //float k2 = (tan(45 * 3.14 / 180) + k)/(1 - tan(45 * 3.14 / 180) * k);//tan(120 * 3.14 / 180 + std::atan(k));
+    float b1 = yy - xx * k1;
+    //float b2 = yy - xx * k2;
+
+    float xx1 = xx - 30/(sqrt(1+k1*k1)) * (xx<x2 ? 1: -1 ) *( k1 < -1 ? -1 : 1);
+    //float xx2 = xx - 30/(sqrt(1+k2*k2)) * (xx<x2 ? 1: -1 ) /*( k2 < -1 ? 1 : -1)*/;
+    float yy1 = xx1 * k1 + b1;
+    //float yy2 = xx1 * k2 + b2;
+
+    float k2 = -1/k;
+    float b2 = yy1 - xx1 * k2;
+
+    float n = (b2 - b) / (k - k2);
+    float m = k2 * n + b2;
+
+    float xx2 = 2 * n - xx1;
+    float yy2 = 2 * m - yy1;
+
+    std::cout<<k2<<std::endl;
+
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(xx, yy);
+    glVertex2f(xx1, yy1);
+    glEnd();
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(xx, yy);
+    glVertex2f(xx2, yy2);
+    glEnd();
+    /*glColor3f(0.0, 1.0, 0.0);
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(xx, yy);
+    glVertex2f(n, m);
+    glEnd();*/
     //QString edgeUsage("100%");
     renderText(x - 14,y + 5 ,edgeUsage, true, Qt::red);
 }
