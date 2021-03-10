@@ -95,7 +95,7 @@
       <property name="geometry">
        <rect>
         <x>1640</x>
-        <y>380</y>
+        <y>450</y>
         <width>131</width>
         <height>31</height>
        </rect>
@@ -121,7 +121,7 @@
       <property name="geometry">
        <rect>
         <x>1650</x>
-        <y>590</y>
+        <y>660</y>
         <width>111</width>
         <height>31</height>
        </rect>
@@ -167,7 +167,7 @@
       <property name="geometry">
        <rect>
         <x>1650</x>
-        <y>520</y>
+        <y>590</y>
         <width>111</width>
         <height>25</height>
        </rect>
@@ -177,7 +177,7 @@
       <property name="geometry">
        <rect>
         <x>1650</x>
-        <y>490</y>
+        <y>560</y>
         <width>111</width>
         <height>21</height>
        </rect>
@@ -193,7 +193,7 @@
       <property name="geometry">
        <rect>
         <x>1650</x>
-        <y>640</y>
+        <y>710</y>
         <width>111</width>
         <height>31</height>
        </rect>
@@ -297,7 +297,7 @@
       <property name="geometry">
        <rect>
         <x>1640</x>
-        <y>460</y>
+        <y>530</y>
         <width>131</width>
         <height>25</height>
        </rect>
@@ -307,7 +307,7 @@
       <property name="geometry">
        <rect>
         <x>1650</x>
-        <y>430</y>
+        <y>500</y>
         <width>111</width>
         <height>21</height>
        </rect>
@@ -317,6 +317,51 @@
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_3">
+      <property name="geometry">
+       <rect>
+        <x>1640</x>
+        <y>330</y>
+        <width>131</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Сhance of the link break </string>
+      </property>
+      <property name="wordWrap">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="linkBreakChance">
+      <property name="geometry">
+       <rect>
+        <x>1700</x>
+        <y>380</y>
+        <width>71</width>
+        <height>25</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_4">
+      <property name="geometry">
+       <rect>
+        <x>1640</x>
+        <y>380</y>
+        <width>51</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>1 /</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+      <property name="wordWrap">
+       <bool>true</bool>
       </property>
      </widget>
     </widget>
@@ -511,6 +556,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>linkBreakChance</sender>
+   <signal>editingFinished()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onnn_break_chance_editingFinished()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1736</x>
+     <y>415</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>894</x>
+     <y>499</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>AddButtonClick()</slot>
@@ -521,5 +582,6 @@
   <slot>onnn_count_of_bytes_editingFinished()</slot>
   <slot>onnn_send_interval_editingFinished()</slot>
   <slot>onnn_lambda_editingFinished()</slot>
+  <slot>onnn_break_chance_editingFinished()</slot>
  </slots>
 </ui>

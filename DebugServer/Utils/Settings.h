@@ -14,6 +14,7 @@ class Settings
     static float limitForDeTail;
     static int alpha;
     static float localFowConnectionLoadLimit;
+    static int connectionBreakChance;
 public:
     static int getDebugFirstPortNum()
     {
@@ -70,6 +71,15 @@ public:
     static void setLocalFowConnectionLoadLimit(float i)
     {
         localFowConnectionLoadLimit = i;
+    }
+
+    static int getConnectionBreakChance()
+    {
+        return connectionBreakChance;
+    };
+    static void setConnectionBreakChance(int i)
+    {
+        connectionBreakChance = i;
     }
 
 };

@@ -105,8 +105,8 @@ void Graph::save(QString path)
     ofs<<"*.\n";
     for (int i=0;i<edges.size();i++)
     {
-        ofs<<edges[i].from<<" "<<edges[i].to<<" "<<edges[i].toToEdgeData.sendIntervalMS<<" "<<edges[i].toToEdgeData.SendBytesPerInterval
-           <<" "<<edges[i].toFromEdgeData.sendIntervalMS<<" "<<edges[i].toFromEdgeData.SendBytesPerInterval<<".\n";
+        ofs<<edges[i].from<<" "<<edges[i].to<<" "<<edges[i].toToEdgeData.sendIntervalMS<<" "<<edges[i].toToEdgeData.SendBytesPerInterval<<" "<<edges[i].toToEdgeData.connectionBreakChance
+           <<" "<<edges[i].toFromEdgeData.sendIntervalMS<<" "<<edges[i].toFromEdgeData.SendBytesPerInterval<<" "<<edges[i].toFromEdgeData.connectionBreakChance<<".\n";
     }
     ofs<<"*.\n";
     for (int i = 0; i<packets.size();i++)
@@ -132,7 +132,10 @@ void Graph::load(QString path)
         {
             sim::sout<< line<<'\n';
             QString q = QString::fromStdString(line);
-            float arr[6];
+            float arr[8];
+            for (int i = 2;i<8;i++){
+                arr[i] = -1;
+            }
             int counter = 0;
             QString buff = "";
             if (q[0]!='*')
@@ -166,13 +169,14 @@ void Graph::load(QString path)
                     edge.to = (int)arr[1];
                     edge.toToEdgeData.sendIntervalMS = arr[2];
                     edge.toToEdgeData.SendBytesPerInterval = arr[3];
-                    edge.toFromEdgeData.sendIntervalMS = arr[4];
-                    edge.toFromEdgeData.SendBytesPerInterval = arr[5];
+                    edge.toToEdgeData.connectionBreakChance = (int) arr[4];
+                    edge.toFromEdgeData.sendIntervalMS = arr[5];
+                    edge.toFromEdgeData.SendBytesPerInterval = arr[6];
+                    edge.toFromEdgeData.connectionBreakChance = (int) arr[7];
                     addEdge(edge);
                     //sim::sout<<" "<<arr[0]<<" "<<arr[1]<<sim::endl;
                     //addEdge((int)arr[0]);
                     //addEdge((int)arr[1]);
-
                 }
                 if (loadPart == 2)
                 {
@@ -421,7 +425,6 @@ void Graph::deleteEllips(int number)
         }
     }
     activeNumberForEdge = -1;
-    //sim::sout<<counter<<" edges deleted"<<sim::endl;
 }
 
 void Graph::get_system_message(SystemMessage m)

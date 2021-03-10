@@ -37,7 +37,6 @@ void OGLWidget::initializeGL()
 
 void OGLWidget::paintGL()
 {
-
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     for (Ellips e:graph.ellipses)
@@ -80,8 +79,8 @@ void OGLWidget::paintGL()
             graph.edges[i].toToEdgeData.y = (y1 * 9 + y2) / 10;
             graph.edges[i].toFromEdgeData.x = (x2 * 9 + x1) / 10;
             graph.edges[i].toFromEdgeData.y = (y2 * 9 + y1) / 10;;
-            bool toToEdgeDefault = graph.edges[i].toToEdgeData.sendIntervalMS ==-1 && graph.edges[i].toToEdgeData.SendBytesPerInterval ==-1;
-            bool toFromEdgeDefault = graph.edges[i].toFromEdgeData.sendIntervalMS ==-1 && graph.edges[i].toFromEdgeData.SendBytesPerInterval ==-1;
+            bool toToEdgeDefault = graph.edges[i].toToEdgeData.sendIntervalMS ==-1 && graph.edges[i].toToEdgeData.SendBytesPerInterval ==-1 && graph.edges[i].toToEdgeData.connectionBreakChance ==-1;
+            bool toFromEdgeDefault = graph.edges[i].toFromEdgeData.sendIntervalMS ==-1 && graph.edges[i].toFromEdgeData.SendBytesPerInterval ==-1 && graph.edges[i].toFromEdgeData.connectionBreakChance ==-1;
             drawLableCircle(x1,y1,x2,y2, QString::number(graph.edges[i].loadFromTo),toToEdgeDefault);
             drawLableCircle(x2,y2,x1,y1, QString::number(graph.edges[i].loadToFrom),toFromEdgeDefault);
         }
@@ -102,7 +101,8 @@ void OGLWidget::drawLableCircle(float x1, float y1, float x2,float y2, QString e
     glEnd();
     radius++;
     if (graph.activeEdgeData!= nullptr && graph.activeEdgeData->x == x && graph.activeEdgeData->y == y)
-    {    glColor3f(1.0, 0.0, 0.0);
+    {
+        glColor3f(1.0, 0.0, 0.0);
     }
     else{
         if (defaultPerformance){

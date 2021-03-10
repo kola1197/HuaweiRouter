@@ -5,7 +5,7 @@
 #ifndef HUAWEIROUTER_SENDINGQUEUE_H
 #define HUAWEIROUTER_SENDINGQUEUE_H
 
-
+#include "QObject"
 #include <vector>
 #include <mutex>
 #include <Utils/AsyncVar.h>
@@ -14,11 +14,15 @@
 #include "Messages.h"
 #include "QVector"
 
-class SendingQueue {
+class SendingQueue : public QObject{
+Q_OBJECT
 
 public:
+    SendingQueue();
     AsyncVar<int> loadingSize;
     AsyncVar<int> packetsCount{0};
+    AsyncVar<bool> breaked{false};
+    AsyncVar<int> connectionBreakChance{0};
 
     template <typename T>
     void addMessage(T t)
@@ -48,12 +52,13 @@ public:
         updateLoadingSize();
         //sim::sout<<"message set"<<sim::endl;
     }
-
     int from = -1;
     int to = -1;
     std::vector<char> getData(int sendBytesPerInterval);
     std::vector<std::tuple<int,int>> packetsFrom;
     std::mutex packetsFromMutex;
+signals:
+    void updateBreakedStatus();
 private:
     template <typename T>
     void addToQueue(T t)
@@ -78,7 +83,7 @@ private:
         }
         queueMutex.unlock();
     }
-
+    bool coinFlipLinkBreak();
     void updateByteQueue();
     //std::vector<QSharedPointer<Message>> packets;
     std::vector<QSharedPointer<std::vector<char>>> packetsData;

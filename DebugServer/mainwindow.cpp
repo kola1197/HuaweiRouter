@@ -146,7 +146,6 @@ void MainWindow::draw()
 {
 
 }
-
 void MainWindow::createUI()
 {
     if (ui->openGLWidget->graph.needReaintTable || true) {
@@ -582,11 +581,14 @@ void MainWindow::updateEdgePerfomanceLabels()
     if (ui->openGLWidget->graph.activeEdgeData == nullptr) {
         ui->CountOfBytes->setText(QString::number(Settings::getSendBytesPerInterval()));
         ui->sendIntervalMS->setText(QString::number(Settings::getsendIntervalMS()));
+        ui->linkBreakChance->setText(QString::number(Settings::getConnectionBreakChance()));
     } else {
         ui->CountOfBytes->setText(QString::number(ui->openGLWidget->graph.activeEdgeData->SendBytesPerInterval == -1 ?
                                                   Settings::getSendBytesPerInterval() :ui->openGLWidget->graph.activeEdgeData->SendBytesPerInterval));
         ui->sendIntervalMS->setText(QString::number(ui->openGLWidget->graph.activeEdgeData->sendIntervalMS == -1 ?
                                                     Settings::getsendIntervalMS():ui->openGLWidget->graph.activeEdgeData->sendIntervalMS));
+        ui->linkBreakChance->setText(QString::number(ui->openGLWidget->graph.activeEdgeData->connectionBreakChance == -1 ?
+                                                    Settings::getConnectionBreakChance():ui->openGLWidget->graph.activeEdgeData->connectionBreakChance));
     }
 }
 
@@ -603,9 +605,28 @@ void MainWindow::onnn_settingsButton_released()
     sim::sout<<"SETTINGS"<<sim::endl;*/
 }
 
+void MainWindow::onnn_break_chance_editingFinished()
+{
+    bool* b = new bool;
+    *b = false;
+    QString text = ui->linkBreakChance->text();
+    int res = text.toInt(b);
+    if (*b && res < 1024)
+    {
+        ui->linkBreakChance->setStyleSheet("QLineEdit { background: rgb(255, 255, 255); selection-background-color: rgb(233, 99, 0); }");
+        if (ui->openGLWidget->graph.activeEdgeData == nullptr) {
+            Settings::setConnectionBreakChance(res);
+        } else {
+            ui->openGLWidget->graph.activeEdgeData->connectionBreakChance = res == Settings::getConnectionBreakChance() ? -1 : res;
+        }
+    }
+    else {
+        ui->linkBreakChance->setStyleSheet("QLineEdit { background: rgb(255, 65, 65); selection-background-color: rgb(233, 99, 0); }");
+    }
+}
+
 void MainWindow::onnn_count_of_bytes_editingFinished()
 {
-    //sim::sout<<"changed"<<sim::endl;
     bool* b = new bool;
     *b = false;
     QString text = ui->CountOfBytes->text();
@@ -621,7 +642,6 @@ void MainWindow::onnn_count_of_bytes_editingFinished()
     }
     else {
         ui->CountOfBytes->setStyleSheet("QLineEdit { background: rgb(255, 65, 65); selection-background-color: rgb(233, 99, 0); }");
-        //Settings::
     }
 }
 

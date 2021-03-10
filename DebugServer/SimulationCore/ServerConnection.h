@@ -56,13 +56,13 @@ public:
     //connection limit settings
     float sendIntervalMS = 330;
     float sendBytesPerInterval = 64;//64;
+    int connectionBreakChance = 100;
     int updateUsageDataPerTicks = 5;
     int updateUsageDataCounter = 0;
     AsyncVar<float> bufferLoad{0};
     AsyncVar<bool> stopped{false};
 
     AsyncVar<int> nodeLoadForDeTeil{0};
-
     SendingQueue sendingQueue;
     bool sendingWithoutQueue = false;
 

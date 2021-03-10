@@ -27,6 +27,7 @@ struct EdgeData{
     float y;
     float SendBytesPerInterval = -1;
     float sendIntervalMS = -1;
+    int connectionBreakChance = -1;
 };
 
 struct Edge
