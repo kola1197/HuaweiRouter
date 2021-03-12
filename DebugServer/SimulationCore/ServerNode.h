@@ -63,6 +63,8 @@ private:
     float nodeLoad = 0;
 
     std::chrono::milliseconds localFlowLastUpdate;
+
+    void checkConnectionsForBreak();
 };
 
 

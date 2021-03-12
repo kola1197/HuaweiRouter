@@ -142,7 +142,7 @@ void OGLWidget::drawLableCircle(float x1, float y1, float x2,float y2, QString e
     float xx2 = 2 * n - xx1;
     float yy2 = 2 * m - yy1;
 
-    std::cout<<k2<<std::endl;
+    //std::cout<<k2<<std::endl;
 
     glBegin(GL_LINE_LOOP);
     glVertex2f(xx, yy);

@@ -12,12 +12,6 @@ void SendingQueue::updateByteQueue()
     //sim::sout<<packets.size()<<sim::endl;
     queueMutex.lock();
     if (messagesDataQueue.size()==0) {
-        if (coinFlipLinkBreak()) {
-            bool br = breaked.get();
-            breaked.set(!br);
-            //updateBreakedStatus();
-        }
-        if (!breaked.get()){
             queueMutex.unlock();
             packetsMutex.lock();
             if (packetsData.size() > 0) {
@@ -59,6 +53,13 @@ void SendingQueue::updateByteQueue()
                 DebugMessage debP;
                 NodeLoadMessage nodP;
                 NodeLoadForDeTailMessage nodDP;
+                if (coinFlipLinkBreak() && broken.get()) {
+                    bool br = broken.get();
+                    broken.set(!br);
+                    brokenStatusChecked.set(true);
+                    //updateBreakedStatus();
+                    std::cout<<"Connection from "<<from<<" to "<<to<<" RESTORED"<<std::endl;
+                }
                 int j = -1;
                 switch (type) {
                     case MessageType::PACKET_MESSAGE:
@@ -68,6 +69,13 @@ void SendingQueue::updateByteQueue()
                             sim::sout << "ERROR HERE!!!" << sim::endl;
                             qFatal("Error !!! Packet with id %s got wrong checksum ( %s )!!! Check your RAM!!!", p.id,
                                    p.checkSum);
+                        }
+                        if (coinFlipLinkBreak()) {
+                            bool br = broken.get();
+                            broken.set(!br);
+                            brokenStatusChecked.set(true);
+                            //updateBreakedStatus();
+                            std::cout<<"Connection from "<<from<<" to "<<to<<" BROKEN"<<std::endl;
                         }
                         packetsFromMutex.lock();
                         for (int i = 0; i < packetsFrom.size(); i++) {
@@ -120,7 +128,7 @@ void SendingQueue::updateByteQueue()
             } else {
                 packetsMutex.unlock();
             }
-        }
+        //}
     } else{
         queueMutex.unlock();
     }

@@ -304,12 +304,13 @@ void ServerNode::Start()       //on start we connect to debug server
             zeroPacketCountSent = false;
             }
             else{
-                    updatePacketCountForDebugServer();
+                updatePacketCountForDebugServer();
                     //zeroPacketCountSent = true;
                 //}
                 //sim::sout<<"Node "<<serverNum<<":"<<red<<" I AM EMPTY!!! "<<def<<sim::endl;
                 usleep(10000);
             }
+            checkConnectionsForBreak();
             counter++;
             if (counter == alpha) {
                 if (graph.selectedAlgorithm == Algorithms::LOCAL_VOTING || graph.selectedAlgorithm == Algorithms::MY_LOCAL_VOTING){
@@ -446,7 +447,7 @@ int ServerNode::localFlowSelectionAlgorithm(int prevNodeNum, int to)
 int ServerNode::randomSelectionAlgorithm(int prevNodeNum, int to)
 {
     //srand(time(0));
-    //sim::sout<<"prev node num "<<prevNodeNum<<sim::endl;
+    sim::sout<<"prev node num "<<prevNodeNum<<sim::endl;
     int minPathSize = 8888;
     std::vector<int> selectedConnections;
     for (int i=0;i<connections.size();i++)
@@ -454,13 +455,17 @@ int ServerNode::randomSelectionAlgorithm(int prevNodeNum, int to)
         int length = pathLength(connections[i]->to, to);
         if (length == minPathSize)
         {
-            selectedConnections.push_back(i);
+            if (!connections[i]->sendingQueue.broken.get()) {
+                selectedConnections.push_back(i);
+            }
         }
         if (length < minPathSize)
         {
-            selectedConnections.clear();
-            minPathSize = length;
-            selectedConnections.push_back(i);
+            if (!connections[i]->sendingQueue.broken.get()) {
+                selectedConnections.clear();
+                minPathSize = length;
+                selectedConnections.push_back(i);
+            }
         }
     }
     int a = prevNodeNum;
@@ -480,19 +485,23 @@ int ServerNode::drillSelectionAlgorithm(int prevNodeNum, int to)
         int length = pathLength(connections[i]->to, to);
         if (length == minPathSize)
         {
-            selectedConnections.push_back(i);
+            if (!connections[i]->sendingQueue.broken.get()){
+                selectedConnections.push_back(i);
+            }
         }
         if (length < minPathSize)
         {
-            selectedConnections.clear();
-            minPathSize = length;
-            selectedConnections.push_back(i);
+            if (!connections[i]->sendingQueue.broken.get()) {
+                selectedConnections.clear();
+                minPathSize = length;
+                selectedConnections.push_back(i);
+            }
         }
     }
     int a = prevNodeNum;
     int b = prevNodeNum;
     a = selectedConnections[rand() % (selectedConnections.size())];
-    while (prevNodeNum == connections[a]->to){
+    while (prevNodeNum == connections[a]->to ){
         a = selectedConnections[rand() % (selectedConnections.size())];
     }
     b = selectedConnections[rand() % (selectedConnections.size())];
@@ -521,13 +530,17 @@ int ServerNode::deTailSelectionAlgorithm(int prevNodeNum, int to)
             int length = pathLength(connections[i]->to, to);
             if (length == minPathSize)
             {
-                selectedConnections.push_back(i);
+                if (!connections[i]->sendingQueue.broken.get()) {
+                    selectedConnections.push_back(i);
+                }
             }
             if (length < minPathSize)
             {
-                selectedConnections.clear();
-                minPathSize = length;
-                selectedConnections.push_back(i);
+                if (!connections[i]->sendingQueue.broken.get()) {
+                    selectedConnections.clear();
+                    minPathSize = length;
+                    selectedConnections.push_back(i);
+                }
             }
         }
     }
@@ -649,6 +662,31 @@ int ServerNode::pathLength(int nodeFrom, int nodeTo)
 {
     graph.calculatePathLength(nodeFrom);
     return graph.getEllipseByNumber(nodeTo)->pathLength;
+}
+
+void ServerNode::checkConnectionsForBreak()
+{
+    for (int i = 0; i < connections.size();i++){
+        if (connections[i]->sendingQueue.brokenStatusChecked.get() && connections[i]->sendingQueue.broken.get()){
+            connections[i]->sendingQueue.packetsMutex.lock();
+            while (!connections[i]->sendingQueue.packetsData.empty()){
+                char cdata[connections[i]->sendingQueue.packetsData[0].get()->size()];
+                for (int j = 0; j < connections[i]->sendingQueue.packetsData[0].get()->size(); j++) {
+                    cdata[j] = (*connections[i]->sendingQueue.packetsData[0].get())[j];
+                }
+                PacketMessage p;
+                memcpy(&p, cdata, sizeof(p));
+                get_message(p);
+
+                connections[i]->sendingQueue.packetsData.erase(connections[i]->sendingQueue.packetsData.begin());
+                connections[i]->sendingQueue.packetsFrom.erase(connections[i]->sendingQueue.packetsFrom.begin());
+            }
+            //connections[i]->sendingQueue.packetsData.erase(connections[i]->sendingQueue.packetsData.begin());
+            //connections[i]->sendingQueue.packetsFrom.erase(connections[i]->sendingQueue.packetsFrom.begin());
+            connections[i]->sendingQueue.brokenStatusChecked.set(true);
+            connections[i]->sendingQueue.packetsMutex.unlock();
+        }
+    }
 }
 
 void ServerNode::updateEdgesUsage()      // it will be broken with more than 99 edges in one node

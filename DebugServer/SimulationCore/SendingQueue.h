@@ -21,7 +21,8 @@ public:
     SendingQueue();
     AsyncVar<int> loadingSize;
     AsyncVar<int> packetsCount{0};
-    AsyncVar<bool> breaked{false};
+    AsyncVar<bool> broken{false};
+    AsyncVar<bool> brokenStatusChecked{true};
     AsyncVar<int> connectionBreakChance{0};
 
     template <typename T>
@@ -57,6 +58,9 @@ public:
     std::vector<char> getData(int sendBytesPerInterval);
     std::vector<std::tuple<int,int>> packetsFrom;
     std::mutex packetsFromMutex;
+
+    std::vector<QSharedPointer<std::vector<char>>> packetsData;
+    std::mutex packetsMutex;
 signals:
     void updateBreakedStatus();
 private:
@@ -86,14 +90,13 @@ private:
     bool coinFlipLinkBreak();
     void updateByteQueue();
     //std::vector<QSharedPointer<Message>> packets;
-    std::vector<QSharedPointer<std::vector<char>>> packetsData;
+
     std::vector<MessageType> packetsTypes;
     std::vector<Priority> packetsPriority;
 
     //QVector<QSharedPointer<Message>> qPackets;
     std::vector<char> messagesDataQueue;
     std::mutex queueMutex;
-    std::mutex packetsMutex;
     void updateLoadingSize();
 };
 

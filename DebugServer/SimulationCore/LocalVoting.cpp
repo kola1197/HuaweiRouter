@@ -56,7 +56,7 @@ int ServerNode::localVotingSelectionAlgorithm(int prevNodeNum, int to)
     //srand(time(0));
     int result = prevNodeNum;
     int counter = 0;
-    while (result == prevNodeNum) {
+    while (result == prevNodeNum ) {
         counter ++;
         if (counter > 100)
         {
@@ -66,7 +66,7 @@ int ServerNode::localVotingSelectionAlgorithm(int prevNodeNum, int to)
         for (int i = 0; i < nodesWeights.size(); i++) {
             a -= nodesWeights[i];
             if (a < 0) {
-                if (connections[i]->to != prevNodeNum) {
+                if (connections[i]->to != prevNodeNum && !connections[i]->sendingQueue.broken.get()) {
                     result = i;
                     return i;
                 } else {
