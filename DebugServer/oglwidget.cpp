@@ -158,7 +158,11 @@ void OGLWidget::drawLableCircle(float x1, float y1, float x2,float y2, QString e
     glVertex2f(n, m);
     glEnd();*/
     //QString edgeUsage("100%");
+    if (edgeUsage == "-100"){
+        edgeUsage = "  X";
+    }
     renderText(x - 14,y + 5 ,edgeUsage, true, Qt::red);
+
 }
 
 void OGLWidget::drawEdge(float x1, float y1, float x2,float y2)

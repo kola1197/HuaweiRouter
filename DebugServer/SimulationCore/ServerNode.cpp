@@ -468,10 +468,14 @@ int ServerNode::randomSelectionAlgorithm(int prevNodeNum, int to)
             }
         }
     }
+
+
     int a = prevNodeNum;
-    a = selectedConnections[rand() % (selectedConnections.size())];
-    while (prevNodeNum == connections[a]->to){
+    if (!selectedConnections.empty()) {
         a = selectedConnections[rand() % (selectedConnections.size())];
+        while (prevNodeNum == connections[a]->to) {
+            a = selectedConnections[rand() % (selectedConnections.size())];
+        }
     }
     return a;
 }
@@ -667,24 +671,28 @@ int ServerNode::pathLength(int nodeFrom, int nodeTo)
 void ServerNode::checkConnectionsForBreak()
 {
     for (int i = 0; i < connections.size();i++){
-        if (connections[i]->sendingQueue.brokenStatusChecked.get() && connections[i]->sendingQueue.broken.get()){
-            connections[i]->sendingQueue.packetsMutex.lock();
-            while (!connections[i]->sendingQueue.packetsData.empty()){
-                char cdata[connections[i]->sendingQueue.packetsData[0].get()->size()];
-                for (int j = 0; j < connections[i]->sendingQueue.packetsData[0].get()->size(); j++) {
-                    cdata[j] = (*connections[i]->sendingQueue.packetsData[0].get())[j];
-                }
-                PacketMessage p;
-                memcpy(&p, cdata, sizeof(p));
-                get_message(p);
+        if (connections[i]->sendingQueue.brokenStatusChecked.get())
+        {
 
-                connections[i]->sendingQueue.packetsData.erase(connections[i]->sendingQueue.packetsData.begin());
-                connections[i]->sendingQueue.packetsFrom.erase(connections[i]->sendingQueue.packetsFrom.begin());
+            if (connections[i]->sendingQueue.broken.get()){
+                connections[i]->sendingQueue.packetsMutex.lock();
+                while (!connections[i]->sendingQueue.packetsData.empty()){
+                    char cdata[connections[i]->sendingQueue.packetsData[0].get()->size()];
+                    for (int j = 0; j < connections[i]->sendingQueue.packetsData[0].get()->size(); j++) {
+                        cdata[j] = (*connections[i]->sendingQueue.packetsData[0].get())[j];
+                    }
+                    PacketMessage p;
+                    memcpy(&p, cdata, sizeof(p));
+                    get_message(p);
+
+                    connections[i]->sendingQueue.packetsData.erase(connections[i]->sendingQueue.packetsData.begin());
+                    connections[i]->sendingQueue.packetsFrom.erase(connections[i]->sendingQueue.packetsFrom.begin());
+                }
+                //connections[i]->sendingQueue.packetsData.erase(connections[i]->sendingQueue.packetsData.begin());
+                //connections[i]->sendingQueue.packetsFrom.erase(connections[i]->sendingQueue.packetsFrom.begin());
+                connections[i]->sendingQueue.brokenStatusChecked.set(true);
+                connections[i]->sendingQueue.packetsMutex.unlock();
             }
-            //connections[i]->sendingQueue.packetsData.erase(connections[i]->sendingQueue.packetsData.begin());
-            //connections[i]->sendingQueue.packetsFrom.erase(connections[i]->sendingQueue.packetsFrom.begin());
-            connections[i]->sendingQueue.brokenStatusChecked.set(true);
-            connections[i]->sendingQueue.packetsMutex.unlock();
         }
     }
 }
@@ -699,7 +707,7 @@ void ServerNode::updateEdgesUsage()      // it will be broken with more than 99 
     {
         d.i[1+j*3] = connections[j]->id;
         d.i[2+j*3] = connections[j]->from;
-        d.i[3+j*3] = qRound(connections[j]->bufferLoad.get());
+        d.i[3+j*3] = connections[j]->sendingQueue.broken.get() ? -100 :qRound(connections[j]->bufferLoad.get());
     }
     debugConnection->sendMessage(d);
 }
