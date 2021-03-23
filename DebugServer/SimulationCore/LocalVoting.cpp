@@ -27,16 +27,18 @@ int ServerNode::localVotingSelectionAlgorithm(int prevNodeNum, int to)
 
     for (int i=0;i<connections.size();i++)
     {
-        float z = 1/ (connections[i]->bufferLoad.get() + 1);
-        zSum += z;
-        float x = connections[i]->nodeLoad.get();
-        float u = alpha * (- x + nodeLoad);
-        u = u > 0 ? u : 0;
-        uSum += u;
-        float w = 1.0f/(pathLength(connections[i]->to,to) + 1);
-        wSum += w;
-        std::tuple<float,float,float> t(z,u,w);
-        nodesLoad.push_back(t);
+        if (!connections[i]->sendingQueue.broken.get()){
+            float z = 1/ (connections[i]->bufferLoad.get() + 1);
+            zSum += z;
+            float x = connections[i]->nodeLoad.get();
+            float u = alpha * (- x + nodeLoad);
+            u = u > 0 ? u : 0;
+            uSum += u;
+            float w = 1.0f/(pathLength(connections[i]->to,to) + 1);
+            wSum += w;
+            std::tuple<float,float,float> t(z,u,w);
+            nodesLoad.push_back(t);
+        }
         //nodesLoad.push_back( (a + b + c * c * c * c) * (a + b + c * c * c * c) + 1);
         //sim::sout<<"Local voting:   "<<a<<" "<<b<<" "<<c<<" "<<sim::endl;
     }
@@ -56,7 +58,7 @@ int ServerNode::localVotingSelectionAlgorithm(int prevNodeNum, int to)
     //srand(time(0));
     int result = prevNodeNum;
     int counter = 0;
-    while (result == prevNodeNum ) {
+    while (result == prevNodeNum && nodesWeights.size()>1 ) {
         counter ++;
         if (counter > 100)
         {

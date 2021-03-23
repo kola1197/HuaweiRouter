@@ -80,7 +80,9 @@ void ServerNode::loadPackets()
             m.type = graph.packets[i].type;
             m.checkSum = Messages::getChecksum(&m);
             m.firstCheckSum = 239239239;
+            messageStackMutex.lock();
             messagesStack.push_back(m);
+            messageStackMutex.unlock();
             sim::sout << "Node " << serverNum << ":" << " got packet with id " << m.id << "  " << sim::endl;
         }
     }
@@ -239,10 +241,11 @@ void ServerNode::Start()       //on start we connect to debug server
                     }
                     int prevNodeNum = m.prevposition;
 
+                    messageStackMutex.unlock();
 
                     debugPrevPacketSendedId = m.id;
                     int i = selectPacketPath(prevNodeNum, m.to);
-                    if (i != -1) {
+                    if (i != -1 && i<connections.size() ) {
                         sim::sout << "Node " << serverNum << ":" << grn << " sending packet with id " << m.id << " to "
                                   << connections[i]->to << def << sim::endl;
                         connections[i]->sendMessage(m);
@@ -250,7 +253,6 @@ void ServerNode::Start()       //on start we connect to debug server
                         get_message(m);
                         sim::sout << "Node " << serverNum << ":" << grn << " message with id " << m.id << " returned to Node "<< def << sim::endl;
                     }
-                    messageStackMutex.unlock();
                 }
                 else{
                     if (localFlowBufferOpened && !messagesStack.empty()){
@@ -494,9 +496,7 @@ int ServerNode::randomSelectionAlgorithm(int prevNodeNum, int to)
         }
     }
 
-    if (serverNum==1){
-        sim::sout<<"Node "<<serverNum<<": here1"<<sim::endl;
-    }
+
     int a = prevNodeNum;
     if (!selectedConnections.empty()) {
         a = selectedConnections[rand() % (selectedConnections.size())];
@@ -504,9 +504,7 @@ int ServerNode::randomSelectionAlgorithm(int prevNodeNum, int to)
             a = selectedConnections[rand() % (selectedConnections.size())];
         }
     }
-    if (serverNum==1){
-        sim::sout<<"Node "<<serverNum<<": here2"<<sim::endl;
-    }
+
     if (a == prevNodeNum){
         for (int j=0;j<connections.size();j++){
             if (connections[j]->to == prevNodeNum)
@@ -720,25 +718,31 @@ void ServerNode::checkConnectionsForBreak()
                 connections[i]->sendingQueue.packetsMutex.lock();
 
                 //while (!connections[i]->sendingQueue.packetsData.empty()){
-                for (int l=0;l<connections[i]->sendingQueue.packetsData.size();l++){
-                    char cdata[connections[i]->sendingQueue.packetsData[l].get()->size()];
-                    for (int j = 0; j < connections[i]->sendingQueue.packetsData[l].get()->size(); j++) {
-                        cdata[j] = (*connections[i]->sendingQueue.packetsData[l].get())[j];
-                    }
-                    PacketMessage p{};
-                    memcpy(&p, cdata, sizeof(p));
-                    if (p.id == debugPrevPacketFromConnectionId)
-                    {
-                        sim::sout<<"Node"<< serverNum<<": Error got back duplicat from broken connection with id "<<p.id <<sim::endl;
-                    }
-                    debugPrevPacketFromConnectionId = p.id;
-                    get_message(p);
-                    sim::sout<<"Node"<< serverNum<<": got back from broken connection " << connections[i]->to<<" message with id "<<p.id<<" got CHECKSUM = "<<
-                    p.checkSum<<sim::endl;
+                for (int l=0;l<connections[i]->sendingQueue.packetsData.size();l++) {
+                    if (connections[i]->sendingQueue.packetsTypes[l] == PACKET_MESSAGE){
+                        char cdata[connections[i]->sendingQueue.packetsData[l].get()->size()];
+                        for (int j = 0; j < connections[i]->sendingQueue.packetsData[l].get()->size(); j++) {
+                            cdata[j] = (*connections[i]->sendingQueue.packetsData[l].get())[j];
+                        }
+                        PacketMessage p{};
+                        memcpy(&p, cdata, sizeof(p));
+                        if (p.id == 0) {
+                            sim::sout << "WTF?? " << p.id << sim::endl;
+                        }
+                        if (p.id == debugPrevPacketFromConnectionId) {
+                            sim::sout << "Node " << serverNum << ": Error got back duplicat from broken connection with id "
+                                      << p.id << sim::endl;
+                        }
+                        debugPrevPacketFromConnectionId = p.id;
+                        get_message(p);
+                        sim::sout << "Node " << serverNum << ": got back from broken connection " << connections[i]->to
+                                  << " message with id " << p.id << " got CHECKSUM = " <<
+                                  p.checkSum << sim::endl;
 //                    connections[i]->sendingQueue.packetsData.erase(connections[i]->sendingQueue.packetsData.begin());
 //                    connections[i]->sendingQueue.packetsFrom.erase(connections[i]->sendingQueue.packetsFrom.begin());
 //                    connections[i]->sendingQueue.packetsPriority.erase(connections[i]->sendingQueue.packetsPriority.begin());
 //                    connections[i]->sendingQueue.packetsTypes.erase(connections[i]->sendingQueue.packetsTypes.begin());
+                    }
                 }
                 connections[i]->sendingQueue.packetsId.clear();
                 connections[i]->sendingQueue.packetsData.clear();

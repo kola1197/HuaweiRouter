@@ -611,7 +611,7 @@ void MainWindow::onnn_break_chance_editingFinished()
     *b = false;
     QString text = ui->linkBreakChance->text();
     int res = text.toInt(b);
-    if (*b && res < 1000000)
+    if (*b && res < 1000000 && res > 200)
     {
         ui->linkBreakChance->setStyleSheet("QLineEdit { background: rgb(255, 255, 255); selection-background-color: rgb(233, 99, 0); }");
         if (ui->openGLWidget->graph.activeEdgeData == nullptr) {
