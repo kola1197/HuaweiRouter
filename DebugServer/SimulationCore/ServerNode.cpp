@@ -251,7 +251,7 @@ void ServerNode::Start()       //on start we connect to debug server
                         connections[i]->sendMessage(m);
                     } else{
                         get_message(m);
-                        sim::sout << "Node " << serverNum << ":" << grn << " message with id " << m.id << " returned to Node "<< def << sim::endl;
+                        sim::sout << "Node " << serverNum << ":" << grn << " message with id " << m.id << " returned to Node. No available connections.  "<< def << sim::endl;
                     }
                 }
                 else{
@@ -295,16 +295,18 @@ void ServerNode::Start()       //on start we connect to debug server
                             std::vector<int> selectedConnections;
                             for (int i=0;i<connections.size();i++)
                             {
-                                int length = pathLength(connections[i]->to, maxI);
-                                if (length == minPathSize /*&& connections[i]->nodeLoad.get() < Settings::getLocalFowConnectionLoadLimit()*/)
-                                {
-                                    selectedConnections.push_back(i);
-                                }
-                                if (length < minPathSize /*&& connections[i]->nodeLoad.get() < Settings::getLocalFowConnectionLoadLimit()*/)
-                                {
-                                    selectedConnections.clear();
-                                    minPathSize = length;
-                                    selectedConnections.push_back(i);
+                                if (!connections[i]->sendingQueue.broken.get()) {
+                                    int length = pathLength(connections[i]->to, maxI);
+                                    if (length ==
+                                        minPathSize /*&& connections[i]->nodeLoad.get() < Settings::getLocalFowConnectionLoadLimit()*/) {
+                                        selectedConnections.push_back(i);
+                                    }
+                                    if (length <
+                                        minPathSize /*&& connections[i]->nodeLoad.get() < Settings::getLocalFowConnectionLoadLimit()*/) {
+                                        selectedConnections.clear();
+                                        minPathSize = length;
+                                        selectedConnections.push_back(i);
+                                    }
                                 }
                             }
                             messageStackMutex.lock();
@@ -313,13 +315,30 @@ void ServerNode::Start()       //on start we connect to debug server
                             messageStackMutex.unlock();
                             int prevNodeNum = packetM.prevposition;
                             int a = prevNodeNum;
-                            a = selectedConnections[rand() % (selectedConnections.size())];
-                            while (prevNodeNum == connections[a]->to){
+                            if (selectedConnections.size()>1) {
                                 a = selectedConnections[rand() % (selectedConnections.size())];
+                                while (prevNodeNum == connections[a]->to) {
+                                    a = selectedConnections[rand() % (selectedConnections.size())];
+                                }
                             }
-                            sim::sout << "Node " << serverNum << ":" << grn << " sending packet with id " << packetM.id << " to "
-                                      << connections[a]->to << def << sim::endl;
-                            connections[a]->sendMessage(packetM);
+                            else {
+                                if (selectedConnections.size()==1){
+                                    a = selectedConnections[0];
+                                }
+                                else{
+                                    a =-1;
+                                }
+                            }
+                            if (a != -1 && a < connections.size()) {
+                                sim::sout << "Node " << serverNum << ":" << grn << " sending packet with id "
+                                          << packetM.id << " to "
+                                          << connections[a]->to << def << sim::endl;
+                                connections[a]->sendMessage(packetM);
+                            }
+                            else{
+                                get_message(m);
+                                sim::sout << "Node " << serverNum << ":" << grn << " message with id " << m.id << " returned to Node. No available connections. "<< def << sim::endl;
+                            }
 
                         }
                         localFlowBufferOpened = true;
@@ -513,9 +532,7 @@ int ServerNode::randomSelectionAlgorithm(int prevNodeNum, int to)
             }
         }
     }
-    if (serverNum==1){
-        sim::sout<<"Node "<<serverNum<<": selected path: "<<a<<sim::endl;
-    }
+
     return a;
 }
 
@@ -525,34 +542,47 @@ int ServerNode::drillSelectionAlgorithm(int prevNodeNum, int to)
     std::vector<int> selectedConnections;
     for (int i=0;i<connections.size();i++)
     {
-        int length = pathLength(connections[i]->to, to);
-        if (length == minPathSize)
-        {
-            if (!connections[i]->sendingQueue.broken.get()){
-                selectedConnections.push_back(i);
+        if (!connections[i]->sendingQueue.broken.get()) {
+            int length = pathLength(connections[i]->to, to);
+            if (length == minPathSize) {
+                if (!connections[i]->sendingQueue.broken.get()) {
+                    selectedConnections.push_back(i);
+                }
             }
-        }
-        if (length < minPathSize)
-        {
-            if (!connections[i]->sendingQueue.broken.get()) {
-                selectedConnections.clear();
-                minPathSize = length;
-                selectedConnections.push_back(i);
+            if (length < minPathSize) {
+                if (!connections[i]->sendingQueue.broken.get()) {
+                    selectedConnections.clear();
+                    minPathSize = length;
+                    selectedConnections.push_back(i);
+                }
             }
         }
     }
     int a = prevNodeNum;
     int b = prevNodeNum;
-    a = selectedConnections[rand() % (selectedConnections.size())];
-    while (prevNodeNum == connections[a]->to ){
+    if (selectedConnections.size()>0) {
         a = selectedConnections[rand() % (selectedConnections.size())];
-    }
-    b = selectedConnections[rand() % (selectedConnections.size())];
-    while (prevNodeNum == connections[b]->to){
+        while (prevNodeNum == connections[a]->to && selectedConnections.size() > 1) {
+            a = selectedConnections[rand() % (selectedConnections.size())];
+        }
         b = selectedConnections[rand() % (selectedConnections.size())];
-    }
+        while (prevNodeNum == connections[b]->to && selectedConnections.size() > 1) {
+            b = selectedConnections[rand() % (selectedConnections.size())];
+        }
 
-    return connections[a]->bufferLoad.get() < connections[b]->bufferLoad.get() ? a : b;
+        /*if (a == prevNodeNum){
+            for (int j=0;j<connections.size();j++){
+                if (connections[j]->to == prevNodeNum)
+                {
+                    a = j;
+                }
+            }
+        }*/
+        return connections[a]->bufferLoad.get() < connections[b]->bufferLoad.get() ? a : b;
+    }
+    else {
+        return -1;
+    }
     /*int a = rand() % (connections.size());
     int b = a;
     while (b == a)
@@ -568,7 +598,7 @@ int ServerNode::deTailSelectionAlgorithm(int prevNodeNum, int to)
     std::vector<int> selectedConnections;
     for (int i=0;i<connections.size();i++)
     {
-        if (connections[i]->nodeLoadForDeTeil.get() < Settings::getConnectionsFirstPortNum())
+        if (connections[i]->nodeLoadForDeTeil.get() < Settings::getConnectionsFirstPortNum() && !connections[i]->sendingQueue.broken.get())
         {
             int length = pathLength(connections[i]->to, to);
             if (length == minPathSize)
@@ -591,7 +621,7 @@ int ServerNode::deTailSelectionAlgorithm(int prevNodeNum, int to)
     if (!selectedConnections.empty() && selectedConnections[0] != prevNodeNum)
     {
         a = selectedConnections[rand() % (selectedConnections.size())];
-        while (prevNodeNum == connections[a]->to){
+        while (prevNodeNum == connections[a]->to && selectedConnections.size()>1){
             a = selectedConnections[rand() % (selectedConnections.size())];
         }
     }
@@ -666,15 +696,19 @@ int ServerNode::MyLocalVotingSelectionAlgorithm(int prevNodeNum, int to)
 {
     //sim::sout<<"localVotingSelectionAlgorithm"<<sim::endl;
     std::vector<float> nodesLoad;
+    std::vector<int> nodesId;
     float sum=0;
     for (int i=0;i<connections.size();i++)
     {
-        float a = connections[i]->nodeLoad.get();
-        float b = connections[i]->bufferLoad.get();
-        float c = pathLength(connections[i]->to,to);
-        nodesLoad.push_back( (a + b + c * c * c * c) * (a + b + c * c * c * c) + 1);
-        sim::sout<<"Local voting:   "<<a<<" "<<b<<" "<<c<<" "<<sim::endl;
-        sum += nodesLoad[nodesLoad.size()-1];
+        if (!connections[i]->sendingQueue.broken.get()) {
+            float a = connections[i]->nodeLoad.get();
+            float b = connections[i]->bufferLoad.get();
+            float c = pathLength(connections[i]->to, to);
+            nodesLoad.push_back((a + b + c * c * c * c) * (a + b + c * c * c * c) + 1);
+            nodesId.push_back(i);
+            sim::sout << "Local voting:   " << a << " " << b << " " << c << " " << sim::endl;
+            sum += nodesLoad[nodesLoad.size() - 1];
+        }
     }
     int isum = 0;
     for (int i=0;i<nodesLoad.size();i++)
@@ -685,18 +719,27 @@ int ServerNode::MyLocalVotingSelectionAlgorithm(int prevNodeNum, int to)
     }
     //srand(time(0));
     int result = prevNodeNum;
-    while (result == prevNodeNum) {
-        int a = rand() % isum;
-        for (int i = 0; i < nodesLoad.size(); i++) {
-            a -= nodesLoad[i];
-            if (a < 0) {
-                if (connections[i]->to != prevNodeNum) {
-                    result = i;
-                    return i;
-                } else {
-                    i = nodesLoad.size();
+    if (nodesId.size()>1) {
+        while (result == prevNodeNum) {
+            int a = rand() % isum;
+            for (int i = 0; i < nodesLoad.size(); i++) {
+                a -= nodesLoad[i];
+                if (a < 0) {
+                    if (connections[nodesId[i]]->to != prevNodeNum) {
+                        result = nodesId[i];
+                        return nodesId[i];
+                    } else {
+                        i = nodesLoad.size();
+                    }
                 }
             }
+        }
+    }
+    else {
+        if (nodesId.size() == 1){
+            return nodesId[0];
+        } else{
+            return -1;
         }
     }
 }
