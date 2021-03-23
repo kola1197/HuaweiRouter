@@ -24,6 +24,7 @@ ServerConnection::ServerConnection(int _port, int _from, int _to, int _id):QObje
     id = _id;
     sendIntervalMS = Settings::getsendIntervalMS();
     sendBytesPerInterval = Settings::getSendBytesPerInterval();
+    connectionBreakChance = Settings::getConnectionBreakChance();
     sendingQueue.from = from;
     sendingQueue.to = to;
     sendingQueue.connectionBreakChance.set(connectionBreakChance);

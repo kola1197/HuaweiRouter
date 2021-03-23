@@ -10,4 +10,4 @@ float Settings::sendIntervalMS = 330;
 float Settings::limitForDeTail = 25;
 int Settings::alpha = 10;
 float Settings::localFowConnectionLoadLimit = 400;
-int Settings::connectionBreakChance = 2000;
+int Settings::connectionBreakChance = 20000;
