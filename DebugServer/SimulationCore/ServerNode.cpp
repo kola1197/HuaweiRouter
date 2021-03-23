@@ -231,7 +231,7 @@ void ServerNode::Start()       //on start we connect to debug server
                     int pp = messagesStack[0].id;
                     int ppp = messagesStack.size()>1? messagesStack[1].id : -1;
                     if (pp == ppp){
-                        sim::sout << "Node " << serverNum << ":" << red<< " DUPLICATE FOUND in stack"<< def << sim::endl;
+                        sim::sout << "Node " << serverNum << ":" << red<< " ERROR DUPLICATE FOUND in stack"<< def << sim::endl;
                     }
                     messagesStack.erase(messagesStack.begin());
                     if (!messagesStack.empty() && messagesStack[0].id != ppp){
