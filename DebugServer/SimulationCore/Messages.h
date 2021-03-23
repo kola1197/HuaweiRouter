@@ -47,6 +47,7 @@ struct PacketMessage:Message{
     std::chrono::milliseconds timeOnCreation;
     MessageType type = MessageType::PACKET_MESSAGE;
     int checkSum = 0;
+    int secondId = 0;
 };
 
 //enum Function {PING_MESSAGE, TEST_MESSAGE, SYSTEM_MESSAGE, DEBUG_MESSAGE, PACKET_MESSAGE};
@@ -139,6 +140,7 @@ public:
     {
         int result = 0;
         result+=p->id;
+        result+=p->secondId;
         result+=p->from;
         result+=p->to;
         //result+=p->timeOnCreation.count();

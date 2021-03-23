@@ -61,10 +61,17 @@ private:
 
     int alpha = 10;
     float nodeLoad = 0;
-
+    std::vector<int> recivedPacketsId;
     std::chrono::milliseconds localFlowLastUpdate;
 
     void checkConnectionsForBreak();
+
+    void updateBreakStatuses();
+
+    int debugPrevPacketFromConnectionId = -1;
+    int debugPrevPacketInputId = -1;
+    int debugPrevPacketSendedId = -1;
+
 };
 
 

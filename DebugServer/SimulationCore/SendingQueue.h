@@ -24,7 +24,9 @@ public:
     AsyncVar<bool> broken{false};
     AsyncVar<bool> brokenStatusChecked{true};
     AsyncVar<int> connectionBreakChance{0};
-
+    std::vector<MessageType> packetsTypes;
+    std::vector<int> packetsId;
+    std::vector<Priority> packetsPriority;
     template <typename T>
     void addMessage(T t)
     {
@@ -42,10 +44,15 @@ public:
         {
             packetsFromMutex.lock();
             packetsFrom.push_back(std::tuple<int,int>{t.id, t.prevposition});
+            if (!packetsId.empty() && packetsId[packetsId.size()-1] == t.id){
+                sim::sout<<"duplicate shit here"<<sim::endl;
+            }
+            packetsId.push_back(t.id);
             packetsFromMutex.unlock();
         }
         packetsTypes.push_back(t.type);
         packetsPriority.push_back(t.priority);
+
         //TestMessage tt = *(TestMessage*)packets[0].get();
         //packetsCount.set(packets.size());
         packetsMutex.unlock();
@@ -58,9 +65,14 @@ public:
     std::vector<char> getData(int sendBytesPerInterval);
     std::vector<std::tuple<int,int>> packetsFrom;
     std::mutex packetsFromMutex;
+    void updateLoadingSize();
 
     std::vector<QSharedPointer<std::vector<char>>> packetsData;
     std::mutex packetsMutex;
+    std::mutex queueMutex;
+
+    void tryToChangeBreakStatus();
+
 signals:
     void updateBreakedStatus();
 private:
@@ -91,13 +103,11 @@ private:
     void updateByteQueue();
     //std::vector<QSharedPointer<Message>> packets;
 
-    std::vector<MessageType> packetsTypes;
-    std::vector<Priority> packetsPriority;
+
 
     //QVector<QSharedPointer<Message>> qPackets;
     std::vector<char> messagesDataQueue;
-    std::mutex queueMutex;
-    void updateLoadingSize();
+
 };
 
 

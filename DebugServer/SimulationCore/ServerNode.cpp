@@ -68,10 +68,11 @@ void ServerNode::loadPackets()
     {
         if (graph.packets[i].from == serverNum)
         {
-            PacketMessage m;//(graph.packets[i]);
+            PacketMessage m{};//(graph.packets[i]);
             m.from = graph.packets[i].from;
             m.to = graph.packets[i].to;
             m.id = graph.packets[i].id;
+            m.secondId = m.id;
             //m.currentPosition = graph.packets[i].currentPosition;
             //m.prevposition = m.currentPosition;
             m.currentPosition = serverNum;
@@ -80,6 +81,7 @@ void ServerNode::loadPackets()
             m.checkSum = Messages::getChecksum(&m);
             m.firstCheckSum = 239239239;
             messagesStack.push_back(m);
+            sim::sout << "Node " << serverNum << ":" << " got packet with id " << m.id << "  " << sim::endl;
         }
     }
 }
@@ -217,15 +219,38 @@ void ServerNode::Start()       //on start we connect to debug server
             if (!messagesStack.empty() || !localFlowStack.empty())
             {
                 if (graph.selectedAlgorithm != LOCAL_FLOW) {
+                    //if (serverNum == 1){
+                    //    sim::sout << "Node " << serverNum<<": on another loop"<<sim::endl;
+                    //}
+                    messageStackMutex.lock();
                     PacketMessage m(messagesStack[0]);
+                    if (messagesStack.size()>1 && debugPrevPacketSendedId == m.id){
+                        sim::sout << "Node " << serverNum << ":" << red<< " DUPLICATE FOUND id " << m.id<< def << sim::endl;
+                    }
+                    //int check = messageStack
+                    int pp = messagesStack[0].id;
+                    int ppp = messagesStack.size()>1? messagesStack[1].id : -1;
+                    if (pp == ppp){
+                        sim::sout << "Node " << serverNum << ":" << red<< " DUPLICATE FOUND in stack"<< def << sim::endl;
+                    }
                     messagesStack.erase(messagesStack.begin());
+                    if (!messagesStack.empty() && messagesStack[0].id != ppp){
+                        sim::sout << "Node " << serverNum << ":" << red<< " ERASE ERROR"<< def << sim::endl;
+                    }
                     int prevNodeNum = m.prevposition;
+
+
+                    debugPrevPacketSendedId = m.id;
                     int i = selectPacketPath(prevNodeNum, m.to);
                     if (i != -1) {
                         sim::sout << "Node " << serverNum << ":" << grn << " sending packet with id " << m.id << " to "
                                   << connections[i]->to << def << sim::endl;
                         connections[i]->sendMessage(m);
+                    } else{
+                        get_message(m);
+                        sim::sout << "Node " << serverNum << ":" << grn << " message with id " << m.id << " returned to Node "<< def << sim::endl;
                     }
+                    messageStackMutex.unlock();
                 }
                 else{
                     if (localFlowBufferOpened && !messagesStack.empty()){
@@ -447,7 +472,7 @@ int ServerNode::localFlowSelectionAlgorithm(int prevNodeNum, int to)
 int ServerNode::randomSelectionAlgorithm(int prevNodeNum, int to)
 {
     //srand(time(0));
-    sim::sout<<"prev node num "<<prevNodeNum<<sim::endl;
+    sim::sout<<"Node "<<serverNum<<": prev node num "<<prevNodeNum<<sim::endl;
     int minPathSize = 8888;
     std::vector<int> selectedConnections;
     for (int i=0;i<connections.size();i++)
@@ -469,13 +494,29 @@ int ServerNode::randomSelectionAlgorithm(int prevNodeNum, int to)
         }
     }
 
-
+    if (serverNum==1){
+        sim::sout<<"Node "<<serverNum<<": here1"<<sim::endl;
+    }
     int a = prevNodeNum;
     if (!selectedConnections.empty()) {
         a = selectedConnections[rand() % (selectedConnections.size())];
-        while (prevNodeNum == connections[a]->to) {
+        while (prevNodeNum == connections[a]->to && selectedConnections.size()>1) {
             a = selectedConnections[rand() % (selectedConnections.size())];
         }
+    }
+    if (serverNum==1){
+        sim::sout<<"Node "<<serverNum<<": here2"<<sim::endl;
+    }
+    if (a == prevNodeNum){
+        for (int j=0;j<connections.size();j++){
+            if (connections[j]->to == prevNodeNum)
+            {
+                a = j;
+            }
+        }
+    }
+    if (serverNum==1){
+        sim::sout<<"Node "<<serverNum<<": selected path: "<<a<<sim::endl;
     }
     return a;
 }
@@ -670,30 +711,57 @@ int ServerNode::pathLength(int nodeFrom, int nodeTo)
 
 void ServerNode::checkConnectionsForBreak()
 {
+    updateBreakStatuses();
     for (int i = 0; i < connections.size();i++){
-        if (connections[i]->sendingQueue.brokenStatusChecked.get())
+        if (!connections[i]->sendingQueue.brokenStatusChecked.get())
         {
-
             if (connections[i]->sendingQueue.broken.get()){
+                connections[i]->sendingQueue.queueMutex.lock();
                 connections[i]->sendingQueue.packetsMutex.lock();
-                while (!connections[i]->sendingQueue.packetsData.empty()){
-                    char cdata[connections[i]->sendingQueue.packetsData[0].get()->size()];
-                    for (int j = 0; j < connections[i]->sendingQueue.packetsData[0].get()->size(); j++) {
-                        cdata[j] = (*connections[i]->sendingQueue.packetsData[0].get())[j];
-                    }
-                    PacketMessage p;
-                    memcpy(&p, cdata, sizeof(p));
-                    get_message(p);
 
-                    connections[i]->sendingQueue.packetsData.erase(connections[i]->sendingQueue.packetsData.begin());
-                    connections[i]->sendingQueue.packetsFrom.erase(connections[i]->sendingQueue.packetsFrom.begin());
+                //while (!connections[i]->sendingQueue.packetsData.empty()){
+                for (int l=0;l<connections[i]->sendingQueue.packetsData.size();l++){
+                    char cdata[connections[i]->sendingQueue.packetsData[l].get()->size()];
+                    for (int j = 0; j < connections[i]->sendingQueue.packetsData[l].get()->size(); j++) {
+                        cdata[j] = (*connections[i]->sendingQueue.packetsData[l].get())[j];
+                    }
+                    PacketMessage p{};
+                    memcpy(&p, cdata, sizeof(p));
+                    if (p.id == debugPrevPacketFromConnectionId)
+                    {
+                        sim::sout<<"Node"<< serverNum<<": Error got back duplicat from broken connection with id "<<p.id <<sim::endl;
+                    }
+                    debugPrevPacketFromConnectionId = p.id;
+                    get_message(p);
+                    sim::sout<<"Node"<< serverNum<<": got back from broken connection " << connections[i]->to<<" message with id "<<p.id<<" got CHECKSUM = "<<
+                    p.checkSum<<sim::endl;
+//                    connections[i]->sendingQueue.packetsData.erase(connections[i]->sendingQueue.packetsData.begin());
+//                    connections[i]->sendingQueue.packetsFrom.erase(connections[i]->sendingQueue.packetsFrom.begin());
+//                    connections[i]->sendingQueue.packetsPriority.erase(connections[i]->sendingQueue.packetsPriority.begin());
+//                    connections[i]->sendingQueue.packetsTypes.erase(connections[i]->sendingQueue.packetsTypes.begin());
                 }
-                //connections[i]->sendingQueue.packetsData.erase(connections[i]->sendingQueue.packetsData.begin());
-                //connections[i]->sendingQueue.packetsFrom.erase(connections[i]->sendingQueue.packetsFrom.begin());
-                connections[i]->sendingQueue.brokenStatusChecked.set(true);
+                connections[i]->sendingQueue.packetsId.clear();
+                connections[i]->sendingQueue.packetsData.clear();
+                connections[i]->sendingQueue.packetsFrom.clear();
+                connections[i]->sendingQueue.packetsPriority.clear();
+                connections[i]->sendingQueue.packetsTypes.clear();
+
+                //getPacketsMutex.lock();
+
+                //getPacketsMutex.unlock();
+
                 connections[i]->sendingQueue.packetsMutex.unlock();
+                connections[i]->sendingQueue.queueMutex.unlock();
             }
+            connections[i]->sendingQueue.brokenStatusChecked.set(true);
+            connections[i]->sendingQueue.updateLoadingSize();
         }
+    }
+}
+
+void ServerNode::updateBreakStatuses(){
+    for (int i=0;i<connections.size();i++){
+        connections[i]->sendingQueue.tryToChangeBreakStatus();
     }
 }
 
@@ -802,8 +870,10 @@ void ServerNode::addConnection(int to, EdgeData * edgeData)
 
 void ServerNode::get_message(PacketMessage m)
 {
+    Color::ColorMode def(Color::FG_DEFAULT);
+    Color::ColorMode red(Color::FG_RED);
     getPacketsMutex.lock();
-    //sim::sout<<"Node"<< serverNum<<", message with id "<<m.id<<" got CHECKSUM = "<<m.checkSum<<sim::endl;
+    sim::sout<<"Node"<< serverNum<<": got message with id "<<m.id<<" got CHECKSUM = "<<m.checkSum<<sim::endl;
     if (m.checkSum!= Messages::getChecksum(&m) || m.firstCheckSum!=239239239)
     {
         /*PacketMessage mm;
@@ -840,6 +910,10 @@ void ServerNode::get_message(PacketMessage m)
 
     if (m.to != serverNum)
     {
+        if (debugPrevPacketInputId == m.id){
+            sim::sout <<"Node " << serverNum <<red<< ": INPUT Error!!! PacketMessage with id " << m.id << " is already added. It Is duplicate." <<def<< sim::endl;
+        }
+        debugPrevPacketInputId = m.id;
         messageStackMutex.lock();
         messagesStack.push_back(m);
         messageStackMutex.unlock();
@@ -847,7 +921,19 @@ void ServerNode::get_message(PacketMessage m)
     }
     else{
         packetMessagesCounter.increase(1);
-        sim::sout<<"Node "<<serverNum<<": PacketMessage with id "<<m.id<<" is now at home. Already got "<<packetMessagesCounter.get()<<" messages!"<<sim::endl;
+        bool alreadyHere = false;
+        for ( int i=0; i<recivedPacketsId.size();i++){
+            alreadyHere = alreadyHere || recivedPacketsId[i] == m.id;
+        }
+        if (alreadyHere){
+            sim::sout <<"Node " << serverNum <<red<< ": Error!!! PacketMessage with id " << m.id << " is already at home. It Is duplicate. Already got "
+                      << packetMessagesCounter.get() << " messages!" <<def<< sim::endl;
+        }
+        else {
+            recivedPacketsId.push_back(m.id);
+            sim::sout << "Node " << serverNum << ": PacketMessage with id " << m.id << " is now at home. Already got "
+                      << packetMessagesCounter.get() << " messages!" << sim::endl;
+        }
         m.delivered = true;
         std::chrono::milliseconds ms = timeNow();
         DebugMessage msg;

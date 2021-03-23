@@ -53,13 +53,13 @@ void SendingQueue::updateByteQueue()
                 DebugMessage debP;
                 NodeLoadMessage nodP;
                 NodeLoadForDeTailMessage nodDP;
-                if (coinFlipLinkBreak() && broken.get()) {
+                /*if (coinFlipLinkBreak() && broken.get()) {
                     bool br = broken.get();
                     broken.set(!br);
-                    brokenStatusChecked.set(true);
+                    brokenStatusChecked.set(false);
                     //updateBreakedStatus();
                     std::cout<<"Connection from "<<from<<" to "<<to<<" RESTORED"<<std::endl;
-                }
+                }*/
                 int j = -1;
                 switch (type) {
                     case MessageType::PACKET_MESSAGE:
@@ -70,13 +70,13 @@ void SendingQueue::updateByteQueue()
                             qFatal("Error !!! Packet with id %s got wrong checksum ( %s )!!! Check your RAM!!!", p.id,
                                    p.checkSum);
                         }
-                        if (coinFlipLinkBreak()) {
+                        /*if (coinFlipLinkBreak()) {
                             bool br = broken.get();
                             broken.set(!br);
-                            brokenStatusChecked.set(true);
+                            brokenStatusChecked.set(false);
                             //updateBreakedStatus();
                             std::cout<<"Connection from "<<from<<" to "<<to<<" BROKEN"<<std::endl;
-                        }
+                        }*/
                         packetsFromMutex.lock();
                         for (int i = 0; i < packetsFrom.size(); i++) {
                             if (std::get<0>(packetsFrom[i]) == p.id) {
@@ -84,6 +84,7 @@ void SendingQueue::updateByteQueue()
                             }
                         }
                         if (j != -1) {
+                            packetsId.erase(packetsId.begin() + j);
                             packetsFrom.erase(packetsFrom.begin() + j);
                         }
                         packetsFromMutex.unlock();
@@ -134,10 +135,23 @@ void SendingQueue::updateByteQueue()
     }
 }
 
+void SendingQueue::tryToChangeBreakStatus(){
+    if (coinFlipLinkBreak()){
+        bool br = broken.get();
+        broken.set(!br);
+        brokenStatusChecked.set(false);
+    }
+}
+
 bool SendingQueue::coinFlipLinkBreak()
 {
     bool result = false;
-    result = 0 == rand() % connectionBreakChance.get();
+    if (broken.get()){
+        result = 0 == rand() % (connectionBreakChance.get()/10);
+    }
+    else{
+        result = 0 == rand() % connectionBreakChance.get();
+    }
     return result;
 }
 
