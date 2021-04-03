@@ -83,7 +83,7 @@ public:
     Ellips *getEllipseByNumber(int num);
     int activeNumberForEdge = -1;
     bool needReaintTable = false;
-
+    int graphId = 0;
     std::vector<int> tableIndexesToUpdate;
 
     bool addEdge(int number);
@@ -111,6 +111,7 @@ public:
     Algorithms selectedAlgorithm = Algorithms::RANDOM;
 
     std::mutex packetsToUpdateListMutex;
+    std::mutex edgesToUpdateListMutex;
     void calculatePathLength(int nodeId);
 public slots:
     void get_system_message(SystemMessage m);

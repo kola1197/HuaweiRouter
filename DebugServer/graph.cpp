@@ -18,6 +18,9 @@ Graph& Graph::operator = (const Graph &obj)
     ellipses.clear();
     edges.clear();
     packets.clear();
+    edgeCounter = 0;
+    ellipseCounter = 0;
+    packetIdCounter = 0;
     for (int i=0;i<obj.ellipses.size();i++)
     {
         addEllips(obj.ellipses[i]);
@@ -36,6 +39,12 @@ Graph& Graph::operator = (const Graph &obj)
 
 Graph::Graph(const Graph &obj)
 {
+    ellipses.clear();
+    edges.clear();
+    packets.clear();
+    edgeCounter = 0;
+    ellipseCounter = 0;
+    packetIdCounter = 0;
     for (int i=0;i<obj.ellipses.size();i++)
     {
         addEllips(obj.ellipses[i]);
@@ -473,7 +482,8 @@ void Graph::get_system_message(DebugMessage m)
         }
         packetsToUpdateListMutex.unlock();
         if (m.function == DebugMessage::EDGES_USAGE_STATUS) {
-            sim::sout<<"got EDGES_USAGE_STATUS"<<sim::endl;
+            //sim::sout<<"got EDGES_USAGE_STATUS"<<sim::endl;
+            edgesToUpdateListMutex.lock();
             int count = m.i[0];
             for (int j = 0; j < count; j++) {
                 for (int i = 0; i < edges.size(); i++) {
@@ -489,6 +499,7 @@ void Graph::get_system_message(DebugMessage m)
                     }
                 }
             }
+            edgesToUpdateListMutex.unlock();
             emit repaint();
         }
         signalsMutex.unlock();

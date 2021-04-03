@@ -68,6 +68,7 @@ void OGLWidget::paintGL()
     //for (Edge e:graph.edges)
     for (int i=0;i<graph.edges.size();i++)
     {
+        graph.edgesToUpdateListMutex.lock();
         Ellips *el1 = graph.getEllipseByNumber(graph.edges[i].from);
         Ellips *el2 = graph.getEllipseByNumber(graph.edges[i].to);
         if (el1!=NULL && el2!=NULL)
@@ -84,6 +85,7 @@ void OGLWidget::paintGL()
             drawLableCircle(x1,y1,x2,y2, QString::number(graph.edges[i].loadFromTo),toToEdgeDefault);
             drawLableCircle(x2,y2,x1,y1, QString::number(graph.edges[i].loadToFrom),toFromEdgeDefault);
         }
+        graph.edgesToUpdateListMutex.unlock();
     }
 }
 

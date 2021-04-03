@@ -411,11 +411,14 @@ void MainWindow::on_startButton_released()   // lock the screen and start simula
     else {
         ui->startButton->setText("Please wait");
         blockInterface();
+        disconnectSlots();
         std::thread thr1 = std::thread([this](){
-            disconnectSlots();
             simulationIsActive = false;
             simulation->stop();
+            delete simulation;
             //usleep(100000);
+            //ui->openGLWidget->graph.~Graph();
+            //new(&ui->openGLWidget->graph) Graph(savedGraph);
             ui->openGLWidget->graph = Graph(savedGraph);
             sim::sout<<ui->openGLWidget->graph.edges.size()<<sim::endl;
             emit simulation_finish_done();
@@ -436,6 +439,9 @@ void MainWindow::repaint_on_simulation_finish_done()
 
 void MainWindow::disconnectSlots()
 {
+    //disconnect(0,0,&ui->openGLWidget->graph,0);
+    Graph * g= &ui->openGLWidget->graph;
+    g->disconnect();
     disconnect(&ui->openGLWidget->graph,SIGNAL(repaint()),this,SLOT(repaintOGLWidget()));
     disconnect(&ui->openGLWidget->graph,SIGNAL(updateTable()),this,SLOT(updateTable()));
     for (int i=0;i<simulation->debugServer->connections.size();i++ )
@@ -443,7 +449,25 @@ void MainWindow::disconnectSlots()
         //connect(simulation.debugServer->connections[i],SIGNAL(transmit_to_gui(SystemMessage)),&ui->openGLWidget->graph,SLOT(get_system_message(SystemMessage)));
         disconnect(simulation->debugServer->connections[i],SIGNAL(transmit_to_gui(SystemMessage)),simulation->debugServer,SLOT(get_message_for_debug(SystemMessage)));
         disconnect(simulation->debugServer->connections[i],SIGNAL(transmit_to_gui(DebugMessage)),&ui->openGLWidget->graph,SLOT(get_system_message(DebugMessage)));
+
     }
+}
+
+void MainWindow::connectSlots()
+{
+    connect(&ui->openGLWidget->graph,SIGNAL(repaint()),this,SLOT(repaintOGLWidget()));
+    connect(&ui->openGLWidget->graph,SIGNAL(updateTable()),this,SLOT(updateTable()));
+    for (int i=0;i<simulation->debugServer->connections.size();i++ )
+    {
+        //connect(simulation.debugServer->connections[i],SIGNAL(transmit_to_gui(SystemMessage)),&ui->openGLWidget->graph,SLOT(get_system_message(SystemMessage)));
+        connect(simulation->debugServer->connections[i],SIGNAL(transmit_to_gui(SystemMessage)),simulation->debugServer,SLOT(get_message_for_debug(SystemMessage)));
+        connect(simulation->debugServer->connections[i],SIGNAL(transmit_to_gui(DebugMessage)),&ui->openGLWidget->graph,SLOT(get_system_message(DebugMessage)));
+
+    }
+    ui->openGLWidget->graph.graphId++;
+    //connect(simulation.debugServer->debugConnection,SIGNAL(transmit_to_gui(SystemMessage)),&ui->openGLWidget->graph,SLOT(get_system_message(SystemMessage)));
+
+    //connect(simulation.debugServer->debugConnection,SIGNAL(transmit_to_gui(SystemMessage)),this,SLOT(get_system_message(SystemMessage)));
 }
 
 void MainWindow::blockInterface()
@@ -538,20 +562,7 @@ void MainWindow::checkSimulationStatus()
     }
 }
 
-void MainWindow::connectSlots()
-{
-    connect(&ui->openGLWidget->graph,SIGNAL(repaint()),this,SLOT(repaintOGLWidget()));
-    connect(&ui->openGLWidget->graph,SIGNAL(updateTable()),this,SLOT(updateTable()));
-    for (int i=0;i<simulation->debugServer->connections.size();i++ )
-    {
-        //connect(simulation.debugServer->connections[i],SIGNAL(transmit_to_gui(SystemMessage)),&ui->openGLWidget->graph,SLOT(get_system_message(SystemMessage)));
-        connect(simulation->debugServer->connections[i],SIGNAL(transmit_to_gui(SystemMessage)),simulation->debugServer,SLOT(get_message_for_debug(SystemMessage)));
-        connect(simulation->debugServer->connections[i],SIGNAL(transmit_to_gui(DebugMessage)),&ui->openGLWidget->graph,SLOT(get_system_message(DebugMessage)));
-    }
-    //connect(simulation.debugServer->debugConnection,SIGNAL(transmit_to_gui(SystemMessage)),&ui->openGLWidget->graph,SLOT(get_system_message(SystemMessage)));
 
-    //connect(simulation.debugServer->debugConnection,SIGNAL(transmit_to_gui(SystemMessage)),this,SLOT(get_system_message(SystemMessage)));
-}
 
 void MainWindow::repaintOGLWidget()
 {
