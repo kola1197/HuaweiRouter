@@ -365,7 +365,7 @@ void ServerNode::Start()       //on start we connect to debug server
             }
             checkConnectionsForBreak();
             counter++;
-            if (counter == alpha) {
+            if (counter == 10){   //alpha) {
                 if (graph.selectedAlgorithm == Algorithms::LOCAL_VOTING || graph.selectedAlgorithm == Algorithms::MY_LOCAL_VOTING){
                     updateNodeLoadForLocalVoting();
             }
@@ -501,6 +501,7 @@ int ServerNode::localFlowSelectionAlgorithm(int prevNodeNum, int to)
 int ServerNode::randomSelectionAlgorithm(int prevNodeNum, int to)
 {
     //srand(time(0));
+
     sim::sout<<"Node "<<serverNum<<": prev node num "<<prevNodeNum<<sim::endl;
     int minPathSize = 8888;
     std::vector<int> selectedConnections;
@@ -524,15 +525,20 @@ int ServerNode::randomSelectionAlgorithm(int prevNodeNum, int to)
     }
 
 
-    int a = prevNodeNum;
+    int a = -1;
     if (!selectedConnections.empty()) {
         a = selectedConnections[rand() % (selectedConnections.size())];
+        //a = selectedConnections[0];
         while (prevNodeNum == connections[a]->to && selectedConnections.size()>1) {
             a = selectedConnections[rand() % (selectedConnections.size())];
         }
     }
 
-    if (a == prevNodeNum){
+    if (serverNum == 6){
+        sim::sout<<"Node 5"<<sim::endl;
+    }
+
+    if (a == -1){
         for (int j=0;j<connections.size();j++){
             if (connections[j]->to == prevNodeNum)
             {

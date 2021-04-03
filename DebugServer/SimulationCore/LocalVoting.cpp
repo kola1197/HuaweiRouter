@@ -52,14 +52,14 @@ int ServerNode::localVotingSelectionAlgorithm(int prevNodeNum, int to)
     {
         float z = 1000 * std::get<0>(nodesLoad[i]) / zSum;
         float u = uSum == 0 ? 0 : 1000 * std::get<1>(nodesLoad[i]) / uSum;
-        float w = 1000 * std::get<2>(nodesLoad[i]) / wSum;
+        float w = 2000 * std::get<2>(nodesLoad[i]) / wSum;
         //sim::sout<<"z:  "<<z<<" u:  "<<u<<" w:  "<<w<<sim::endl;
         float weight = z + u + w;
         nodesWeights.push_back(weight);
         isum += qRound(weight);
     }
     //srand(time(0));
-    int result = prevNodeNum;
+    int result = -1;
     int counter = 0;
     if (nodesId.size()>1) {
     while (result == prevNodeNum && nodesWeights.size()>1 ) {
