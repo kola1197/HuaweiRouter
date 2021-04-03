@@ -15,6 +15,7 @@
 #include <ctime>
 #include <Utils/sout.h>
 #include "string"
+#include "sys/prctl.h"
 
 ServerNode::ServerNode(int _serverNum,int _debugSocketAdress, Graph g):QObject()
 {
@@ -91,6 +92,8 @@ void ServerNode::loadPackets()
 void ServerNode::Start()       //on start we connect to debug server
 {
     std::thread thr([this]() {
+        QString s = "ServerNode_" + QString::number(serverNum);
+        prctl(PR_SET_NAME,(char *)s.toStdString().c_str());
         /*int counter = 0;
         for (int i=0;i<graph.packets.size();i++)
         {
@@ -263,6 +266,9 @@ void ServerNode::Start()       //on start we connect to debug server
                         localFlowStack.push_back(mm);
                         messageStackMutex.unlock();
                     }
+                    else {
+                        sim::sout<<"Node "<<serverNum<<":  localFlowBufferOpened = " <<localFlowBufferOpened<<" ,  messagesStack.size = "<<messagesStack.size() <<sim::endl;
+                    }
                     std::chrono::milliseconds timeNow = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
                     //sim::sout << "LOCAL FLOW timer: "<<(timeNow - localFlowLastUpdate).count()<< sim::endl;
                     if ((timeNow - localFlowLastUpdate).count() > 1000)
@@ -337,7 +343,8 @@ void ServerNode::Start()       //on start we connect to debug server
                             }
                             else{
                                 get_message(m);
-                                sim::sout << "Node " << serverNum << ":" << grn << " message with id " << m.id << " returned to Node. No available connections. "<< def << sim::endl;
+                                sim::sout << "Node " << serverNum << ":" << grn << " message with id " << m.id
+                                << " returned to Node. No available connections. "<< def << sim::endl;
                             }
 
                         }
@@ -371,6 +378,7 @@ void ServerNode::Start()       //on start we connect to debug server
         }
         sim::sout<<"NODE "<<serverNum<<" STOPPED"<<sim::endl;
     });
+
     thr.detach();
 }
 

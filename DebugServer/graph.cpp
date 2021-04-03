@@ -473,6 +473,7 @@ void Graph::get_system_message(DebugMessage m)
         }
         packetsToUpdateListMutex.unlock();
         if (m.function == DebugMessage::EDGES_USAGE_STATUS) {
+            sim::sout<<"got EDGES_USAGE_STATUS"<<sim::endl;
             int count = m.i[0];
             for (int j = 0; j < count; j++) {
                 for (int i = 0; i < edges.size(); i++) {

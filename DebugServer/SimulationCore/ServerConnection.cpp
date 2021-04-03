@@ -12,6 +12,8 @@
 #include "Messages.h"
 #include "QObject"
 #include <Utils/sout.h>
+#include <linux/prctl.h>
+#include <sys/prctl.h>
 
 
 AsyncVar<int> ServerConnection::connectionsCount{0};
@@ -109,6 +111,8 @@ void ServerConnection::connectTo()
 
             thr1 = std::thread([this]()
                                {
+                                   QString s = "SC_FROM_" + QString::number(from)+"_TO_"+QString::number(to);
+                                   prctl(PR_SET_NAME,(char *)s.toStdString().c_str());
                                    while (!needToStop.get()){
                                        sendMessagesFromBufferTick();
                                        usleep(sendIntervalMS);
