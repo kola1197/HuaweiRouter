@@ -52,9 +52,12 @@ int ServerNode::localVotingSelectionAlgorithm(int prevNodeNum, int to)
     {
         float z = 1000 * std::get<0>(nodesLoad[i]) / zSum;
         float u = uSum == 0 ? 0 : 1000 * std::get<1>(nodesLoad[i]) / uSum;
-        float w = 2000 * std::get<2>(nodesLoad[i]) / wSum;
+        float w = 1000 * std::get<2>(nodesLoad[i]) / wSum;
+
+        w = w*w;
+
         //sim::sout<<"z:  "<<z<<" u:  "<<u<<" w:  "<<w<<sim::endl;
-        float weight = z + u + w;
+        float weight = (float)qRound(z + u + w);
         nodesWeights.push_back(weight);
         isum += qRound(weight);
     }
@@ -62,31 +65,51 @@ int ServerNode::localVotingSelectionAlgorithm(int prevNodeNum, int to)
     int result = -1;
     int counter = 0;
     if (nodesId.size()>1) {
-    while (result == prevNodeNum && nodesWeights.size()>1 ) {
-        counter ++;
-        if (counter > 100)
-        {
-            sim::sout<<Color::ColorMode(Color::Code::FG_RED)<<"ERROR! Loop on "<<serverNum<<Color::ColorMode(Color::Code::FG_DEFAULT)<<sim::endl;
-        }
-        int a = rand() % isum;
-        for (int i = 0; i < nodesWeights.size(); i++) {
-            a -= nodesWeights[i];
-            if (a < 0) {
-                if (connections[nodesId[i]]->to != prevNodeNum && !connections[nodesId[i]]->sendingQueue.broken.get()) {
-                    result = nodesId[i];
+         int nodeToRemove = -1;
+         for (int j=0;j<nodesId.size();j++) {                       //removing last packet node
+            if (connections[nodesId[j]]->to == prevNodeNum) {
+                nodeToRemove = j;
+            }
+         }
+         if (nodeToRemove != -1){
+             nodesId.erase(nodesId.begin() + nodeToRemove);
+             isum -= nodesWeights[nodeToRemove];
+             nodesWeights.erase(nodesWeights.begin() + nodeToRemove);
+             nodesLoad.erase(nodesLoad.begin() + nodeToRemove);
+         }
+
+        //while (result == prevNodeNum && nodesWeights.size()>1 ) {
+        if (!nodesWeights.empty()) {
+            //sim::sout<<"here2"<<sim::endl;
+            counter ++;
+            //if (counter > 100)
+            //{
+            //    sim::sout<<Color::ColorMode(Color::Code::FG_RED)<<"ERROR! Loop on "<<serverNum<<Color::ColorMode(Color::Code::FG_DEFAULT)<<sim::endl;
+            //}
+            int a = rand() % isum;
+            for (int i = 0; i < nodesWeights.size(); i++) {
+                a -= nodesWeights[i];
+                if (a < 0) {
                     return nodesId[i];
-                } else {
-                    i = nodesWeights.size();
+                    /*if (connections[nodesId[i]]->to != prevNodeNum && !connections[nodesId[i]]->sendingQueue.broken.get()) {
+                        result = nodesId[i];
+                        sim::sout<<"LV out = "<<nodesId[i]<<sim::endl;
+                        return nodesId[i];
+                    } else {
+                        i = nodesWeights.size();
+                    }*/
                 }
             }
         }
     }
-    }
     else{
         if (nodesId.size() == 1){
+            //sim::sout<<"LV out = "<<nodesId[0]<<sim::endl;
             return nodesId[0];
         } else{
+            //sim::sout<<"LV out = "<<-1<<sim::endl;
             return -1;
         }
     }
+    return -1;
 }

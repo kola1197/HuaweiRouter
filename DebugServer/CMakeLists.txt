@@ -107,7 +107,7 @@ else()
           Utils/CpuInfo.h
           SimulationCore/SimulationReport.cpp
           SimulationCore/SimulationReport.h
-          icon.qrc SimulationCore/LocalVoting.cpp)
+          icon.qrc SimulationCore/LocalVoting.cpp SimulationCore/LocalVoting.h)
 endif()
 
 target_link_libraries(HuaweiRouter PRIVATE Qt5::Widgets  ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${OpenCV_LIBS})

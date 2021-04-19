@@ -254,7 +254,7 @@ void ServerNode::Start()       //on start we connect to debug server
                         connections[i]->sendMessage(m);
                     } else{
                         get_message(m);
-                        sim::sout << "Node " << serverNum << ":" << grn << " message with id " << m.id << " returned to Node. No available connections.  "<< def << sim::endl;
+                        sim::sout << "Node " << serverNum << ":" << grn << " message with id " << m.id << " returned to Node. No available connections.  "<<i<< def << sim::endl;
                     }
                 }
                 else{
@@ -467,6 +467,7 @@ void ServerNode::updateNodeLoadForLocalVoting()
 
 int ServerNode::selectPacketPath(int prevNodeNum, int to)
 {
+    int result = 0;
     switch (graph.selectedAlgorithm) {
         case Algorithms::RANDOM:
             return randomSelectionAlgorithm(prevNodeNum, to);
@@ -481,7 +482,8 @@ int ServerNode::selectPacketPath(int prevNodeNum, int to)
             return localFlowSelectionAlgorithm(prevNodeNum, to);
             break;
         case Algorithms::LOCAL_VOTING:
-            return localVotingSelectionAlgorithm(prevNodeNum, to);
+            result =  localVotingSelectionAlgorithm(prevNodeNum, to);
+            return result;
             break;
         case Algorithms::MY_LOCAL_VOTING:
             return MyLocalVotingSelectionAlgorithm(prevNodeNum, to);
@@ -720,7 +722,7 @@ int ServerNode::MyLocalVotingSelectionAlgorithm(int prevNodeNum, int to)
             float c = pathLength(connections[i]->to, to);
             nodesLoad.push_back((a + b + c * c * c * c) * (a + b + c * c * c * c) + 1);
             nodesId.push_back(i);
-            sim::sout << "Local voting:   " << a << " " << b << " " << c << " " << sim::endl;
+            //sim::sout << "Local voting:   " << a << " " << b << " " << c << " " << sim::endl;
             sum += nodesLoad[nodesLoad.size() - 1];
         }
     }
@@ -771,6 +773,7 @@ void ServerNode::checkConnectionsForBreak()
         if (!connections[i]->sendingQueue.brokenStatusChecked.get())
         {
             if (connections[i]->sendingQueue.broken.get()){
+                connectionRestarted = true;
                 connections[i]->sendingQueue.queueMutex.lock();
                 connections[i]->sendingQueue.packetsMutex.lock();
 
@@ -972,8 +975,15 @@ void ServerNode::get_message(PacketMessage m)
     if (m.to != serverNum)
     {
         if (debugPrevPacketInputId == m.id){
-            sim::sout <<"Node " << serverNum <<red<< ": INPUT Error!!! PacketMessage with id " << m.id << " is already added. It Is duplicate." <<def<< sim::endl;
+            if (connectionRestarted){
+                connectionRestarted = false;
+            }
+            else {
+                sim::sout << "Node " << serverNum << red << ": INPUT Error!!! PacketMessage with id " << m.id
+                          << " is already added. It Is duplicate." << def << sim::endl;
+            }
         }
+
         debugPrevPacketInputId = m.id;
         messageStackMutex.lock();
         messagesStack.push_back(m);
@@ -1025,3 +1035,4 @@ void ServerNode::get_message(SystemMessage m)
         debugServerReady.set(m.i[0]==1);
     }
 }
+

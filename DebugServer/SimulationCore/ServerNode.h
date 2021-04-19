@@ -72,6 +72,7 @@ private:
     int debugPrevPacketInputId = -1;
     int debugPrevPacketSendedId = -1;
 
+    bool connectionRestarted = false;
 };
 
 
