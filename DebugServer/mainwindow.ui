@@ -107,8 +107,8 @@
      <widget class="QPushButton" name="AddButton">
       <property name="geometry">
        <rect>
-        <x>1660</x>
-        <y>810</y>
+        <x>1650</x>
+        <y>920</y>
         <width>101</width>
         <height>31</height>
        </rect>
@@ -121,7 +121,7 @@
       <property name="geometry">
        <rect>
         <x>1650</x>
-        <y>660</y>
+        <y>750</y>
         <width>111</width>
         <height>31</height>
        </rect>
@@ -193,7 +193,7 @@
       <property name="geometry">
        <rect>
         <x>1650</x>
-        <y>710</y>
+        <y>800</y>
         <width>111</width>
         <height>31</height>
        </rect>
@@ -283,10 +283,10 @@
      <widget class="QLabel" name="PacketsCounterLabel">
       <property name="geometry">
        <rect>
-        <x>1660</x>
-        <y>870</y>
+        <x>1650</x>
+        <y>850</y>
         <width>101</width>
-        <height>51</height>
+        <height>61</height>
        </rect>
       </property>
       <property name="text">
@@ -362,6 +362,102 @@
       </property>
       <property name="wordWrap">
        <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="zText">
+      <property name="geometry">
+       <rect>
+        <x>1700</x>
+        <y>630</y>
+        <width>61</width>
+        <height>25</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="uText">
+      <property name="geometry">
+       <rect>
+        <x>1700</x>
+        <y>670</y>
+        <width>61</width>
+        <height>25</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="wText">
+      <property name="geometry">
+       <rect>
+        <x>1700</x>
+        <y>710</y>
+        <width>61</width>
+        <height>25</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="infoLabel_4">
+      <property name="geometry">
+       <rect>
+        <x>1650</x>
+        <y>630</y>
+        <width>31</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string extracomment="Connection load">Connection load</string>
+      </property>
+      <property name="toolTipDuration">
+       <number>3000</number>
+      </property>
+      <property name="text">
+       <string>Z</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+     <widget class="QLabel" name="infoLabel_5">
+      <property name="geometry">
+       <rect>
+        <x>1650</x>
+        <y>670</y>
+        <width>31</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string extracomment="Node load">Node load</string>
+      </property>
+      <property name="toolTipDuration">
+       <number>3000</number>
+      </property>
+      <property name="text">
+       <string>U</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+     <widget class="QLabel" name="infoLabel_6">
+      <property name="geometry">
+       <rect>
+        <x>1650</x>
+        <y>710</y>
+        <width>31</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string extracomment="Path length">Path length</string>
+      </property>
+      <property name="toolTipDuration">
+       <number>3000</number>
+      </property>
+      <property name="text">
+       <string>W</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
     </widget>
@@ -572,6 +668,54 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>uText</sender>
+   <signal>editingFinished()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onnn_u_text_editingFinished()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1731</x>
+     <y>705</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>894</x>
+     <y>499</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>wText</sender>
+   <signal>editingFinished()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onnn_w_text_editingFinished()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1731</x>
+     <y>745</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>894</x>
+     <y>499</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>zText</sender>
+   <signal>editingFinished()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onnn_z_text_editingFinished()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1731</x>
+     <y>665</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>894</x>
+     <y>499</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>AddButtonClick()</slot>
@@ -583,5 +727,8 @@
   <slot>onnn_send_interval_editingFinished()</slot>
   <slot>onnn_lambda_editingFinished()</slot>
   <slot>onnn_break_chance_editingFinished()</slot>
+  <slot>onnn_z_text_editingFinished()</slot>
+  <slot>onnn_u_text_editingFinished()</slot>
+  <slot>onnn_w_text_editingFinished()</slot>
  </slots>
 </ui>

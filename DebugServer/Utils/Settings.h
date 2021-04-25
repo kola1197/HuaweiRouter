@@ -15,6 +15,11 @@ class Settings
     static int alpha;
     static float localFowConnectionLoadLimit;
     static int connectionBreakChance;
+
+    static int zCoef;
+    static int uCoef;
+    static int wCoef;
+
 public:
     static int getDebugFirstPortNum()
     {
@@ -80,6 +85,27 @@ public:
     static void setConnectionBreakChance(int i)
     {
         connectionBreakChance = i;
+    }
+
+    static int getZCoef(){
+        return zCoef;
+    }
+    static void setZCoef(int i){
+        zCoef = i;
+    }
+
+    static int getUCoef(){
+        return uCoef;
+    }
+    static void setUCoef(int i){
+        uCoef = i;
+    }
+
+    static int getWCoef(){
+        return wCoef;
+    }
+    static void setWCoef(int i){
+        wCoef = i;
     }
 
 };

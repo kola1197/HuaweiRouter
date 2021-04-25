@@ -11,3 +11,6 @@ float Settings::limitForDeTail = 25;
 int Settings::alpha = 10;
 float Settings::localFowConnectionLoadLimit = 400;
 int Settings::connectionBreakChance = 1000;
+int Settings::zCoef = 1;
+int Settings::uCoef = 1;
+int Settings::wCoef = 1;

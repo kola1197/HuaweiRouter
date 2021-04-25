@@ -38,6 +38,10 @@ private slots:
     void onnn_send_interval_editingFinished();                       // QT thinks that "on_" is system slot ?!
     void onnn_lambda_editingFinished();
     void repaint_on_simulation_finish_done();
+
+    void onnn_z_text_editingFinished();
+    void onnn_u_text_editingFinished();
+    void onnn_w_text_editingFinished();
 signals:
     void simulation_finish_done();
 public slots:
@@ -49,6 +53,8 @@ public slots:
     void updateCpuLabel();
     void updateEdgePerfomanceLabels();
     void onnn_break_chance_editingFinished();
+
+
     //void get_system_message(SystemMessage m);
 private:
     int screenUpdateFrameCounter;

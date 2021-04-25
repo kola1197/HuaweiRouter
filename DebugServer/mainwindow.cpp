@@ -127,6 +127,9 @@ void MainWindow::setDefaultSettings()
 //    ui->CountOfBytes->setText(QString::number(Settings::getSendBytesPerInterval()));
 //    ui->sendIntervalMS->setText(QString::number(Settings::getsendIntervalMS()));
     ui->lambdaText->setText(QString::number(Settings::getAlpha()));
+    ui->zText->setText(QString::number(Settings::getZCoef()));
+    ui->uText->setText(QString::number(Settings::getUCoef()));
+    ui->wText->setText(QString::number(Settings::getWCoef()));
 }
 
 MainWindow::~MainWindow()
@@ -482,6 +485,9 @@ void MainWindow::blockInterface()
     ui->CountOfBytes->setEnabled(false);
     ui->sendIntervalMS->setEnabled(false);
     ui->lambdaText->setEnabled(false);
+    ui->zText->setEnabled(false);
+    ui->uText->setEnabled(false);
+    ui->wText->setEnabled(false);
 }
 
 void MainWindow::unBlockInterface()
@@ -496,6 +502,9 @@ void MainWindow::unBlockInterface()
     ui->CountOfBytes->setEnabled(true);
     ui->sendIntervalMS->setEnabled(true);
     ui->lambdaText->setEnabled(true);
+    ui->zText->setEnabled(true);
+    ui->uText->setEnabled(true);
+    ui->wText->setEnabled(true);
     updateStartButtonText();
 }
 
@@ -693,4 +702,58 @@ void MainWindow::onnn_lambda_editingFinished()
         ui->sendIntervalMS->setStyleSheet("QLineEdit { background: rgb(255, 65, 65); selection-background-color: rgb(233, 99, 0); }");
         //Settings::
     }
+}
+
+void MainWindow::onnn_z_text_editingFinished()
+{
+    //sim::sout<<"changed"<<sim::endl;
+    bool* b = new bool;
+    *b = false;
+    QString text = ui->zText->text();
+    int res = text.toInt(b);
+    if (*b && res < 100000)
+    {
+        ui->zText->setStyleSheet("QLineEdit { background: rgb(255, 255, 255); selection-background-color: rgb(233, 99, 0); }");
+        Settings::setZCoef(res);
+    }
+    else {
+        ui->zText->setStyleSheet("QLineEdit { background: rgb(255, 65, 65); selection-background-color: rgb(233, 99, 0); }");
+    }
+    //sim::sout<<Settings::getZCoef()<<" "<<Settings::getUCoef()<<" "<<Settings::getWCoef()<<sim::endl;
+}
+
+void MainWindow::onnn_w_text_editingFinished()
+{
+    //sim::sout<<"changed"<<sim::endl;
+    bool* b = new bool;
+    *b = false;
+    QString text = ui->wText->text();
+    int res = text.toInt(b);
+    if (*b && res < 100000)
+    {
+        ui->wText->setStyleSheet("QLineEdit { background: rgb(255, 255, 255); selection-background-color: rgb(233, 99, 0); }");
+        Settings::setWCoef(res);
+    }
+    else {
+        ui->wText->setStyleSheet("QLineEdit { background: rgb(255, 65, 65); selection-background-color: rgb(233, 99, 0); }");
+    }
+    //sim::sout<<Settings::getZCoef()<<" "<<Settings::getUCoef()<<" "<<Settings::getWCoef()<<sim::endl;
+}
+
+void MainWindow::onnn_u_text_editingFinished()
+{
+    //sim::sout<<"changed"<<sim::endl;
+    bool* b = new bool;
+    *b = false;
+    QString text = ui->uText->text();
+    int res = text.toInt(b);
+    if (*b && res < 100000)
+    {
+        ui->uText->setStyleSheet("QLineEdit { background: rgb(255, 255, 255); selection-background-color: rgb(233, 99, 0); }");
+        Settings::setUCoef(res);
+    }
+    else {
+        ui->uText->setStyleSheet("QLineEdit { background: rgb(255, 65, 65); selection-background-color: rgb(233, 99, 0); }");
+    }
+    //sim::sout<<Settings::getZCoef()<<" "<<Settings::getUCoef()<<" "<<Settings::getWCoef()<<sim::endl;
 }

@@ -7,6 +7,7 @@
 #include "SimulationReport.h"
 #include <unistd.h>
 #include <Utils/CpuInfo.h>
+#include <Utils/Settings.h>
 #include "Utils/sout.h"
 
 void SimulationReport::generateReport(Graph* g, std::string alg)
@@ -24,6 +25,7 @@ void SimulationReport::generateReport(Graph* g, std::string alg)
     fout<<"----------- Test №"<<i<<" -----------\n\n";
     fout<<"             "<<g->packets.size()<<" Packets                  \n";
     fout<<" Algorithm:        "<<alg<<"   \n";
+
     fout<<" CPU:              "<<CpuInfo::getCPUName()<<"                  \n";
     std::string cpuLoadStatus = g->cpuLoadCriticalFrames < 1 ? "OK" : "OVERLOAD ( we've got " + QString::number(g->cpuLoadCriticalFrames).toStdString() + " overload frames: "+QString::number(g->cpuLoadCriticalFrames*100/g->cpuFrames).toStdString()+"% of time )";
     fout<<" CPU load status:       "<<cpuLoadStatus<<"                  \n";
@@ -32,6 +34,10 @@ void SimulationReport::generateReport(Graph* g, std::string alg)
     fout<<" Average time:     "<<g->averageTime<<"          \n";
     fout<<" Max time:         "<<g->maxTime<<"          \n";
     fout<<" Max edge load:    "<<g->maxLoad<<"%         \n\n";
+
+    if (alg == "LOCAL VOTING"){
+        fout<<" Local voting coefficients:   Z - "<<Settings::getZCoef()<<", U - "<<Settings::getUCoef()<<", W - "<<Settings::getWCoef()<<"\n\n";
+    }
 
     for (int k=0;k<g->edges.size();k++){
         Edge* e = &g->edges[k];

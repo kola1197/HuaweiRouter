@@ -54,6 +54,10 @@ int ServerNode::localVotingSelectionAlgorithm(int prevNodeNum, int to)
         float u = uSum == 0 ? 0 : 1000 * std::get<1>(nodesLoad[i]) / uSum;
         float w = 1000 * std::get<2>(nodesLoad[i]) / wSum;
 
+        z *= Settings::getZCoef();
+        u *= Settings::getUCoef();
+        w *= Settings::getWCoef();
+
         w = w*w;
 
         //sim::sout<<"z:  "<<z<<" u:  "<<u<<" w:  "<<w<<sim::endl;
