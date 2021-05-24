@@ -22,6 +22,10 @@ MainWindow::MainWindow(QWidget *parent)
     //lastTableUpdate = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
     //lastOGLWUpdate = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
     ui->setupUi(this);
+
+    ui->uText->setVisible(false);
+    ui->infoLabel_5->setVisible(false);
+
     setCentralWidget(ui->scrollArea);
     createUI();
     createAlgprithmComboBox();
@@ -139,7 +143,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::createAlgprithmComboBox()
 {
-    ui->algorithmBox->addItems(QStringList() <<trUtf8("RANDOM") << trUtf8("DRILL") << trUtf8("LOCAL VOTING") << trUtf8("DE TAIl") << trUtf8("MY LOCAL VOTING") <<  trUtf8("LOCAL FLOW")  /*<< trUtf8("LocalFlow")*/);
+    ui->algorithmBox->addItems(QStringList() <<trUtf8("RANDOM") << trUtf8("DRILL") << trUtf8("LOCAL VOTING") << trUtf8("DE TAIl") /*<< trUtf8("MY LOCAL VOTING")*/ <<  trUtf8("LOCAL FLOW")  /*<< trUtf8("LocalFlow")*/);
     //ui->algorithmBox.
 }
 
@@ -223,6 +227,7 @@ void MainWindow::createUI()
                 btn->setToolTip(QString::number(j));
                 btn->setToolTipDuration(0);
                 ui->tableWidget->setCellWidget(j, 7, btn);
+                ui->tableWidget->setColumnHidden(2, true);
 
                 connect(btn, SIGNAL(clicked(bool)), SLOT(onBtnClicked()));
             }
