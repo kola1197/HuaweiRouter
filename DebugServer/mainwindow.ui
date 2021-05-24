@@ -313,7 +313,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>LV Alpha</string>
+       <string>LV Gamma</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
@@ -378,9 +378,9 @@
       <property name="geometry">
        <rect>
         <x>1700</x>
-        <y>670</y>
+        <y>710</y>
         <width>61</width>
-        <height>25</height>
+        <height>21</height>
        </rect>
       </property>
      </widget>
@@ -388,7 +388,7 @@
       <property name="geometry">
        <rect>
         <x>1700</x>
-        <y>710</y>
+        <y>670</y>
         <width>61</width>
         <height>25</height>
        </rect>
@@ -410,7 +410,7 @@
        <number>3000</number>
       </property>
       <property name="text">
-       <string>Z</string>
+       <string>L</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
@@ -420,7 +420,7 @@
       <property name="geometry">
        <rect>
         <x>1650</x>
-        <y>670</y>
+        <y>710</y>
         <width>31</width>
         <height>21</height>
        </rect>
@@ -442,7 +442,7 @@
       <property name="geometry">
        <rect>
         <x>1650</x>
-        <y>710</y>
+        <y>670</y>
         <width>31</width>
         <height>21</height>
        </rect>
