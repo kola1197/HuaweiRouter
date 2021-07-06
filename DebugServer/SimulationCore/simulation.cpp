@@ -1,3 +1,7 @@
+//
+// The Simulation class contains ServerNodes - one class for SimulationNode
+//
+
 #include <Utils/Settings.h>
 #include <QtCore/QSharedPointer>
 #include "simulation.h"
