@@ -50,8 +50,6 @@ add_executable(HuaweiRouter
           SimulationCore/DebugServer.h
           Utils/Settings.h Utils/ColorMode.cpp
           Utils/ColorMode.h
-          TextureImage.cpp
-          TextureImage.h
           Utils/MutexInt.cpp
           Utils/MutexInt.h
           Utils/AsyncVar.cpp
