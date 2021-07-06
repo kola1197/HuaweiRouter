@@ -36,13 +36,6 @@ add_executable(HuaweiRouter
           oglwidget.h
           graph.cpp
           graph.h
-          Network/channel.h
-          Network/channel.cpp
-          Network/node.h
-          Network/node.cpp
-          Network/network.h
-          Network/network.cpp
-          Network/channel.cpp
           SimulationCore/simulation.cpp
           SimulationCore/simulation.h
           SimulationCore/Messages.h
@@ -76,6 +69,5 @@ add_executable(HuaweiRouter
           SimulationCore/SimulationReport.cpp
           SimulationCore/SimulationReport.h
           icon.qrc SimulationCore/LocalVoting.cpp SimulationCore/LocalVoting.h)
-
 
 target_link_libraries(HuaweiRouter PRIVATE Qt5::Widgets  ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${OpenCV_LIBS})
