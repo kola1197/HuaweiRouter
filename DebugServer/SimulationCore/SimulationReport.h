@@ -1,5 +1,6 @@
 //
 // Created by nickolay on 20.12.2020.
+// This class generates report after simulation
 //
 
 #ifndef HUAWEIROUTER_SIMULATIONREPORT_H

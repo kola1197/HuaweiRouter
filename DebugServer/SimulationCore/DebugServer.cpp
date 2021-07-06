@@ -10,17 +10,12 @@
 
 DebugServer::DebugServer(int debugSocketAdress, Graph g) : ServerNode(-1,debugSocketAdress,g)
 {
-    //sim::sout<<"Debug server: we have got "<<g.ellipses.size()<<" nodes"<<sim::endl;
-    //graph = g;
-    //sim::sout<<"Debug server: now we have got "<<graph.ellipses.size()<<" nodes"<<sim::endl;
+
 }
 
 DebugServer::~DebugServer() noexcept
 {
-    /*for (int i=0;i<connections.size();i++)
-    {
-        connections[i]->~ServerConnection();
-    };*/
+
 }
 
 void DebugServer::Stop()

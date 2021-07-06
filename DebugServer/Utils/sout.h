@@ -15,8 +15,8 @@
 #include "AsyncVar.h"
 #include <Utils/sout.h>
 
-#define MUTEX_MODE
-#define WRITE_CONSOLE_LOG
+#define MUTEX_MODE                                // Turns on asynk mode with mutexes if defined
+#define WRITE_CONSOLE_LOG                         // Turns on write to console mode if defined
 
 class Sout
 {
