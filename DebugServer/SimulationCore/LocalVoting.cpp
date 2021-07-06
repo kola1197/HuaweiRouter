@@ -58,7 +58,7 @@ int ServerNode::localVotingSelectionAlgorithm(int prevNodeNum, int to)
         u *= Settings::getUCoef();
         w *= Settings::getWCoef();
 
-        w = w*w;
+        //w = w*w;
 
         //sim::sout<<"z:  "<<z<<" u:  "<<u<<" w:  "<<w<<sim::endl;
         float weight = (float)qRound(z + u + w);

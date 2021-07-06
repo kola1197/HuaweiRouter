@@ -1,5 +1,6 @@
 //
 // Created by nickolay on 28.09.2020.
+// One settings class for different threads
 //
 #pragma ones
 #ifndef HUAWEIROUTER_SETTINGS_H

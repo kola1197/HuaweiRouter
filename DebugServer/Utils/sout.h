@@ -1,5 +1,6 @@
 //
 // Created by nickolay on 12.12.2020.
+// This is helper utility with asynk std::cout realisation for debud output
 //
 
 #ifndef HUAWEIROUTER_SOUT_H

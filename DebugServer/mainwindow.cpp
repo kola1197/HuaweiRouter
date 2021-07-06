@@ -126,7 +126,7 @@ void MainWindow::setDefaultSettings()
 {
     Settings::setsendIntervalMS(330);
     Settings::setSendBytesPerInterval(64);
-    Settings::setAlpha(10);
+    //Settings::setAlpha(10);
     updateEdgePerfomanceLabels();
 //    ui->CountOfBytes->setText(QString::number(Settings::getSendBytesPerInterval()));
 //    ui->sendIntervalMS->setText(QString::number(Settings::getsendIntervalMS()));

@@ -36,7 +36,7 @@ void SimulationReport::generateReport(Graph* g, std::string alg)
     fout<<" Max edge load:    "<<g->maxLoad<<"%         \n\n";
 
     if (alg == "LOCAL VOTING"){
-        fout<<" Local voting coefficients:   Z - "<<Settings::getZCoef()<<", U - "<<Settings::getUCoef()<<", W - "<<Settings::getWCoef()<<"\n\n";
+        fout<<" Local voting coefficients:   L - "<<Settings::getZCoef()<<", Gamma - "<<Settings::getAlpha()<<", W - "<<Settings::getWCoef()<<"\n\n";
     }
 
     for (int k=0;k<g->edges.size();k++){
