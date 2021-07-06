@@ -3,7 +3,6 @@
 
 #include "graph.h"
 #include "TextureImage.h"
-
 #include <QWidget>
 #include <QOpenGLWidget>
 
@@ -30,8 +29,7 @@ protected:
     void initializeGL();
     void resizeGL(int w, int h);
     void paintGL();
-    //std::tuple<float, float, float, float> countCoords(Ellips *el1, Ellips *el2);
-    //int sign(float i);
+
     void drawLableCircle(float x1, float y1, float x2, float y2, QString edgeUsage, bool defaultPerformance = true);
 
 signals:
