@@ -1,5 +1,6 @@
 //
 // Created by nickolay on 28.09.2020.
+// Class for color console output. Used for debug.
 //
 #include <ostream>
 

@@ -1,5 +1,6 @@
 //
 // Created by nickolay on 09.06.2020.
+// Earlier asynkVar realisation without templates
 //
 
 #ifndef DRONEAPP_MUTEXBOOL_H

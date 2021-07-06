@@ -22,44 +22,12 @@ IF ( USE_OPENCV )
     endif()
 ENDIF ()
 find_package(OpenGL REQUIRED)
-#find_package(GLUT REQUIRED)
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
-#find_package(Qt5 5.12 REQUIRED)
-#find_package(Qt5Widgets 5.12 EXACT REQUIRED)
+
 
 
 include_directories(include)
-if(ANDROID)
-  add_library(HuaweiRouter SHARED
-    main.cpp
-    mainwindow.cpp
-    mainwindow.h
-    mainwindow.ui
-    oglwidget.cpp
-    oglwidget.h
-    graph.cpp
-    graph.h
-    channel.h
-    channel.cpp
-    node.h
-    node.cpp
-    network.h
-    network.cpp
-    dir/channel.cpp
-    SimulationCore/ServerNode.cpp
-    SimulationCore/ServerNode.h
-    SimulationCore/ServerConnection.cpp
-    SimulationCore/ServerConnection.h
-    SimulationCore/DebugServer.cpp
-    SimulationCore/DebugServer.h
-    TextureImage.cpp
-    TextureImage.h
-    Utils/MutexInt.cpp
-    Utils/MutexInt.h
-    Utils/AsyncVar.cpp
-    Utils/AsyncVar.h)
-else()
-  add_executable(HuaweiRouter
+add_executable(HuaweiRouter
           Network/main.cpp
           mainwindow.cpp
           mainwindow.h
@@ -108,6 +76,6 @@ else()
           SimulationCore/SimulationReport.cpp
           SimulationCore/SimulationReport.h
           icon.qrc SimulationCore/LocalVoting.cpp SimulationCore/LocalVoting.h)
-endif()
+
 
 target_link_libraries(HuaweiRouter PRIVATE Qt5::Widgets  ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${OpenCV_LIBS})

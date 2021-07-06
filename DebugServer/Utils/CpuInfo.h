@@ -1,5 +1,6 @@
 //
 // Created by nickolay on 19.12.2020.
+// Class for getting cpu temperature and cores load
 //
 
 #ifndef HUAWEIROUTER_CPUINFO_H

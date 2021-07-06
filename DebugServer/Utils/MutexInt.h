@@ -1,6 +1,6 @@
 //
 // Created by nickolay on 26.11.2020.
-// Async access for variables from different threads
+// Earlier asynkVar realisation without templates
 //
 
 #ifndef HUAWEIROUTER_MUTEXINT_H
