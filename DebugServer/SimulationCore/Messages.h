@@ -10,22 +10,19 @@
 
 #define int64 int64_t
 
-//new generation
 enum Priority {
     LOW=0, MEDIUM=1, HIGH=2
 };
 
 enum MessageType {MESSAGE=0,PACKET_MESSAGE=1, PING_MESSAGE=2, TEST_MESSAGE=3, SYSTEM_MESSAGE=4, DEBUG_MESSAGE=5, NODE_LOAD_MESSAGE = 6, NODE_LOAD_FOR_DE_TAIL_MESSAGE = 7 };
 
-struct HarbingerMessage {                                           //sends before other messages, to set resiver to it
-    //enum MessageType {MESSAGE=0,PACKET_MESSAGE=1, PING_MESSAGE=2, TEST_MESSAGE=3, SYSTEM_MESSAGE=4, DEBUG_MESSAGE=5};
+struct HarbingerMessage {                                           //sends before other messages, to tell reciver what to expect
     MessageType type;
     int code;
 };
 
 struct Message
 {
-    //enum MessageType {MESSAGE=0,PACKET_MESSAGE=1, PING_MESSAGE=2, TEST_MESSAGE=3, SYSTEM_MESSAGE=4, DEBUG_MESSAGE=5};
     Priority priority = Priority::MEDIUM;
     int id;
     int to;
@@ -50,7 +47,6 @@ struct PacketMessage:Message{
     int secondId = 0;
 };
 
-//enum Function {PING_MESSAGE, TEST_MESSAGE, SYSTEM_MESSAGE, DEBUG_MESSAGE, PACKET_MESSAGE};
 struct SystemMessage:Message {
     enum Function {TEXT_ALLERT, START_SIMULATION_FLAG, SERVERS_READY, DEBUG_SERVER_READY};
     char text[200];
@@ -143,13 +139,10 @@ public:
         result+=p->secondId;
         result+=p->from;
         result+=p->to;
-        //result+=p->timeOnCreation.count();
         return result;
     }
 };
-//class Messages {
 
-//};
 
 
 #endif //DRONEAPP_MESSAGES_H
