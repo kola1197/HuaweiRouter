@@ -1,5 +1,6 @@
 //
 // Created by nickolay on 28.09.2020.
+// Additional Node that is linked with every ServerNode for debugging, visualization on screen and help with first handshake between serverNodes
 //
 
 #ifndef HUAWEIROUTER_DEBUGSERVER_H

@@ -1,5 +1,6 @@
 //
 // Created by nickolay on 10.06.2020.
+// This class contains some Message structures, that we will send as packets
 //
 
 #ifndef DRONEAPP_MESSAGES_H

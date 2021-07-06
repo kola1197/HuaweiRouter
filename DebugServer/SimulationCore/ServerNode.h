@@ -1,5 +1,6 @@
 //
 // Created by nickolay on 27.09.2020.
+// Server Node contains its own working thread, which decides where send incoming packet depending on the selected algorithm
 //
 
 #ifndef HUAWEIROUTER_SERVERNODE_H

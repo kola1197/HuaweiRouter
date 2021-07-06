@@ -1,3 +1,7 @@
+//
+// This class contains graph for simulation and list of packets, it will be sent to all serverNodes, so they will know all topology
+//
+
 #ifndef GRAPH_H
 #define GRAPH_H
 

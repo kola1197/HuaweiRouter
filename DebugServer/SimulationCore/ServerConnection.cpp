@@ -1,5 +1,7 @@
 //
 // Created by nickolay on 27.09.2020.
+// This class response for socket connection between nodes (One from node A to node B, another from B to A)
+// When new packet is received, serverConnection sends signal to it's serverNode, that will send it further
 //
 #include <netinet/in.h>
 #include <arpa/inet.h>

@@ -1,5 +1,6 @@
 //
 // Created by nickolay on 17.12.2020.
+// This class is part of server connection, when serverNode sends packet with serverConnection - serverConnection puts it to sendingQueue to send with priority when socket connection will be ready
 //
 
 #include "SendingQueue.h"
