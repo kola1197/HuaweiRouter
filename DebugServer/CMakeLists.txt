@@ -54,9 +54,6 @@ add_executable(HuaweiRouter
           Utils/MutexInt.h
           Utils/AsyncVar.cpp
           Utils/AsyncVar.h
-          settingsform.cpp
-          settingsform.h
-          settingsform.ui
           Utils/Settings.cpp
           Utils/sout.cpp
           Utils/sout.h
