@@ -3,7 +3,6 @@
 //
 #include <sys/stat.h>
 #include <fstream>
-#include <cstring>
 #include "SimulationReport.h"
 #include <unistd.h>
 #include <Utils/CpuInfo.h>

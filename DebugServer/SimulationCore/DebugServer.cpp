@@ -3,7 +3,6 @@
 //
 
 #include <thread>
-#include <iostream>
 #include <Utils/ColorMode.h>
 #include <Utils/sout.h>
 #include "DebugServer.h"

@@ -3,18 +3,14 @@
 //
 
 #include <graph.h>
-#include <QtCore/QSharedPointer>
 #include "ServerNode.h"
 #include <unistd.h>
-#include <iostream>
 #include <thread>
 #include <Utils/ColorMode.h>
 #include <Utils/Settings.h>
 #include "QObject"
 #include <cstdlib>
-#include <ctime>
 #include <Utils/sout.h>
-#include "string"
 #include "sys/prctl.h"
 
 ServerNode::ServerNode(int _serverNum,int _debugSocketAdress, Graph g):QObject()

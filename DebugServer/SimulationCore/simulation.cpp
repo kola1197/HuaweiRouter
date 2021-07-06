@@ -2,7 +2,6 @@
 #include <QtCore/QSharedPointer>
 #include "simulation.h"
 #include <unistd.h>
-#include <iostream>
 #include <Utils/sout.h>
 #include <QMessageBox>
 #include <Utils/ColorMode.h>
