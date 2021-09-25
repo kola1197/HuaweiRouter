@@ -72,6 +72,7 @@ public:
     std::mutex queueMutex;
 
     void tryToChangeBreakStatus();
+    void setBreakStatus(bool status);
 
 signals:
     void updateBreakedStatus();
@@ -107,7 +108,6 @@ private:
 
     //QVector<QSharedPointer<Message>> qPackets;
     std::vector<char> messagesDataQueue;
-
 };
 
 

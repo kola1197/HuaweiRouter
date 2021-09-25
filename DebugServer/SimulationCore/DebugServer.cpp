@@ -132,3 +132,32 @@ void DebugServer::get_message_for_debug(SystemMessage m)
         }
     }
 }
+
+
+void DebugServer::sendMessageTo(int nodeNum, SystemMessage msg){
+    ServerConnection * con = getConnection(nodeNum);
+    if (con != nullptr){
+        con->sendMessage(msg);
+    }
+}
+
+void DebugServer::stopNode(int nodeNum){
+    for (auto & edge : graph.edges) {
+        if (edge.to == nodeNum){
+            std::cout<<"From "<<edge.from<<" to "<<edge.to<<std::endl;
+            SystemMessage msg;
+            msg.function = SystemMessage::SET_EDGE_STATUS;
+            msg.i[0] = nodeNum;
+            msg.i[1] = 0;          // 0 - turn off, 1 - turn on
+            sendMessageTo(edge.from, msg);
+        }
+        if (edge.from == nodeNum){
+            std::cout<<"From "<<edge.from<<" to "<<edge.to<<std::endl;
+            SystemMessage msg;
+            msg.function = SystemMessage::SET_EDGE_STATUS;
+            msg.i[0] = nodeNum;
+            msg.i[1] = 0;          // 0 - turn off, 1 - turn on
+            sendMessageTo(edge.to, msg);
+        }
+    }
+}

@@ -35,6 +35,9 @@ protected:
     Graph graph;
     int serverNum = -1;
     int debugSocketAdress = -1;
+
+    ServerConnection *getConnection(int nodeNum);
+
 private:
     void addDebugConnection();
     std::chrono::milliseconds timeNow();
@@ -73,6 +76,7 @@ private:
     int debugPrevPacketSendedId = -1;
 
     bool connectionRestarted = false;
+
 };
 
 

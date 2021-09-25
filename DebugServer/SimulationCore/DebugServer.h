@@ -17,10 +17,13 @@ public:
     void Start();
     MutexBool isReady {false};   //true when all connections for nodes are ready
     void Stop();
+    void stopNode(int nodeNum);
 public slots:
     void get_message_for_debug(SystemMessage);
 
 private:
+
+    void sendMessageTo(int nodeNum, SystemMessage msg);
 };
 
 

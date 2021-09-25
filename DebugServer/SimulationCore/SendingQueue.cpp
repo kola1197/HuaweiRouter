@@ -2,6 +2,7 @@
 // Created by nickolay on 17.12.2020.
 //
 
+#include <Utils/ColorMode.h>
 #include "SendingQueue.h"
 SendingQueue::SendingQueue():QObject() {
 
@@ -136,11 +137,19 @@ void SendingQueue::updateByteQueue()
 }
 
 void SendingQueue::tryToChangeBreakStatus(){
-    if (coinFlipLinkBreak()){
+    if (coinFlipLinkBreak() && false){
         bool br = broken.get();
         broken.set(!br);
         brokenStatusChecked.set(false);
     }
+}
+
+void SendingQueue::setBreakStatus(bool status){
+    Color::ColorMode yel(Color::FG_YELLOW);
+    Color::ColorMode def(Color::FG_DEFAULT);
+    sim::sout<<yel<<"Connection from "<<def<<from<<yel<<" to "<< def<<to<<yel<<" paused"<<def<<sim::endl;
+    broken.set(status);
+    brokenStatusChecked.set(false);
 }
 
 bool SendingQueue::coinFlipLinkBreak()

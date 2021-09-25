@@ -1034,5 +1034,19 @@ void ServerNode::get_message(SystemMessage m)
         sim::sout<<"Node "<<serverNum<<" got DEBUG_SERVER_READY status "<<m.i[0]<<sim::endl;
         debugServerReady.set(m.i[0]==1);
     }
+    if (m.function == SystemMessage::SET_EDGE_STATUS){
+        sim::sout<<"Node "<<serverNum<<" got SET_EDGE_STATUS status. Connection to "<<m.i[0]<<" new status is "<<m.i[1]<<sim::endl;
+        getConnection(m.i[0])->sendingQueue.setBreakStatus(m.i[1] != 1);
+    }
 }
 
+ServerConnection* ServerNode::getConnection(int nodeNum){
+    ServerConnection* n;
+    for (auto connection : connections){
+        if (connection->to == nodeNum){
+            return connection;
+        }
+    }
+    std::cout<<"ERROR! Connection does not exists"<<std::endl;
+    return n;
+}

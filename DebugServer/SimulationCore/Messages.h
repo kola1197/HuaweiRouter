@@ -52,7 +52,7 @@ struct PacketMessage:Message{
 
 //enum Function {PING_MESSAGE, TEST_MESSAGE, SYSTEM_MESSAGE, DEBUG_MESSAGE, PACKET_MESSAGE};
 struct SystemMessage:Message {
-    enum Function {TEXT_ALLERT, START_SIMULATION_FLAG, SERVERS_READY, DEBUG_SERVER_READY};
+    enum Function {TEXT_ALLERT, START_SIMULATION_FLAG, SERVERS_READY, DEBUG_SERVER_READY, SET_EDGE_STATUS};
     char text[200];
     int i[8];
     int authorNum;

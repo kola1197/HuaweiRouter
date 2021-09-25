@@ -762,3 +762,25 @@ void MainWindow::onnn_u_text_editingFinished()
     }
     //sim::sout<<Settings::getZCoef()<<" "<<Settings::getUCoef()<<" "<<Settings::getWCoef()<<sim::endl;
 }
+
+void MainWindow::onnn_stopNodeButtonReleased(){
+    if (simulationIsActive){
+        QString text = ui->stopNodeTextField->text();
+        bool* b = new bool(false);
+        int nodeNum = text.toInt(b);
+        if (*b){
+            simulation->debugServer->stopNode(nodeNum);
+//            for (auto & edge : ui->openGLWidget->graph.edges) {
+//                if (edge.to == nodeNum){
+//                    std::cout<<"From "<<edge.from<<" to "<<edge.to<<std::endl;
+//                }
+//                if (edge.from == nodeNum){
+//                    std::cout<<"From "<<edge.from<<" to "<<edge.to<<std::endl;
+//                }
+//            }
+        }
+        else{
+            std::cout<<"Incorrect Node number"<<std::endl;
+        }
+    }
+}

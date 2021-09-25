@@ -42,6 +42,7 @@ private slots:
     void onnn_z_text_editingFinished();
     void onnn_u_text_editingFinished();
     void onnn_w_text_editingFinished();
+    void onnn_stopNodeButtonReleased();
 signals:
     void simulation_finish_done();
 public slots:
