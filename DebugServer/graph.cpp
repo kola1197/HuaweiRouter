@@ -1,3 +1,8 @@
+//
+// This class contains graph for simulation and list of packets, it will be sent to all serverNodes, so they will know all topology
+//
+
+
 #include "graph.h"
 #include "cmath"
 #include "iostream"
@@ -62,45 +67,10 @@ Graph::Graph(const Graph &obj)
 
 void Graph::testInit()
 {
-//    addEllips(0.0,0.0);
-//    addEllips(200.0,500.0);
-//    addEllips(500.0,800.0);
-//    addEdge(0);
-//    addEdge(1);
-//    addEdge(2);
-//    addEdge(1);
 
-    //addEllips(800.0,450.0);
-    //addEllips(1600.0,900.0);
-    //addEllips(2.0,2.0);
-    //addEllips(-1.0,-1.0);
-    //addEllips(-2.0,-2.0);
 }
 
-//template<typename POD>
-//std::ostream& serialize(std::ostream& os, std::vector<POD> const& v)
-//{
-//    // this only works on built in data types (PODs)
-//    static_assert(std::is_trivial<POD>::value && std::is_standard_layout<POD>::value,
-//        "Can only serialize POD types with this function");
 
-//    auto size = v.size();
-//    os.write(reinterpret_cast<char const*>(&size), sizeof(size));
-//    os.write(reinterpret_cast<char const*>(v.data()), v.size() * sizeof(POD));
-//    return os;
-//}
-
-//template<typename POD>
-//std::istream& deserialize(std::istream& is, std::vector<POD>& v)
-//{
-//    static_assert(std::is_trivial<POD>::value && std::is_standard_layout<POD>::value,
-//        "Can only deserialize POD types with this function");
-//    decltype(v.size()) size;
-//    is.read(reinterpret_cast<char*>(&size), sizeof(size));
-//    v.resize(size);
-//    is.read(reinterpret_cast<char*>(v.data()), v.size() * sizeof(POD));
-//    return is;
-//}
 
 void Graph::save(QString path)
 {
@@ -183,9 +153,6 @@ void Graph::load(QString path)
                     edge.toFromEdgeData.SendBytesPerInterval = arr[6];
                     edge.toFromEdgeData.connectionBreakChance = (int) arr[7];
                     addEdge(edge);
-                    //sim::sout<<" "<<arr[0]<<" "<<arr[1]<<sim::endl;
-                    //addEdge((int)arr[0]);
-                    //addEdge((int)arr[1]);
                 }
                 if (loadPart == 2)
                 {
@@ -235,13 +202,6 @@ std::tuple<float,float,float,float> Graph::countEdgeCircleCoords(Ellips* el1, El
                       / (4 * k * k +1);
         float resY2 = resX2 * k + b;
 
-
-        //float resX = (-8*b*k + sign(el2->x - el1->x) * sqrt(64 * k * k * b * b - 4 * ( 4 * (4 * k * k + 1)) * ( 4 * b * b - 50 * 50 )))
-        //        /(2*(4*k*k+1));
-        //float resX1 = resX + el1->x;
-        //float resY1 = k * resX1 + b;
-        //float resX2 = resX + el2->x;
-        //float resY2 = k * resX2 + b;
         return std::tuple<float,float, float, float>(resX1, resY1, resX2, resY2 );
     } else {
         return std::tuple<float,float, float, float>(el1->x, el1->y + sign(el2->y - el1->y) * 25,el2->x , el2->y + sign(el1->y - el2->y) * 25);
@@ -292,7 +252,6 @@ void Graph::addPacket(Packet m)
 {
     Packet p;
     p.id = m.id;
-    //p.type = m.type;
     p.from = m.from;
     p.to = m.to;
     p.delivered = m.delivered;
@@ -311,7 +270,6 @@ Ellips * Graph::getEllipseByNumber(int num)
     {
         if ( ellipses[i].number == num )
         {
-            //sim::sout<<ellipses[i].x<<"*"<<ellipses[i].y<<sim::endl;
             result = &ellipses[i];
         }
     }
@@ -330,14 +288,12 @@ std::tuple<Edge*, bool> Graph::getEdgeByPoint(int x,int y)
             sim::sout<<"Edge "<<edge.to<<" to "<<edge.from<<sim::endl;
             resultEdge = &edge;
         }
-        //sim::sout << edge.toFromEdgeData.x << ", " << edge.toFromEdgeData.y << " to " << x << ", " << y << " < 15" << sim::endl;
         if (dist(x, y, edge.toToEdgeData.x, edge.toToEdgeData.y) < 15 )
         {
             from = false;
             sim::sout<<"Edge "<<edge.from<<" to "<<edge.to<<sim::endl;
             resultEdge = &edge;
         }
-        //sim::sout<<edge.toToEdgeData.x<<", "<<edge.toToEdgeData.y<<" to "<<x<<", "<<y<<" < 15"<<sim::endl;
     }
     std::tuple<Edge*,bool> result {resultEdge,from};
     return result;
@@ -347,9 +303,6 @@ std::tuple<Edge*, bool> Graph::getEdgeByPoint(int x,int y)
 Ellips * Graph::getEllipseByPoint(int x,int y)
 {
     Ellips *result;
-    //Ellips q;
-    //q.x=-239;
-    //q.y=-239;
     result = NULL;
     for (int i=0;i<ellipses.size();i++)
     {
@@ -373,8 +326,6 @@ void Graph::addEdge(Edge e)
     e.id = edgeCounter;
     edgeCounter++;
     edges.push_back(e);
-//    addEdge(e.from);
-//    addEdge(e.to);
 }
 
 bool Graph::addEdge(int number)
@@ -449,20 +400,16 @@ void Graph::get_system_message(DebugMessage m)
             Ellips *e = getEllipseByNumber(m.i[0]);
             e->connected = m.i[1] == 1;
             e->colorStatus = m.i[1];
-            //sim::sout<<m.i[0]<<" send system message, colorStatus now is "<<e->colorStatus<<sim::endl;
             emit repaint();
         }
         packetsToUpdateListMutex.lock();
         if (m.function == DebugMessage::PACKET_STATUS) {
-            //sim::sout<<"GOT PACKET STATUS "<<m.i[0]<<"   "<<m.i[1]<<sim::endl;
             for (int i = 0; i < packets.size(); i++) {
                 if (packets[i].id == m.i[0] && !packets[i].delivered) {
                     packets[i].currentPosition = m.i[1];
                     tableIndexesToUpdate.push_back(i);
                 }
             }
-            //emit repaint();
-            //emit updateTable();
         }
         if (m.function == DebugMessage::PACKET_STATUS_DELIVERED) {
             for (int i = 0; i < packets.size(); i++) {
@@ -482,7 +429,6 @@ void Graph::get_system_message(DebugMessage m)
         }
         packetsToUpdateListMutex.unlock();
         if (m.function == DebugMessage::EDGES_USAGE_STATUS) {
-            //sim::sout<<"got EDGES_USAGE_STATUS"<<sim::endl;
             edgesToUpdateListMutex.lock();
             int count = m.i[0];
             for (int j = 0; j < count; j++) {
@@ -503,7 +449,6 @@ void Graph::get_system_message(DebugMessage m)
             emit repaint();
         }
         signalsMutex.unlock();
-        //sim::sout<<m.i[0]<<" send connection status "<<m.i[1]<<sim::endl;
     }
     else {
         sim::sout<<"DebugMessage checksum error"<<sim::endl;
@@ -515,7 +460,6 @@ void Graph::addPacket()
     Packet m;
     m.id = packetIdCounter;
     packetIdCounter++;
-    //m.type = PacketMessage::DEFAULT_PACKET;
     m.from = -1;
     m.to = -1;
     m.currentPosition = -1;
@@ -525,7 +469,6 @@ void Graph::addPacket()
     packetsToUpdateListMutex.lock();
     tableIndexesToUpdate.push_back(packets.size()-1);
     packetsToUpdateListMutex.unlock();
-    //emit repaint();
 }
 
 void Graph::calculatePathLength(int nodeId)

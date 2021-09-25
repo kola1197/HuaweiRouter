@@ -1,5 +1,6 @@
 //
 // Created by nickolay on 17.12.2020.
+// This class is part of server connection, when serverNode sends packet with serverConnection - serverConnection puts it to sendingQueue to send with priority when socket connection will be ready
 //
 
 #ifndef HUAWEIROUTER_SENDINGQUEUE_H
@@ -38,7 +39,6 @@ public:
         {
             v.push_back(c[i]);
         }
-        //packetsData.push_back(QSharedPointer<typeof(T)>(new T{t}));
         packetsData.push_back(QSharedPointer<std::vector<char>>(new std::vector<char>(v)));
         if (t.type == PACKET_MESSAGE)
         {
@@ -52,13 +52,9 @@ public:
         }
         packetsTypes.push_back(t.type);
         packetsPriority.push_back(t.priority);
-
-        //TestMessage tt = *(TestMessage*)packets[0].get();
-        //packetsCount.set(packets.size());
         packetsMutex.unlock();
         updateByteQueue();
         updateLoadingSize();
-        //sim::sout<<"message set"<<sim::endl;
     }
     int from = -1;
     int to = -1;
@@ -66,11 +62,9 @@ public:
     std::vector<std::tuple<int,int>> packetsFrom;
     std::mutex packetsFromMutex;
     void updateLoadingSize();
-
     std::vector<QSharedPointer<std::vector<char>>> packetsData;
     std::mutex packetsMutex;
     std::mutex queueMutex;
-
     void tryToChangeBreakStatus();
     void setBreakStatus(bool status);
 
@@ -89,7 +83,6 @@ private:
                 std::cout<< ("Error on Node %s !!! Packet with id %s got wrong checksum ( %s )!!! Check your RAM!!!",p->id, p->checkSum)<<std::endl;
                 qFatal("Error on Node %s !!! Packet with id %s got wrong checksum ( %s )!!! Check your RAM!!!",p->id, p->checkSum);
             }
-
         }
         char mData[sizeof(t)];
         memcpy(mData, &t, sizeof(t));
@@ -102,11 +95,6 @@ private:
     }
     bool coinFlipLinkBreak();
     void updateByteQueue();
-    //std::vector<QSharedPointer<Message>> packets;
-
-
-
-    //QVector<QSharedPointer<Message>> qPackets;
     std::vector<char> messagesDataQueue;
 };
 

@@ -1,3 +1,8 @@
+//
+//  MainWindow for visualization of simulation process
+//
+
+
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 

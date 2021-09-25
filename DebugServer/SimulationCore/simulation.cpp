@@ -1,8 +1,11 @@
+//
+// The Simulation class contains ServerNodes - one class for SimulationNode
+//
+
 #include <Utils/Settings.h>
 #include <QtCore/QSharedPointer>
 #include "simulation.h"
 #include <unistd.h>
-#include <iostream>
 #include <Utils/sout.h>
 #include <QMessageBox>
 #include <Utils/ColorMode.h>
@@ -20,20 +23,12 @@ Simulation::Simulation(Graph *_graph)
 
 Simulation::~Simulation()
 {
-/*    if (started){
-        sim::sout<<"SIMULATION DESTRUCTION"<<sim::endl;
-        for (int i=0;i<serverNodes.size();i++)
-        {
-            serverNodes[i]->~ServerNode();
-        }
-        debugServer->~DebugServer();
-    }*/
+
 }
 
 void Simulation::stop()
 {
     if (started){
-//        sim::sout<<"SIMULATION STOP. Count of active connections: "<<ServerConnection::connectionsCount.get()<<sim::endl;
         for (int i=0;i<serverNodes.size();i++)
         {
             serverNodes[i]->StopToConnections();
@@ -51,7 +46,6 @@ void Simulation::stop()
         {
             sim::sout<<red<<"ERROR!!! "<<def<<ServerConnection::connectionsCountTo.get()<<red<<" threads alive"<<def<<sim::endl;
         }
-        //usleep(100000);
         for (int i=0;i<serverNodes.size();i++)
         {
             serverNodes[i]->Stop();
@@ -82,7 +76,6 @@ void Simulation::stop()
 
 void Simulation::Start()
 {
-    //sim::sout<<"Packet count "<<graph->packets.size()<<sim::endl;
     ServerConnection::connectionsCount.set(0);
     started = true;
     debugServer = new DebugServer(Settings::getDebugFirstPortNum(), *graph);

@@ -1,12 +1,10 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
-#include "iostream"
 #include "settingsform.h"
 #include <QComboBox>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <qtextedit.h>
-#include <zconf.h>
 #include <Utils/Settings.h>
 #include <Utils/sout.h>
 #include <Utils/CpuInfo.h>
@@ -19,8 +17,7 @@ MainWindow::MainWindow(QWidget *parent)
     qRegisterMetaType<DebugMessage>("DebugMessage");             //now we can use this messages in signal/slot system as QObjects
     qRegisterMetaType<SystemMessage>("SystemMessage");
     qRegisterMetaType<PacketMessage>("PacketMessage");
-    //lastTableUpdate = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-    //lastOGLWUpdate = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+
     ui->setupUi(this);
 
     ui->uText->setVisible(false);
@@ -36,10 +33,8 @@ MainWindow::MainWindow(QWidget *parent)
     draw();
     tmr = new QTimer();
     tmr->setInterval(84);
-    //connect(tmr, SIGNAL(timeout()), this, SLOT(updateCpuLabel()));
     connect(tmr, SIGNAL(timeout()), this, SLOT(updateAllScreen()));
     tmr->start();
-    //ui->openGLWidget->graph = new Graph();
 }
 
 
@@ -62,7 +57,6 @@ void MainWindow::updateAllScreen()
     }
     screenUpdateFrameCounter++;
     std::chrono::microseconds end = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch());
-    //sim::sout<<"updateAllScreen: 1) "<<(render2 - render1).count()<<"2) "<<(render3 - render2).count()<<"3) "<<(end - render3).count()<<" microseconds"<<sim::endl;
 }
 
 void MainWindow::updatePacketsLabel()
@@ -126,10 +120,7 @@ void MainWindow::setDefaultSettings()
 {
     Settings::setsendIntervalMS(330);
     Settings::setSendBytesPerInterval(64);
-    Settings::setAlpha(10);
     updateEdgePerfomanceLabels();
-//    ui->CountOfBytes->setText(QString::number(Settings::getSendBytesPerInterval()));
-//    ui->sendIntervalMS->setText(QString::number(Settings::getsendIntervalMS()));
     ui->lambdaText->setText(QString::number(Settings::getAlpha()));
     ui->zText->setText(QString::number(Settings::getZCoef()));
     ui->uText->setText(QString::number(Settings::getUCoef()));
@@ -144,7 +135,6 @@ MainWindow::~MainWindow()
 void MainWindow::createAlgprithmComboBox()
 {
     ui->algorithmBox->addItems(QStringList() <<trUtf8("RANDOM") << trUtf8("DRILL") << trUtf8("LOCAL VOTING") << trUtf8("DE TAIl") /*<< trUtf8("MY LOCAL VOTING")*/ <<  trUtf8("LOCAL FLOW")  /*<< trUtf8("LocalFlow")*/);
-    //ui->algorithmBox.
 }
 
 
@@ -158,15 +148,12 @@ void MainWindow::createUI()
     if (ui->openGLWidget->graph.needReaintTable || true) {
         if (ui->openGLWidget->graph.packets.size() != ui->tableWidget->rowCount()) {
             ui->tableWidget->clear();
-            //int s = ui->tableWidget->rowCount();
             while (ui->tableWidget->rowCount() > 0) {
                 ui->tableWidget->removeRow(0);
             }
-            //connect(ui->tableWidget, SIGNAL(cellChanged(int,int)),this,SLOT(cellChangedCheck(int,int)));
             ui->tableWidget->setColumnCount(8);
             ui->tableWidget->setShowGrid(true);
             ui->tableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
-            //QStringList headers =
             ui->tableWidget->setHorizontalHeaderLabels(
                     QStringList() << trUtf8("№") << trUtf8("    id    ") << trUtf8("    Function    ")
                                   << trUtf8("    From    ") << trUtf8("    To    ")
@@ -213,14 +200,12 @@ void MainWindow::createUI()
                 QTableWidgetItem *newitem2 = protoitem->clone();
                 newitem2->setText(QString::number(ui->openGLWidget->graph.packets[j].currentPosition));
                 ui->tableWidget->setItem(j, 5, newitem2);
-                //ui->tableWidget->setItem(j,5, new QTableWidgetItem(QString::number(ui->openGLWidget->graph.packets[j].currentPosition)));
 
                 QString deliveringTime = ui->openGLWidget->graph.packets[j].delivered ? QString::number(
                         ui->openGLWidget->graph.packets[j].timeOnCreation.count()) : "Not delivered";
                 QTableWidgetItem *newitem3 = protoitem->clone();
                 newitem3->setText(deliveringTime);
                 ui->tableWidget->setItem(j, 6, newitem3);
-                //ui->tableWidget->setItem(j,6, new QTableWidgetItem(deliveringTime));
 
                 QPushButton *btn = new QPushButton();
                 btn->setText("Delete");
@@ -233,7 +218,6 @@ void MainWindow::createUI()
             }
             if (!tableResized) {
                 ui->tableWidget->resizeColumnsToContents();
-                //ui->tableWidget->setColumnWidth(7, 10);
                 if (ui->openGLWidget->graph.packets.size() > 0) {
                     tableResized = true;
                 }
@@ -251,7 +235,6 @@ void MainWindow::createUI()
                         QTableWidgetItem *newitem2 = protoitem->clone();
                         newitem2->setText(QString::number(ui->openGLWidget->graph.packets[j].currentPosition));
                         ui->tableWidget->setItem(j, 5, newitem2);
-                        //ui->tableWidget->setItem(j,5, new QTableWidgetItem(QString::number(ui->openGLWidget->graph.packets[j].currentPosition)));
                         QString deliveringTime = ui->openGLWidget->graph.packets[j].delivered ? QString::number(
                                 ui->openGLWidget->graph.packets[j].timeOnCreation.count()) : "Not delivered";
                         QTableWidgetItem *newitem3 = protoitem->clone();
@@ -273,7 +256,6 @@ void MainWindow::onBtnClicked()
         if( QPushButton* btn = qobject_cast< QPushButton* >( sender() ) )
         {
             int index = btn->toolTip().toInt();
-            //QMessageBox::information( this, "The button was clicked", QString::number(index));
             ui->openGLWidget->graph.packets.erase(ui->openGLWidget->graph.packets.begin()+index);
             createUI();
             repaintOGLWidget();
@@ -288,7 +270,6 @@ void MainWindow::cellIndexChanged(int i)
         int index = box->toolTip().toInt();
         if (i == 0)
         {
-            //ui->openGLWidget->graph.packets[index].type = PacketMessage::DEFAULT_PACKET;
         }
     }
 }
@@ -307,7 +288,6 @@ void MainWindow::cellFromTextChanged()
             if (s.toStdString() != "" && s.toStdString() != " " ) {
                 data = -1;
                 QMessageBox::information(this, "The button was pressed", edit->toPlainText());
-                //QColor c ()
                 edit->setTextColor(QColor(255, 0, 0));
                 edit->setText("-1");
             }
@@ -338,7 +318,6 @@ void MainWindow::cellToTextChanged()
             if (s.toStdString() != "" && s.toStdString() != " " ) {
                 data = -1;
                 QMessageBox::information(this, "The button was pressed", edit->toPlainText());
-                //QColor c ()
                 edit->setTextColor(QColor(255, 0, 0));
                 edit->setText("-1");
             }else {}
@@ -367,7 +346,6 @@ void MainWindow::SavePacketClick()
         QWidget *_editTo = ui->tableWidget->cellWidget(i,3);
         QPushButton *editTo = new QPushButton(_editTo);
         QMessageBox::information( this, "The button was clicked", editTo->text());
-        //QString s = ui->tableWidget->itemAt(i,3)->data().toReal();
     }
 }
 
@@ -401,7 +379,6 @@ void MainWindow::on_deleteButton_released()
 
 void MainWindow::on_startButton_released()   // lock the screen and start simulation
 {
-    //sim::sout<<"START PRESS"<<sim::endl;
     if (!simulationIsActive){
         simulationIsActive = true;
         ui->openGLWidget->graph.cpuCorrect = true;
@@ -424,16 +401,11 @@ void MainWindow::on_startButton_released()   // lock the screen and start simula
             simulationIsActive = false;
             simulation->stop();
             delete simulation;
-            //usleep(100000);
-            //ui->openGLWidget->graph.~Graph();
-            //new(&ui->openGLWidget->graph) Graph(savedGraph);
             ui->openGLWidget->graph = Graph(savedGraph);
             sim::sout<<ui->openGLWidget->graph.edges.size()<<sim::endl;
             emit simulation_finish_done();
         });
         thr1.detach();
-        //simulation = Simulation(&ui->openGLWidget->graph);
-        //simulation.~Simulation();
     }
 }
 
@@ -447,14 +419,12 @@ void MainWindow::repaint_on_simulation_finish_done()
 
 void MainWindow::disconnectSlots()
 {
-    //disconnect(0,0,&ui->openGLWidget->graph,0);
     Graph * g= &ui->openGLWidget->graph;
     g->disconnect();
     disconnect(&ui->openGLWidget->graph,SIGNAL(repaint()),this,SLOT(repaintOGLWidget()));
     disconnect(&ui->openGLWidget->graph,SIGNAL(updateTable()),this,SLOT(updateTable()));
     for (int i=0;i<simulation->debugServer->connections.size();i++ )
     {
-        //connect(simulation.debugServer->connections[i],SIGNAL(transmit_to_gui(SystemMessage)),&ui->openGLWidget->graph,SLOT(get_system_message(SystemMessage)));
         disconnect(simulation->debugServer->connections[i],SIGNAL(transmit_to_gui(SystemMessage)),simulation->debugServer,SLOT(get_message_for_debug(SystemMessage)));
         disconnect(simulation->debugServer->connections[i],SIGNAL(transmit_to_gui(DebugMessage)),&ui->openGLWidget->graph,SLOT(get_system_message(DebugMessage)));
 
@@ -467,15 +437,11 @@ void MainWindow::connectSlots()
     connect(&ui->openGLWidget->graph,SIGNAL(updateTable()),this,SLOT(updateTable()));
     for (int i=0;i<simulation->debugServer->connections.size();i++ )
     {
-        //connect(simulation.debugServer->connections[i],SIGNAL(transmit_to_gui(SystemMessage)),&ui->openGLWidget->graph,SLOT(get_system_message(SystemMessage)));
         connect(simulation->debugServer->connections[i],SIGNAL(transmit_to_gui(SystemMessage)),simulation->debugServer,SLOT(get_message_for_debug(SystemMessage)));
         connect(simulation->debugServer->connections[i],SIGNAL(transmit_to_gui(DebugMessage)),&ui->openGLWidget->graph,SLOT(get_system_message(DebugMessage)));
 
     }
     ui->openGLWidget->graph.graphId++;
-    //connect(simulation.debugServer->debugConnection,SIGNAL(transmit_to_gui(SystemMessage)),&ui->openGLWidget->graph,SLOT(get_system_message(SystemMessage)));
-
-    //connect(simulation.debugServer->debugConnection,SIGNAL(transmit_to_gui(SystemMessage)),this,SLOT(get_system_message(SystemMessage)));
 }
 
 void MainWindow::blockInterface()
@@ -526,14 +492,7 @@ void MainWindow::updateStartButtonText()
 
 void MainWindow::updateTable()
 {
-    /*std::chrono::milliseconds timeNow = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-    if ((timeNow - lastTableUpdate).count()>42)
-    {
-        checkSimulationStatus();
-        createUI();
-        lastTableUpdate = timeNow;
-    }
-    //sim::sout<<"updating table"<<sim::endl;*/
+
 }
 
 void MainWindow::checkSimulationStatus()
@@ -545,8 +504,6 @@ void MainWindow::checkSimulationStatus()
     float maxLoad = 0;
     for (int i=0;i< ui->openGLWidget->graph.packets.size();i++)
     {
-        //sim::sout<<"Packet "<<i<<" delivering  status = "<<ui->openGLWidget->graph.packets[i].delivered<<sim::endl;
-        //allPacketsDelivered *= ui->openGLWidget->graph.packets[i].delivered;
         allPacketsDelivered = allPacketsDelivered && ui->openGLWidget->graph.packets[i].delivered;
         time += ui->openGLWidget->graph.packets[i].timeOnCreation.count();
         maxTime = ui->openGLWidget->graph.packets[i].timeOnCreation.count() > maxTime ? ui->openGLWidget->graph.packets[i].timeOnCreation.count() : maxTime;
@@ -580,12 +537,7 @@ void MainWindow::checkSimulationStatus()
 
 void MainWindow::repaintOGLWidget()
 {
-    /*std::chrono::milliseconds timeNow = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-    if ((timeNow - lastOGLWUpdate).count()>42)
-    {
-        ui->openGLWidget->update();
-        lastOGLWUpdate = timeNow;
-    }*/
+
 }
 
 void MainWindow::AddButtonClick()
@@ -619,15 +571,7 @@ void MainWindow::updateEdgePerfomanceLabels()
 
 void MainWindow::onnn_settingsButton_released()
 {
-    /*settingsForm = new SettingsForm;
-    settingsForm->setWindowTitle("Simulation settings");
-    QIcon icon;
-    icon.addFile(QStringLiteral("../icon1.ico"), QSize(), QIcon::Normal, QIcon::Off);
-    settingsForm->setWindowIcon(icon);
-    settingsForm->setWindowIconText("Simulation");
-    settingsForm->setWindowFlag(Qt::WindowStaysOnTopHint);
-    settingsForm->show();
-    sim::sout<<"SETTINGS"<<sim::endl;*/
+
 }
 
 void MainWindow::onnn_break_chance_editingFinished()
@@ -672,7 +616,6 @@ void MainWindow::onnn_count_of_bytes_editingFinished()
 
 void MainWindow::onnn_send_interval_editingFinished()
 {
-    //sim::sout<<"changed"<<sim::endl;
     bool* b = new bool;
     *b = false;
     QString text = ui->sendIntervalMS->text();
@@ -693,7 +636,6 @@ void MainWindow::onnn_send_interval_editingFinished()
 
 void MainWindow::onnn_lambda_editingFinished()
 {
-    //sim::sout<<"changed"<<sim::endl;
     bool* b = new bool;
     *b = false;
     QString text = ui->sendIntervalMS->text();
@@ -705,13 +647,11 @@ void MainWindow::onnn_lambda_editingFinished()
     }
     else {
         ui->sendIntervalMS->setStyleSheet("QLineEdit { background: rgb(255, 65, 65); selection-background-color: rgb(233, 99, 0); }");
-        //Settings::
     }
 }
 
 void MainWindow::onnn_z_text_editingFinished()
 {
-    //sim::sout<<"changed"<<sim::endl;
     bool* b = new bool;
     *b = false;
     QString text = ui->zText->text();
@@ -724,12 +664,10 @@ void MainWindow::onnn_z_text_editingFinished()
     else {
         ui->zText->setStyleSheet("QLineEdit { background: rgb(255, 65, 65); selection-background-color: rgb(233, 99, 0); }");
     }
-    //sim::sout<<Settings::getZCoef()<<" "<<Settings::getUCoef()<<" "<<Settings::getWCoef()<<sim::endl;
 }
 
 void MainWindow::onnn_w_text_editingFinished()
 {
-    //sim::sout<<"changed"<<sim::endl;
     bool* b = new bool;
     *b = false;
     QString text = ui->wText->text();
@@ -742,12 +680,10 @@ void MainWindow::onnn_w_text_editingFinished()
     else {
         ui->wText->setStyleSheet("QLineEdit { background: rgb(255, 65, 65); selection-background-color: rgb(233, 99, 0); }");
     }
-    //sim::sout<<Settings::getZCoef()<<" "<<Settings::getUCoef()<<" "<<Settings::getWCoef()<<sim::endl;
 }
 
 void MainWindow::onnn_u_text_editingFinished()
 {
-    //sim::sout<<"changed"<<sim::endl;
     bool* b = new bool;
     *b = false;
     QString text = ui->uText->text();
@@ -760,7 +696,6 @@ void MainWindow::onnn_u_text_editingFinished()
     else {
         ui->uText->setStyleSheet("QLineEdit { background: rgb(255, 65, 65); selection-background-color: rgb(233, 99, 0); }");
     }
-    //sim::sout<<Settings::getZCoef()<<" "<<Settings::getUCoef()<<" "<<Settings::getWCoef()<<sim::endl;
 }
 
 void MainWindow::onnn_stopNodeButtonReleased(){

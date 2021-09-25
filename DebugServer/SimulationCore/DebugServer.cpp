@@ -1,26 +1,21 @@
 //
 // Created by nickolay on 28.09.2020.
+// Additional Node that is linked with every ServerNode for debugging, visualization on screen and help with first handshake between serverNodes
 //
 
 #include <thread>
-#include <iostream>
 #include <Utils/ColorMode.h>
 #include <Utils/sout.h>
 #include "DebugServer.h"
 
 DebugServer::DebugServer(int debugSocketAdress, Graph g) : ServerNode(-1,debugSocketAdress,g)
 {
-    //sim::sout<<"Debug server: we have got "<<g.ellipses.size()<<" nodes"<<sim::endl;
-    //graph = g;
-    //sim::sout<<"Debug server: now we have got "<<graph.ellipses.size()<<" nodes"<<sim::endl;
+
 }
 
 DebugServer::~DebugServer() noexcept
 {
-    /*for (int i=0;i<connections.size();i++)
-    {
-        connections[i]->~ServerConnection();
-    };*/
+
 }
 
 void DebugServer::Stop()

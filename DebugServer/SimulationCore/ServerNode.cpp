@@ -1,20 +1,17 @@
 //
 // Created by nickolay on 27.09.2020.
+// Server Node contains its own working thread, which decides where send incoming packet depending on the selected algorithm
 //
 
 #include <graph.h>
-#include <QtCore/QSharedPointer>
 #include "ServerNode.h"
 #include <unistd.h>
-#include <iostream>
 #include <thread>
 #include <Utils/ColorMode.h>
 #include <Utils/Settings.h>
 #include "QObject"
 #include <cstdlib>
-#include <ctime>
 #include <Utils/sout.h>
-#include "string"
 #include "sys/prctl.h"
 
 ServerNode::ServerNode(int _serverNum,int _debugSocketAdress, Graph g):QObject()
@@ -28,17 +25,12 @@ ServerNode::ServerNode(int _serverNum,int _debugSocketAdress, Graph g):QObject()
 
 ServerNode::~ServerNode() noexcept
 {
- /*   for (int i=0; i < connections.size();i++)
-    {
-        connections[i]->~ServerConnection();
-    }
-    debugConnection->~ServerConnection();*/
+
 }
 
 void ServerNode::StopToConnections()
 {
     stopNode.set(true);
-    //usleep(15000);
     for (int i=0; i < connections.size();i++)
     {
         if (connections[i]->connectionType == ConnectionType::TO){
@@ -52,7 +44,6 @@ void ServerNode::StopToConnections()
 void ServerNode::Stop()
 {
     stopNode.set(true);
-    //usleep(15000);
     for (int i=0; i < connections.size();i++)
     {
         if (connections[i]->connectionType == ConnectionType::FROM){
@@ -60,7 +51,6 @@ void ServerNode::Stop()
         }
     }
     usleep(10000);
-    //debugConnection->stop();
 }
 
 void ServerNode::loadPackets()
@@ -69,13 +59,11 @@ void ServerNode::loadPackets()
     {
         if (graph.packets[i].from == serverNum)
         {
-            PacketMessage m{};//(graph.packets[i]);
+            PacketMessage m{};
             m.from = graph.packets[i].from;
             m.to = graph.packets[i].to;
             m.id = graph.packets[i].id;
             m.secondId = m.id;
-            //m.currentPosition = graph.packets[i].currentPosition;
-            //m.prevposition = m.currentPosition;
             m.currentPosition = serverNum;
             m.prevposition = m.currentPosition;
             m.type = graph.packets[i].type;
@@ -94,26 +82,13 @@ void ServerNode::Start()       //on start we connect to debug server
     std::thread thr([this]() {
         QString s = "ServerNode_" + QString::number(serverNum);
         prctl(PR_SET_NAME,(char *)s.toStdString().c_str());
-        /*int counter = 0;
-        for (int i=0;i<graph.packets.size();i++)
-        {
-            if (graph.packets[i].from == serverNum)
-            {
-                counter++;
-                PacketMessage m(graph.packets[i]);
-                messagesStack.push_back(m);
-            }
-        }*/
-        //sim::sout<<"Node "<<serverNum<<": GOT  "<<counter<<" packets"<<sim::endl;
 
         updatePacketPrevSendingTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
         addDebugConnection();
-        //sim::sout<<"Node "<<serverNum<<": awaiting for debug server "<<sim::endl;
         while (!debugConnection->connected.get())
         {
             usleep(400);
         }
-        //sim::sout<<"Node "<<serverNum<<": debugServer active now "<<sim::endl;
         DebugMessage d;
         d.checksum = 239239239;
         d.function = DebugMessage::CONNECTION_STATUS;
@@ -142,7 +117,6 @@ void ServerNode::Start()       //on start we connect to debug server
             }
         }
         bool allServerConnectionsReady = false;
-        //sim::sout<<"Node "<<serverNum<<": waiting for our server connections "<<sim::endl;
 
         while (!allServerConnectionsReady)
         {
@@ -155,7 +129,6 @@ void ServerNode::Start()       //on start we connect to debug server
                 allServerConnectionsReady = b;
             }
         }
-        //sim::sout<<"Node "<<serverNum<<": Servers are ready, waiting for clients connections "<<sim::endl;
         SystemMessage mm;
         mm.function = SystemMessage::SERVERS_READY;
         mm.i[0] = serverNum;
@@ -165,7 +138,6 @@ void ServerNode::Start()       //on start we connect to debug server
         {
             usleep(1000);
         }
-        //sim::sout<<"Node "<<serverNum<<": Starting client connections "<<sim::endl;
 
         for (int i =0; i<connections.size();i++)
         {
@@ -202,7 +174,6 @@ void ServerNode::Start()       //on start we connect to debug server
         Color::ColorMode grn(Color::FG_GREEN);
         Color::ColorMode def(Color::FG_DEFAULT);
         Color::ColorMode red(Color::FG_RED);
-        //sim::sout<<"Node "<<serverNum<<":"<<grn<<" AWAITING FOR TEST START"<<def<<sim::endl;
         while (!startTest.get())
         {
             usleep(50);
@@ -217,22 +188,18 @@ void ServerNode::Start()       //on start we connect to debug server
         int counter = 0;
         bool zeroPacketCountSent = false;
         localFlowLastUpdate = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-        //sim::sout<<"Node "<<serverNum<<":"<<grn<<" STARTING WORK"<<def<<sim::endl;
         while (!stopNode.get())
         {
             updateEdgesUsage();
             if (!messagesStack.empty() || !localFlowStack.empty())
             {
                 if (graph.selectedAlgorithm != LOCAL_FLOW) {
-                    //if (serverNum == 1){
-                    //    sim::sout << "Node " << serverNum<<": on another loop"<<sim::endl;
-                    //}
+
                     messageStackMutex.lock();
                     PacketMessage m(messagesStack[0]);
                     if (messagesStack.size()>1 && debugPrevPacketSendedId == m.id){
                         sim::sout << "Node " << serverNum << ":" << red<< " DUPLICATE FOUND id " << m.id<< def << sim::endl;
                     }
-                    //int check = messageStack
                     int pp = messagesStack[0].id;
                     int ppp = messagesStack.size()>1? messagesStack[1].id : -1;
                     if (pp == ppp){
@@ -270,7 +237,6 @@ void ServerNode::Start()       //on start we connect to debug server
                         sim::sout<<"Node "<<serverNum<<":  localFlowBufferOpened = " <<localFlowBufferOpened<<" ,  messagesStack.size = "<<messagesStack.size() <<sim::endl;
                     }
                     std::chrono::milliseconds timeNow = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-                    //sim::sout << "LOCAL FLOW timer: "<<(timeNow - localFlowLastUpdate).count()<< sim::endl;
                     if ((timeNow - localFlowLastUpdate).count() > 1000)
                     {
                         sim::sout << "LOCAL FLOW UPDATE "<< sim::endl;
@@ -304,11 +270,11 @@ void ServerNode::Start()       //on start we connect to debug server
                                 if (!connections[i]->sendingQueue.broken.get()) {
                                     int length = pathLength(connections[i]->to, maxI);
                                     if (length ==
-                                        minPathSize /*&& connections[i]->nodeLoad.get() < Settings::getLocalFowConnectionLoadLimit()*/) {
+                                        minPathSize ) {
                                         selectedConnections.push_back(i);
                                     }
                                     if (length <
-                                        minPathSize /*&& connections[i]->nodeLoad.get() < Settings::getLocalFowConnectionLoadLimit()*/) {
+                                        minPathSize ) {
                                         selectedConnections.clear();
                                         minPathSize = length;
                                         selectedConnections.push_back(i);
@@ -358,14 +324,11 @@ void ServerNode::Start()       //on start we connect to debug server
             }
             else{
                 updatePacketCountForDebugServer();
-                    //zeroPacketCountSent = true;
-                //}
-                //sim::sout<<"Node "<<serverNum<<":"<<red<<" I AM EMPTY!!! "<<def<<sim::endl;
                 usleep(10000);
             }
             checkConnectionsForBreak();
             counter++;
-            if (counter == 10){   //alpha) {
+            if (counter == 10){
                 if (graph.selectedAlgorithm == Algorithms::LOCAL_VOTING || graph.selectedAlgorithm == Algorithms::MY_LOCAL_VOTING){
                     updateNodeLoadForLocalVoting();
             }
@@ -407,24 +370,6 @@ void ServerNode::updateNodeLoadForDeTails()
         m.secondLoad = load[i];
         connections[i]->sendMessage(m);
     }
-    /*float sum = 0.0f;
-    for (int i=0;i<connections.size();i++)
-    {
-        sum += connections[i]->bufferLoad.get();
-    }
-    for (int i=0;i<messagesStack.size();i++)
-    {
-        sum += sizeof(messagesStack[i]);
-    }
-    for (int i=0;i<connections.size();i++)
-    {
-        if (connections[i]->to != -1)
-        {
-            NodeLoadForDeTailMessage m;
-            m.load = sum;
-            connections[i]->sendMessage(m);
-        }
-    }*/
 }
 
 void ServerNode::updateNodeLoadForLocalVoting()
@@ -458,7 +403,6 @@ void ServerNode::updateNodeLoadForLocalVoting()
             NodeLoadMessage m;
             m.load = qRound(stackload + connectionsLoad);
             m.secondLoad = qRound(stackload + connectionsLoad);
-            //sim::sout<<"Node "<<serverNum<<" load: "<<m.load<<sim::endl;
             connections[i]->sendMessage(m);
         }
     }
@@ -502,8 +446,6 @@ int ServerNode::localFlowSelectionAlgorithm(int prevNodeNum, int to)
 
 int ServerNode::randomSelectionAlgorithm(int prevNodeNum, int to)
 {
-    //srand(time(0));
-
     sim::sout<<"Node "<<serverNum<<": prev node num "<<prevNodeNum<<sim::endl;
     int minPathSize = 8888;
     std::vector<int> selectedConnections;
@@ -530,7 +472,6 @@ int ServerNode::randomSelectionAlgorithm(int prevNodeNum, int to)
     int a = -1;
     if (!selectedConnections.empty()) {
         a = selectedConnections[rand() % (selectedConnections.size())];
-        //a = selectedConnections[0];
         while (prevNodeNum == connections[a]->to && selectedConnections.size()>1) {
             a = selectedConnections[rand() % (selectedConnections.size())];
         }
@@ -585,27 +526,11 @@ int ServerNode::drillSelectionAlgorithm(int prevNodeNum, int to)
         while (prevNodeNum == connections[b]->to && selectedConnections.size() > 1) {
             b = selectedConnections[rand() % (selectedConnections.size())];
         }
-
-        /*if (a == prevNodeNum){
-            for (int j=0;j<connections.size();j++){
-                if (connections[j]->to == prevNodeNum)
-                {
-                    a = j;
-                }
-            }
-        }*/
         return connections[a]->bufferLoad.get() < connections[b]->bufferLoad.get() ? a : b;
     }
     else {
         return -1;
     }
-    /*int a = rand() % (connections.size());
-    int b = a;
-    while (b == a)
-    {
-        b = rand() % (connections.size());
-    }
-    return connections[a]->bufferLoad.get() > connections[b]->bufferLoad.get() ? b : a;*/
 }
 
 int ServerNode::deTailSelectionAlgorithm(int prevNodeNum, int to)
@@ -647,70 +572,9 @@ int ServerNode::deTailSelectionAlgorithm(int prevNodeNum, int to)
 
     return a;
 }
-/*
-int ServerNode::localVotingSelectionAlgorithm(int prevNodeNum, int to)
-{
-    //sim::sout<<"localVotingSelectionAlgorithm"<<sim::endl;
-    std::vector<std::tuple<float,float,float>> nodesLoad;
-    float zSum=0;
-    float uSum=0;
-    float wSum=0;
-
-    for (int i=0;i<connections.size();i++)
-    {
-        float z = 1/ (connections[i]->bufferLoad.get() + 1);
-        zSum += z;
-        float x = connections[i]->nodeLoad.get();
-        float u = alpha * (- x + nodeLoad);
-        u = u > 0 ? u : 0;
-        uSum += u;
-        float w = 1.0f/(pathLength(connections[i]->to,to) + 1);
-        wSum += w;
-        std::tuple<float,float,float> t(z,u,w);
-        nodesLoad.push_back(t);
-        //nodesLoad.push_back( (a + b + c * c * c * c) * (a + b + c * c * c * c) + 1);
-        //sim::sout<<"Local voting:   "<<a<<" "<<b<<" "<<c<<" "<<sim::endl;
-    }
-    std::vector<float> nodesWeights;
-
-    int isum = 0;
-    for (int i=0; i < nodesLoad.size();i++)
-    {
-        float z = 1000 * std::get<0>(nodesLoad[i]) / zSum;
-        float u = uSum == 0 ? 0 : 1000 * std::get<1>(nodesLoad[i]) / uSum;
-        float w = 1000 * std::get<2>(nodesLoad[i]) / wSum;
-        //sim::sout<<"z:  "<<z<<" u:  "<<u<<" w:  "<<w<<sim::endl;
-        float weight = z + u + w;
-        nodesWeights.push_back(weight);
-        isum += qRound(weight);
-    }
-    //srand(time(0));
-    int result = prevNodeNum;
-    int counter = 0;
-    while (result == prevNodeNum) {
-        counter ++;
-        if (counter > 100)
-        {
-            sim::sout<<Color::ColorMode(Color::Code::FG_RED)<<"ERROR! Loop on "<<serverNum<<Color::ColorMode(Color::Code::FG_DEFAULT)<<sim::endl;
-        }
-        int a = rand() % isum;
-        for (int i = 0; i < nodesWeights.size(); i++) {
-            a -= nodesWeights[i];
-            if (a < 0) {
-                if (connections[i]->to != prevNodeNum) {
-                    result = i;
-                    return i;
-                } else {
-                    i = nodesWeights.size();
-                }
-            }
-        }
-    }
-}*/
 
 int ServerNode::MyLocalVotingSelectionAlgorithm(int prevNodeNum, int to)
 {
-    //sim::sout<<"localVotingSelectionAlgorithm"<<sim::endl;
     std::vector<float> nodesLoad;
     std::vector<int> nodesId;
     float sum=0;
@@ -722,7 +586,6 @@ int ServerNode::MyLocalVotingSelectionAlgorithm(int prevNodeNum, int to)
             float c = pathLength(connections[i]->to, to);
             nodesLoad.push_back((a + b + c * c * c * c) * (a + b + c * c * c * c) + 1);
             nodesId.push_back(i);
-            //sim::sout << "Local voting:   " << a << " " << b << " " << c << " " << sim::endl;
             sum += nodesLoad[nodesLoad.size() - 1];
         }
     }
@@ -733,7 +596,6 @@ int ServerNode::MyLocalVotingSelectionAlgorithm(int prevNodeNum, int to)
         nodesLoad[i] = qRound(nodesLoad[i]);
         isum += nodesLoad[i];
     }
-    //srand(time(0));
     int result = prevNodeNum;
     if (nodesId.size()>1) {
         while (result == prevNodeNum) {
@@ -777,7 +639,6 @@ void ServerNode::checkConnectionsForBreak()
                 connections[i]->sendingQueue.queueMutex.lock();
                 connections[i]->sendingQueue.packetsMutex.lock();
 
-                //while (!connections[i]->sendingQueue.packetsData.empty()){
                 for (int l=0;l<connections[i]->sendingQueue.packetsData.size();l++) {
                     if (connections[i]->sendingQueue.packetsTypes[l] == PACKET_MESSAGE){
                         char cdata[connections[i]->sendingQueue.packetsData[l].get()->size()];
@@ -798,10 +659,6 @@ void ServerNode::checkConnectionsForBreak()
                         sim::sout << "Node " << serverNum << ": got back from broken connection " << connections[i]->to
                                   << " message with id " << p.id << " got CHECKSUM = " <<
                                   p.checkSum << sim::endl;
-//                    connections[i]->sendingQueue.packetsData.erase(connections[i]->sendingQueue.packetsData.begin());
-//                    connections[i]->sendingQueue.packetsFrom.erase(connections[i]->sendingQueue.packetsFrom.begin());
-//                    connections[i]->sendingQueue.packetsPriority.erase(connections[i]->sendingQueue.packetsPriority.begin());
-//                    connections[i]->sendingQueue.packetsTypes.erase(connections[i]->sendingQueue.packetsTypes.begin());
                     }
                 }
                 connections[i]->sendingQueue.packetsId.clear();
@@ -809,10 +666,6 @@ void ServerNode::checkConnectionsForBreak()
                 connections[i]->sendingQueue.packetsFrom.clear();
                 connections[i]->sendingQueue.packetsPriority.clear();
                 connections[i]->sendingQueue.packetsTypes.clear();
-
-                //getPacketsMutex.lock();
-
-                //getPacketsMutex.unlock();
 
                 connections[i]->sendingQueue.packetsMutex.unlock();
                 connections[i]->sendingQueue.queueMutex.unlock();
@@ -873,15 +726,10 @@ void ServerNode::updatePacketCountForDebugServer()
 
 void ServerNode::addDebugConnection()
 {
-    //auto* _debugConnection = new ServerConnection(debugSocketAdress, serverNum,-1);
-    //debugConnection = QSharedPointer<ServerConnection>(_debugConnection);
-    //ServerConnection debugConnection(debugSocketAdress + serverNum, serverNum,-1);
     debugConnection = new ServerConnection(debugSocketAdress + serverNum, serverNum,-1);
-    //sim::sout<<"port to recive = "<<debugSocketAdress<<" + "<<serverNum<<sim::endl;
     debugConnection->sendBytesPerInterval = 6000;
     debugConnection->sendIntervalMS = 33;
     debugConnection->sendingWithoutQueue = true;
-    //connections.push_back(debugConnection);
     debugConnection->connectTo();
     connect(debugConnection, SIGNAL(transmit_to_node(SystemMessage)),this,SLOT(get_message(SystemMessage)));
 
@@ -889,8 +737,7 @@ void ServerNode::addDebugConnection()
 
 void ServerNode::addConnection(int to, EdgeData * edgeData)
 {
-    //int portDelta = serverNum>to?serverNum:to;
-    //int port = debugSocketAdress + portDelta;
+
     int port = -1;
     int edgeID = -1;
     for (int i =0;i<graph.edges.size();i++){
@@ -906,7 +753,6 @@ void ServerNode::addConnection(int to, EdgeData * edgeData)
     }
     if (port != -1)
     {
-        //sim::sout<<"debugSocketAdress = "<<debugSocketAdress<<sim::endl;
 
         ServerConnection* newConnection = new ServerConnection(port, serverNum, to, edgeID);
         if (edgeData != nullptr){
@@ -914,12 +760,8 @@ void ServerNode::addConnection(int to, EdgeData * edgeData)
             newConnection->sendIntervalMS = edgeData->sendIntervalMS == -1 ? newConnection->sendIntervalMS : edgeData->sendIntervalMS;
         }
         connections.push_back(newConnection);
-        if (serverNum > to)
+        if (serverNum < to)
         {
-            //sim::sout<<"Node "<<serverNum<<" creating connection to "<<to<<" on port"<<port<<sim::endl;
-            //newConnection->connectTo();
-         }
-        else{
             sim::sout<<"Node "<<serverNum<<" trying to connect "<<to<<" on port"<<port<<sim::endl;
             newConnection->awaitConnection();
         }
@@ -940,28 +782,6 @@ void ServerNode::get_message(PacketMessage m)
     sim::sout<<"Node"<< serverNum<<": got message with id "<<m.id<<" got CHECKSUM = "<<m.checkSum<<sim::endl;
     if (m.checkSum!= Messages::getChecksum(&m) || m.firstCheckSum!=239239239)
     {
-        /*PacketMessage mm;
-        mm.checkSum=239239239;
-        mm.from = 0;
-        mm.to = 1;
-        mm.currentPosition = 0;
-        mm.delivered = false;
-        char mhData[sizeof(mm)];
-        memcpy(mhData, &mm, sizeof(mm));
-        for (int i=0; i<sizeof(mhData); i++)
-        {
-            std::cout<<std::hex<<mhData[i];
-        }
-        std::cout<<std::endl;
-        std::cout<<"---------------"<<std::endl;
-
-        char hData[sizeof(m)];
-        memcpy(hData, &m, sizeof(m));
-        for (int i=0; i<sizeof(hData); i++)
-        {
-            std::cout<<std::hex<<hData[i];
-        }
-        std::cout<<std::endl;*/
         sim::sout<<"Error on Node "<<serverNum<<" !!! Packet with id "<<m.id <<" got wrong checksum ( "<<m.checkSum<<" )!!! Check your RAM!!!"<<sim::endl;
         qFatal("Error on Node %s !!! Packet with id %s got wrong checksum ( %s )!!! Check your RAM!!!",serverNum,m.id, m.checkSum);
     }

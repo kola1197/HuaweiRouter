@@ -1,5 +1,6 @@
 //
 // Created by nickolay on 26.11.2020.
+// Earlier asynkVar realisation without templates
 //
 
 #ifndef HUAWEIROUTER_MUTEXINT_H

@@ -1,5 +1,6 @@
 //
 // Created by nickolay on 12.12.2020.
+// This is helper utility with asynk std::cout realisation for debud output
 //
 
 #ifndef HUAWEIROUTER_SOUT_H
@@ -14,8 +15,8 @@
 #include "AsyncVar.h"
 #include <Utils/sout.h>
 
-#define MUTEX_MODE
-#define WRITE_CONSOLE_LOG
+#define MUTEX_MODE                                // Turns on asynk mode with mutexes if defined
+#define WRITE_CONSOLE_LOG                         // Turns on write to console mode if defined
 
 class Sout
 {
